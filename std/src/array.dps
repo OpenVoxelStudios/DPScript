@@ -1,19 +1,15 @@
 module std/array;
 
 import std/data/{
-    set_data,
-    get_data,
     append_data,
     append_data_from_index,
     remove_data_index,
-    clone,
 };
 
 import std/core/{keyof, storeof};
 import std/core/stores/arrayLength;
 import std/core/stores/tempStorage;
 import std/core/players/temp;
-import std/scoreboard/{add_score, reset_score, set_data_from_score, set_score_from_data, set_score, operation, lessThan};
 
 objective tempArrayLength: dummy = "__dpscript_tmp_array_add_length";
 objective tempArrayPos: dummy = "__dpscript_tmp_array_add_pos";
@@ -24,11 +20,11 @@ pub fn array_add(arr: Any[], add: Any) {
     const stor = storeof(arr);
     const key = keyof(arr);
 
-    set_score_from_data(temp, tempArrayLength, arrayLength, key);
+    tempArrayLength[temp] = arrayLength[key];
     append_data(stor, key, storeof(add), keyof(add));
-    add_score(temp, tempArrayLength, 1);
-    set_data_from_score(stor, key, temp, tempArrayLength);
-    reset_score(temp, tempArrayLength);
+    tempArrayLength[temp] += 1;
+    stor[key] = tempArrayLength[temp];
+    reset tempArrayLength[temp];
 }
 
 pub fn array_add_all(arr: Any[], add: Any[]) {
@@ -37,36 +33,39 @@ pub fn array_add_all(arr: Any[], add: Any[]) {
     const addStore = storeof(add);
     const addKey = keyof(add);
     
-    set_score_from_data(temp, tempArrayLength, arrayLength, key);
-    set_score_from_data(temp, tempOutputLen, arrayLength, key);
-    set_score_from_data(temp, tempInputLen, arrayLength, addKey);
-    set_score(temp, tempArrayPos, 0);
+    tempArrayLength[temp] = arrayLength[key];
+    tempOutputLen[temp] = arrayLength[key];
+    tempInputLen[temp] = arrayLength[addKey];
+    tempArrayPos[temp] = 0;
 
-    clone(stor, key, tempStorage, path: "arr_copy");
-    clone(addStore, addKey, tempStorage, path: "add_copy");
+    // tempStorage[path: "arr_copy"] = stor[key];
+    // tempStorage[path: "add_copy"] = addStore[addKey];
 
-    const arrCopyPath = path: "arr_copy";
-    const addCopyPath = path: "add_copy";
+    // const arrCopyPath = path: "arr_copy";
+    // const addCopyPath = path: "add_copy";
 
-    let arrCopy = get_data(tempStorage, arrCopyPath);
-    let addCopy = get_data(tempStorage, addCopyPath);
+    // let arrCopy = tempStorage[arrCopyPath];
+    // let addCopy = tempStorage[addCopyPath];
+
+    let cloned arrCopy = stor[key];
+    let cloned addCopy = addStore[addKey];
 
     goto appender;
 
-    set_data(stor, key, arrCopy);
-    reset_score(temp, tempArrayLength);
-    reset_score(temp, tempArrayPos);
-    operation(temp, tempOutputLen, path: "+=", temp, tempInputLen);
-    set_data_from_score(arrayLength, key, temp, tempOutputLen);
-    reset_score(temp, tempOutputLen);
-    reset_score(temp, tempInputLen);
+    stor[key] = arrCopy;
+    reset tempArrayLength[temp];
+    reset tempArrayPos[temp];
+    tempOutputLen[temp] += tempInputLen[temp];
+    arrayLength[key] = tempOutputLen[temp];
+    reset tempOutputLen[temp];
+    reset tempInputLen[temp];
 
     sub appender {
         append_data_from_index(tempStorage, path: "arr_copy", tempStorage, path: "add_copy", 0);
         remove_data_index(tempStorage, path: "add_copy", 0);
-        add_score(temp, tempArrayPos, 1);
+        tempArrayPos[temp] += 1;
 
-        if lessThan(temp, tempArrayPos, temp, tempArrayLength) {
+        if tempArrayPos[temp] < tempArrayLength[temp] {
             goto appender;
         }
     }
