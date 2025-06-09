@@ -1,5 +1,5 @@
 use super::{Token, Tokenizer};
-use crate::{util::IsNotIdent, Result, TokenizerError};
+use crate::{Result, TokenizerError, util::IsNotIdent};
 
 impl Tokenizer {
     pub(super) fn tokenize_inner(&mut self, ch: char) -> Result<()> {
@@ -8,7 +8,7 @@ impl Tokenizer {
         }
 
         if ch == '/' {
-            if self.cursor.peek_ahead(0).is_some_and(|v| v == '/') {
+            if self.cursor.peek().is_some_and(|v| v == '/') {
                 // println!("==>>> SKIPPING COMMENT");
 
                 while let Some(ch) = self.cursor.next() {
@@ -40,6 +40,8 @@ impl Tokenizer {
             '/' => Some((Token::Slash, self.cursor.span(1))),
             '&' => Some((Token::And, self.cursor.span(1))),
             '#' => Some((Token::Hash, self.cursor.span(1))),
+            '!' => Some((Token::Exclamation, self.cursor.span(1))),
+            '~' => Some((Token::Tilde, self.cursor.span(1))),
 
             '.' => {
                 if self.cursor.peek().is_some_and(|v| v == '.')
@@ -208,6 +210,12 @@ impl Tokenizer {
                     let span = self.cursor.span(3);
                     self.cursor.skip(2);
                     Some((Token::Pub, span))
+                } else if self.cursor.peek_many(0, 2).is_some_and(|v| v == "os")
+                    && self.cursor.peek_ahead(2).is_some_and(|v| v.is_not_ident())
+                {
+                    let span = self.cursor.span(3);
+                    self.cursor.skip(2);
+                    Some((Token::Pos, span))
                 } else if self.cursor.peek_many(0, 3).is_some_and(|v| v == "ath")
                     && self.cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
                 {
@@ -238,6 +246,9 @@ impl Tokenizer {
                     let span = self.cursor.span(9);
                     self.cursor.skip(8);
                     Some((Token::Component, span))
+                } else if self.cursor.peek_ahead(1).is_some_and(|v| v.is_not_ident()) {
+                    let span = self.cursor.span(1);
+                    Some((Token::ComponentShort, span))
                 } else {
                     None
                 }
@@ -262,6 +273,12 @@ impl Tokenizer {
                     let span = self.cursor.span(6);
                     self.cursor.skip(5);
                     Some((Token::Return, span))
+                } else if self.cursor.peek_many(0, 2).is_some_and(|v| v == "ef")
+                    && self.cursor.peek_ahead(2).is_some_and(|v| v.is_not_ident())
+                {
+                    let span = self.cursor.span(3);
+                    self.cursor.skip(2);
+                    Some((Token::Ref, span))
                 } else {
                     None
                 }

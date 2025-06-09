@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::{attr::Attribute, Node, Subroutine, Type, Variable};
+use super::{Node, Subroutine, Type, Variable, attr::Attribute};
 use crate::Spanned;
 use miette::SourceSpan;
 use serde::{Deserialize, Serialize};
@@ -48,6 +48,7 @@ pub struct FunctionArg {
     pub name: Spanned<String>,
     pub ty: Type,
     pub span: SourceSpan,
+    pub is_ref: bool,
 }
 
 impl Function {

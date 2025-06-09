@@ -3,7 +3,7 @@ mod token;
 
 pub use token::*;
 
-use crate::{util::Cursor, Result, Spanned};
+use crate::{Result, Spanned, util::Cursor};
 use miette::NamedSource;
 
 pub type StringCursor = Cursor<String, NamedSource<String>>;

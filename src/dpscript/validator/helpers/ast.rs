@@ -1,5 +1,5 @@
 use super::ModuleExport;
-use crate::{CheckerContext, Result, AST};
+use crate::{AST, CheckerContext, Result};
 use std::collections::BTreeMap;
 
 impl AST {

@@ -1,86 +1,65 @@
 module std/advops;
 
-import std/data/{set_data, get_data, clone};
+// import std/data/{set_data, get_data, clone};
 
-enum AdvOps {
-    Sqrt,
-    Sin,
-    Cos,
-    Tan,
-    Asin,
-    Acos,
-    Atan,
-}
+export std/gm/sqrt/*;
 
-#[cmd("data advops storage %% %% %%")]
-facade fn advops(storage: Store, pat: NBTPath, op: AdvOps);
+// pub fn sin(num: float) -> float {
+//     const stor = store: "dpscript:temp/ops/sin";
+//     const pat = path: "temp_val";
 
-pub fn sqrt(num: float) -> float {
-    const stor = store: "dpscript:temp/ops/sqrt";
-    const pat = path: "temp_val";
+//     set_data(stor, pat, num);
+//     advops(stor, pat, AdvOps::Sin);
 
-    set_data(stor, pat, num);
-    advops(stor, pat, AdvOps::Sqrt);
+//     return get_data(stor, pat);
+// }
 
-    return get_data(stor, pat);
-}
+// pub fn cos(num: float) -> float {
+//     const stor = store: "dpscript:temp/ops/cos";
+//     const pat = path: "temp_val";
 
-pub fn sin(num: float) -> float {
-    const stor = store: "dpscript:temp/ops/sin";
-    const pat = path: "temp_val";
+//     set_data(stor, pat, num);
+//     advops(stor, pat, AdvOps::Cos);
 
-    set_data(stor, pat, num);
-    advops(stor, pat, AdvOps::Sin);
+//     return get_data(stor, pat);
+// }
 
-    return get_data(stor, pat);
-}
+// pub fn tan(num: float) -> float {
+//     const stor = store: "dpscript:temp/ops/tan";
+//     const pat = path: "temp_val";
 
-pub fn cos(num: float) -> float {
-    const stor = store: "dpscript:temp/ops/cos";
-    const pat = path: "temp_val";
+//     set_data(stor, pat, num);
+//     advops(stor, pat, AdvOps::Tan);
 
-    set_data(stor, pat, num);
-    advops(stor, pat, AdvOps::Cos);
+//     return get_data(stor, pat);
+// }
 
-    return get_data(stor, pat);
-}
+// pub fn asin(num: float) -> float {
+//     const stor = store: "dpscript:temp/ops/asin";
+//     const pat = path: "temp_val";
 
-pub fn tan(num: float) -> float {
-    const stor = store: "dpscript:temp/ops/tan";
-    const pat = path: "temp_val";
+//     set_data(stor, pat, num);
+//     advops(stor, pat, AdvOps::Asin);
 
-    set_data(stor, pat, num);
-    advops(stor, pat, AdvOps::Tan);
+//     return get_data(stor, pat);
+// }
 
-    return get_data(stor, pat);
-}
+// pub fn acos(num: float) -> float {
+//     const stor = store: "dpscript:temp/ops/acos";
+//     const pat = path: "temp_val";
 
-pub fn asin(num: float) -> float {
-    const stor = store: "dpscript:temp/ops/asin";
-    const pat = path: "temp_val";
+//     set_data(stor, pat, num);
+//     advops(stor, pat, AdvOps::Acos);
 
-    set_data(stor, pat, num);
-    advops(stor, pat, AdvOps::Asin);
+//     return get_data(stor, pat);
+// }
 
-    return get_data(stor, pat);
-}
+// pub fn atan(num: float) -> float {
+//     const stor = store: "dpscript:temp/ops/atan";
+//     const pat = path: "temp_val";
 
-pub fn acos(num: float) -> float {
-    const stor = store: "dpscript:temp/ops/acos";
-    const pat = path: "temp_val";
+//     set_data(stor, pat, num);
+//     advops(stor, pat, AdvOps::Atan);
 
-    set_data(stor, pat, num);
-    advops(stor, pat, AdvOps::Acos);
-
-    return get_data(stor, pat);
-}
-
-pub fn atan(num: float) -> float {
-    const stor = store: "dpscript:temp/ops/atan";
-    const pat = path: "temp_val";
-
-    set_data(stor, pat, num);
-    advops(stor, pat, AdvOps::Atan);
-
-    return get_data(stor, pat);
-}
+//     return get_data(stor, pat);
+// }

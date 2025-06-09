@@ -1,6 +1,6 @@
 use super::Analyzer;
 use crate::{
-    check_ir_token, IRCondition, IRNode, IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError,
+    IRCondition, IRNode, IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError, check_ir_token,
 };
 
 impl Analyzer<IRCondition> for IRCondition {
@@ -23,7 +23,7 @@ impl Analyzer<IRCondition> for IRCondition {
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),
                     }
-                    .into())
+                    .into());
                 }
             };
 
@@ -43,7 +43,7 @@ impl Analyzer<IRCondition> for IRCondition {
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),
                     }
-                    .into())
+                    .into());
                 }
             };
 
@@ -63,7 +63,7 @@ impl Analyzer<IRCondition> for IRCondition {
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),
                     }
-                    .into())
+                    .into());
                 }
             };
 
@@ -83,7 +83,7 @@ impl Analyzer<IRCondition> for IRCondition {
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),
                     }
-                    .into())
+                    .into());
                 }
             };
 

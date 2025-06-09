@@ -1,7 +1,7 @@
 use super::Analyzer;
 use crate::{
-    check_ir_token, AddDataOperation, CopyDataOperation, IRConcat, IRDataOperation, IRNode,
-    IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError,
+    AddDataOperation, CopyDataOperation, IRConcat, IRDataOperation, IRNode, IRToken, IRTokenCursor,
+    Result, Spanned, UnnamedLexerError, check_ir_token,
 };
 
 impl Analyzer<IRDataOperation> for IRDataOperation {
@@ -28,7 +28,7 @@ impl Analyzer<IRDataOperation> for IRDataOperation {
                                 at: it.1,
                                 err: format!("Unexpected token: {}", it.0),
                             }
-                            .into())
+                            .into());
                         }
                     };
 
@@ -77,7 +77,7 @@ impl Analyzer<IRDataOperation> for IRDataOperation {
                                 at: it.1,
                                 err: format!("Unexpected token: {}", it.0),
                             }
-                            .into())
+                            .into());
                         }
                     };
 
@@ -126,7 +126,7 @@ impl Analyzer<IRDataOperation> for IRDataOperation {
                                 at: it.1,
                                 err: format!("Unexpected token: {}", it.0),
                             }
-                            .into())
+                            .into());
                         }
                     };
 
@@ -143,7 +143,7 @@ impl Analyzer<IRDataOperation> for IRDataOperation {
                                 at: it.1,
                                 err: format!("Unexpected token: {}", it.0),
                             }
-                            .into())
+                            .into());
                         }
                     };
 
@@ -156,7 +156,7 @@ impl Analyzer<IRDataOperation> for IRDataOperation {
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),
                     }
-                    .into())
+                    .into());
                 }
             }
         } else {

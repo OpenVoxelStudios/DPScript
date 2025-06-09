@@ -1,3 +1,4 @@
+mod assign;
 mod attr;
 mod block;
 mod call;

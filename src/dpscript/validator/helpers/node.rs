@@ -119,6 +119,7 @@ impl Literal {
         let kind = match self.clone() {
             Literal::Int(_) => TypeKind::Int,
             Literal::Float(_) => TypeKind::Float,
+            Literal::Double(_) => TypeKind::Double,
             Literal::Bool(_) => TypeKind::Bool,
             Literal::String(_) => TypeKind::String,
             Literal::Component(_) => TypeKind::Component,
@@ -129,6 +130,7 @@ impl Literal {
             Literal::Selector(_) => TypeKind::Selector,
             Literal::EnumValue((name, _), _) => TypeKind::Ident(name),
             Literal::Nbt(_) => TypeKind::NBT,
+            Literal::Pos3(_, _, _, _) => TypeKind::Pos3,
 
             Literal::Array((arr, span)) => {
                 let mut items = Vec::new();
@@ -232,13 +234,14 @@ impl Node {
             | Self::Conditional(_)
             | Self::Subroutine(_)
             | Self::Goto(_)
-            | Self::Objective(_) => {
+            | Self::Objective(_)
+            | Self::Assign(_) => {
                 return Err(ValidatorError {
                     src,
                     at: self.span(),
                     err: "Nodes that aren't values should never be types!".into(),
                 }
-                .into())
+                .into());
             }
 
             Self::Ident((id, span)) => {

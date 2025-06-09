@@ -1,6 +1,6 @@
 use crate::{
-    check_token, AddSpan, Attribute, AttributeValue, LexerError, Node, Result, Spanned, Token,
-    TokenCursor,
+    AddSpan, Attribute, AttributeValue, LexerError, Node, Result, Spanned, Token, TokenCursor,
+    check_token,
 };
 
 use super::Analyzer;

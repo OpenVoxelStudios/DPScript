@@ -1,6 +1,6 @@
 use crate::{
-    check_token, AddSpan, Attribute, Function, FunctionArg, LexerError, Node, Result, Spanned,
-    Token, TokenCursor, Type,
+    AddSpan, Attribute, Function, FunctionArg, LexerError, Node, Result, Spanned, Token,
+    TokenCursor, Type, check_token,
 };
 
 use super::Analyzer;
@@ -92,7 +92,7 @@ impl Analyzer<Function> for Function {
                     at: name_span,
                     err: format!("Unexpected token while parsing a function: {}", name),
                 }
-                .into())
+                .into());
             }
         };
 
@@ -243,6 +243,17 @@ impl Analyzer<FunctionArg> for FunctionArg {
             _ => None,
         };
 
+        let is_ref = match item.0 {
+            Token::Ref => true,
+            _ => match cursor.peek() {
+                Some((Token::Ref, _)) => {
+                    cursor.skip(1);
+                    true
+                }
+                _ => false,
+            },
+        };
+
         let name = match item.0 {
             Token::Ident(id) => (id, item.1),
 
@@ -252,7 +263,7 @@ impl Analyzer<FunctionArg> for FunctionArg {
                     at: item.1,
                     err: format!("Unexpected token while parsing a function: {}", item.0),
                 }
-                .into())
+                .into());
             }
         };
 
@@ -267,7 +278,7 @@ impl Analyzer<FunctionArg> for FunctionArg {
                         at: item.1,
                         err: "Function arguments require a type!".into(),
                     }
-                    .into())
+                    .into());
                 }
             },
 
@@ -277,7 +288,7 @@ impl Analyzer<FunctionArg> for FunctionArg {
                     at: colon.1,
                     err: "Unexpected end of file!".into(),
                 }
-                .into())
+                .into());
             }
         };
 
@@ -286,6 +297,7 @@ impl Analyzer<FunctionArg> for FunctionArg {
             name,
             span: item.1.add(ty.span),
             ty,
+            is_ref,
         }))
     }
 }

@@ -1,5 +1,5 @@
 use crate::{
-    check_token, AddSpan, Conditional, LexerError, Node, Result, Spanned, Token, TokenCursor,
+    AddSpan, Conditional, LexerError, Node, Result, Spanned, Token, TokenCursor, check_token,
 };
 
 use super::Analyzer;

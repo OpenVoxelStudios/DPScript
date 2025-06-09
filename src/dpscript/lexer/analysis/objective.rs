@@ -1,5 +1,5 @@
 use crate::{
-    check_token, AddSpan, LexerError, Node, Objective, Result, Spanned, Token, TokenCursor,
+    AddSpan, LexerError, Node, Objective, Result, Spanned, Token, TokenCursor, check_token,
 };
 
 use super::Analyzer;
@@ -37,7 +37,7 @@ impl Analyzer<Objective> for Objective {
                     at: name_span,
                     err: format!("Unexpected token while parsing an objective: {}", name),
                 }
-                .into())
+                .into());
             }
         };
 
@@ -63,7 +63,7 @@ impl Analyzer<Objective> for Objective {
                     at: sp,
                     err: format!("Unexpected token while parsing an objective: {}", tkn),
                 }
-                .into())
+                .into());
             }
         };
 

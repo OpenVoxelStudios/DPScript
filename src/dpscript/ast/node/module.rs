@@ -1,5 +1,5 @@
 use super::{ImportNode, Node, TopLevelNode};
-use crate::{module_top_level_getter, ModuleImport, Result, Spanned, ValidatorError};
+use crate::{ModuleImport, Result, Spanned, ValidatorError, module_top_level_getter};
 use miette::{NamedSource, SourceSpan};
 use serde::Serialize;
 use std::collections::HashMap;
@@ -124,7 +124,7 @@ impl Module {
                         at: node.span(),
                         err: format!("This node is not allowed in the top-level: {:?}", node),
                     }
-                    .into())
+                    .into());
                 }
             });
         }

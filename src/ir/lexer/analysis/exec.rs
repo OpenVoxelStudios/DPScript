@@ -1,6 +1,6 @@
 use super::Analyzer;
 use crate::{
-    check_ir_token, IRExecute, IRNode, IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError,
+    IRExecute, IRNode, IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError, check_ir_token,
 };
 
 impl Analyzer<IRExecute> for IRExecute {
@@ -23,7 +23,7 @@ impl Analyzer<IRExecute> for IRExecute {
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),
                     }
-                    .into())
+                    .into());
                 }
             };
 
@@ -41,7 +41,7 @@ impl Analyzer<IRExecute> for IRExecute {
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),
                     }
-                    .into())
+                    .into());
                 }
             };
 

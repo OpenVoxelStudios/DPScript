@@ -95,7 +95,7 @@
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -b",
         "watch": "tsc -b -w",
-        "postinstall": "cd client && pnpm i"
+        "postinstall": "cd client && bun i"
     },
     "devDependencies": {
         "@types/node": "^22.7.5",

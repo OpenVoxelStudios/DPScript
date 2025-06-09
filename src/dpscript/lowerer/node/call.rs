@@ -153,7 +153,7 @@ impl Call {
                                 at: self.span,
                                 err: "Expected a Store for argument 1!".into(),
                             }
-                            .into())
+                            .into());
                         }
                     },
 
@@ -163,7 +163,7 @@ impl Call {
                             at: self.span,
                             err: "Expected a Store for argument 1!".into(),
                         }
-                        .into())
+                        .into());
                     }
                 };
 
@@ -178,7 +178,7 @@ impl Call {
                                 at: self.span,
                                 err: "Expected an NBTPath for argument 2!".into(),
                             }
-                            .into())
+                            .into());
                         }
                     },
 
@@ -188,7 +188,7 @@ impl Call {
                             at: self.span,
                             err: "Expected an NBTPath for argument 2!".into(),
                         }
-                        .into())
+                        .into());
                     }
                 };
 
@@ -210,7 +210,7 @@ impl Call {
                                 at: self.span,
                                 err: "Expected a literal for argument 2!".into(),
                             }
-                            .into())
+                            .into());
                         }
                     },
 
@@ -231,7 +231,7 @@ impl Call {
                             at: self.span,
                             err: "Expected a literal or a reference for argument 2!".into(),
                         }
-                        .into())
+                        .into());
                     }
                 }
             }
@@ -242,7 +242,7 @@ impl Call {
                     at: self.span,
                     err: format!("{} is not a compiler-generated function!", self.function.0),
                 }
-                .into())
+                .into());
             }
         }
     }

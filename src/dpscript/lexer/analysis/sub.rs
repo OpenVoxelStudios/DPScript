@@ -1,5 +1,5 @@
 use crate::{
-    check_token, AddSpan, LexerError, Node, Result, Spanned, Subroutine, Token, TokenCursor,
+    AddSpan, LexerError, Node, Result, Spanned, Subroutine, Token, TokenCursor, check_token,
 };
 
 use super::Analyzer;
@@ -26,7 +26,7 @@ impl Analyzer<Subroutine> for Subroutine {
                     at: name_span,
                     err: format!("Unexpected token while parsing a subroutine: {}", name),
                 }
-                .into())
+                .into());
             }
         };
 

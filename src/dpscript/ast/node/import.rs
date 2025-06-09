@@ -1,4 +1,4 @@
-use crate::{util::Spanned, AddSpan};
+use crate::{AddSpan, util::Spanned};
 use miette::SourceSpan;
 use serde::{Deserialize, Serialize};
 
@@ -28,7 +28,8 @@ impl Import {
 
     pub fn module_span(&self) -> SourceSpan {
         let parts = self.base.clone();
-        let Some((_, mut span)) = parts.first() else {
+
+        let Some(&(_, mut span)) = parts.first() else {
             panic!("Achievement Unlocked: How did we get here?")
         };
 

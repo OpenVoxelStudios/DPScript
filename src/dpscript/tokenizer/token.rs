@@ -21,6 +21,9 @@ pub enum Token {
     Ident(String),
 
     // =============== SYMBOLS ===============
+    /// "!"
+    Exclamation,
+
     /// "&"
     And,
 
@@ -77,6 +80,9 @@ pub enum Token {
 
     /// "#"
     Hash,
+
+    /// "~"
+    Tilde,
 
     // =============== GROUPS ===============
     /// "..."
@@ -135,6 +141,9 @@ pub enum Token {
     Facade,
 
     // ========================================
+    /// "pos"
+    Pos,
+
     /// "pub"
     Pub,
 
@@ -151,12 +160,18 @@ pub enum Token {
     /// "component"
     Component,
 
+    /// "c" - Short version of "component"
+    ComponentShort,
+
     // ========================================
     /// "let"
     Let,
 
     /// "return"
     Return,
+
+    /// "ref"
+    Ref,
 
     /// "objective"
     Objective,
@@ -185,6 +200,7 @@ impl fmt::Display for Token {
             Self::String(s) => write!(f, "\"{}\"", s),
             Self::Bool(b) => write!(f, "{}", b),
             Self::Ident(i) => write!(f, "{}", i),
+            Self::Exclamation => write!(f, "!"),
             Self::And => write!(f, "&"),
             Self::Colon => write!(f, ":"),
             Self::Comma => write!(f, ","),
@@ -226,6 +242,7 @@ impl fmt::Display for Token {
             Self::Const => write!(f, "const"),
             Self::Compiler => write!(f, "compiler"),
             Self::Component => write!(f, "component"),
+            Self::ComponentShort => write!(f, "c"),
             Self::Let => write!(f, "let"),
             Self::Return => write!(f, "return"),
             Self::Objective => write!(f, "objective"),
@@ -234,6 +251,9 @@ impl fmt::Display for Token {
             Self::Init => write!(f, "init"),
             Self::Nbt => write!(f, "nbt"),
             Self::Goto => write!(f, "goto"),
+            Self::Pos => write!(f, "pos"),
+            Self::Tilde => write!(f, "~"),
+            Self::Ref => write!(f, "ref"),
         }
     }
 }

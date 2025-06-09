@@ -45,7 +45,7 @@ impl Valued for Node {
                                 at: it.span(),
                                 err: "Expected an identifier!".into(),
                             }
-                            .into())
+                            .into());
                         }
                     };
 
@@ -68,7 +68,7 @@ impl Valued for Node {
                                 at: it.span(),
                                 err: "Expected an identifier!".into(),
                             }
-                            .into())
+                            .into());
                         }
                     };
 

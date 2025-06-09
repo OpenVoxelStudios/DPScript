@@ -1,0 +1,26 @@
+module std/gm/core;
+
+import std/base/{forceload_add, summon_with};
+import std/cond/{not_entity_exists};
+
+// #[reset(on_load)]
+pub objective gm_std: dummy = "gm.std";
+
+pub const math_entity = entity: "91bb5-0-0-0-ffff";
+pub const invalid_input = entity: "invalid-input";
+
+init {
+    forceload_add(29999999, 91665);
+
+    const data = nbt: {
+        // UUID: [I; 596917, 0, 0, 65535],
+        UUID: [596917, 0, 0, 65535],
+        CustomName: "gm.math_entity",
+    };
+
+    const position = pos: [29999999, 0, 91665];
+
+    if not_entity_exists(math_entity) {
+        summon_with("item_display", position, data);
+    }
+}

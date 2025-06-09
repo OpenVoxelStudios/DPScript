@@ -1,6 +1,6 @@
 use serde_json::Value;
 use tower_lsp::{
-    async_trait,
+    Client, ClientSocket, LanguageServer, LspService, async_trait,
     jsonrpc::Result,
     lsp_types::{
         CompletionItem, CompletionOptions, CompletionParams, CompletionResponse,
@@ -11,7 +11,6 @@ use tower_lsp::{
         TextDocumentSyncCapability, TextDocumentSyncKind, WorkspaceEdit,
         WorkspaceFoldersServerCapabilities, WorkspaceServerCapabilities,
     },
-    Client, ClientSocket, LanguageServer, LspService,
 };
 
 #[derive(Debug, Clone)]

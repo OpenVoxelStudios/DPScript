@@ -1,6 +1,6 @@
 use super::Analyzer;
 use crate::{
-    check_ir_token, IRNode, IRTag, IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError,
+    IRNode, IRTag, IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError, check_ir_token,
 };
 
 impl Analyzer<IRTag> for IRTag {
@@ -21,7 +21,7 @@ impl Analyzer<IRTag> for IRTag {
                         at: it.1,
                         err: format!("Unexpected token: {}", tkn),
                     }
-                    .into())
+                    .into());
                 }
             };
 

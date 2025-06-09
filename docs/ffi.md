@@ -1,8 +1,9 @@
 # FFI
 
-DPScript's FFI - if you can even call it that - is an interface for interacting with Minecraft commands.
-Yes it's technically not FFI in the normal definition, but commands are a foreign function and DPScript
-has an interface for them, so I call it FFI.
+DPScript's FFI - if you can even call it that - is an interface for interacting with
+Minecraft commands.
+Yes, it's technically not FFI in the normal definition, but commands are a foreign function
+and DPScript has an interface for them, so I call it FFI.
 
 ---
 

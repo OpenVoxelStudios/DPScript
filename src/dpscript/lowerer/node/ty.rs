@@ -1,8 +1,8 @@
 use uuid::Uuid;
 
 use crate::{
-    command, BuiltInTypes, CopyDataOperation, IRArgumentOperation, IRDataOperation, IRDefinition,
-    IRGetArgument, IRNode, LoweringContext, VariableAlias,
+    BuiltInTypes, CopyDataOperation, IRArgumentOperation, IRDataOperation, IRDefinition,
+    IRGetArgument, IRNode, LoweringContext, VariableAlias, command,
 };
 
 impl BuiltInTypes {

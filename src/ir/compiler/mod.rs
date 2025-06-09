@@ -6,7 +6,7 @@ pub use pack::*;
 pub use tag::*;
 
 use super::IRAst;
-use crate::{get_versions, PackToml, Result, UnsourcedCompilerError};
+use crate::{PackToml, Result, UnsourcedCompilerError, get_versions};
 use std::{fs, path::PathBuf};
 
 #[derive(Debug, Clone)]

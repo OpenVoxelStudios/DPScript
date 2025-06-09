@@ -1,6 +1,6 @@
 mod analysis;
 
-use crate::{Cursor, Node, Result, Spanned, Token, AST};
+use crate::{AST, Cursor, Node, Result, Spanned, Token};
 use analysis::Analyzer;
 use miette::NamedSource;
 

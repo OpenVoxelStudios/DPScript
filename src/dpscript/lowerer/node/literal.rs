@@ -17,6 +17,7 @@ impl Valued for Literal {
             Self::EnumValue(_, (v, _)) => IRNode::Literal(IRLiteral::String(v.to_lowercase())),
             Self::Float((v, _)) => IRNode::Literal(IRLiteral::String(format!("{}f", v))),
             Self::Int((i, _)) => IRNode::Literal(IRLiteral::String(i.to_string())),
+            Self::Double((d, _)) => IRNode::Literal(IRLiteral::String(format!("{}d", d))),
             Self::Nbt((v, _)) => IRNode::Literal(IRLiteral::String(serde_json::to_string(&v)?)),
             Self::Path((p, _)) => IRNode::Literal(IRLiteral::String(p.clone())),
             Self::Store((s, _)) => IRNode::Literal(IRLiteral::String(s.clone())),
@@ -83,6 +84,10 @@ impl Valued for Literal {
                 }
 
                 IRNode::Reference(var)
+            }
+
+            Self::Pos3(x, y, z, _) => {
+                todo!()
             }
         })
     }

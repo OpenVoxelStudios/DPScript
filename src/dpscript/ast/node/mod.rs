@@ -1,3 +1,4 @@
+mod assign;
 mod attr;
 mod block;
 mod call;
@@ -16,6 +17,7 @@ mod sub;
 mod ty;
 mod var;
 
+pub use assign::*;
 pub use attr::*;
 pub use block::*;
 pub use call::*;
@@ -41,6 +43,7 @@ use std::fmt;
 
 #[derive(Debug, Clone, Serialize)]
 pub enum Node {
+    Assign(Assign),
     Module(Module),
     Literal(Literal),
     Ident(Spanned<String>),
@@ -75,6 +78,7 @@ pub enum TopLevelNode {
 impl Node {
     pub fn span(&self) -> SourceSpan {
         match self {
+            Self::Assign(a) => a.span,
             Self::Module(m) => m.span,
             Self::Literal(l) => l.span(),
             Self::Ident(i) => i.1,
@@ -99,6 +103,7 @@ impl Node {
 impl fmt::Display for Node {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.clone() {
+            Self::Assign(_) => write!(f, "Assign"),
             Self::Module(_) => write!(f, "Module"),
             Self::Literal(_) => write!(f, "Literal"),
             Self::Ident(_) => write!(f, "Import"),

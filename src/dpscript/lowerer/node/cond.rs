@@ -1,7 +1,7 @@
 use super::{Lowerable, Valued};
 use crate::{
-    command, AddDataOperation, CheckerContext, Conditional, CopyDataOperation, IRBlock,
-    IRCondition, IRDataOperation, IRDefinition, IRNode, LoweringContext, Result, VariableAlias,
+    AddDataOperation, CheckerContext, Conditional, CopyDataOperation, IRBlock, IRCondition,
+    IRDataOperation, IRDefinition, IRNode, LoweringContext, Result, VariableAlias, command,
 };
 use uuid::Uuid;
 

@@ -37,10 +37,10 @@ pub facade fn neq(ent: Entity, score: Objective, other_ent: Entity, other: Objec
 pub facade fn equal(ent: Entity, score: Objective, val: int);
 
 #[cmd("execute store success storage dpscript:core/funcs return_value int 1 run execute unless score %% %% matches %%")]
-pub facade fn notEqual(ent: Entity, score: Objective, val: int);
+pub facade fn not_equal(ent: Entity, score: Objective, val: int);
 
 #[cmd("execute store success storage dpscript:core/funcs return_value int 1 run execute if score %% %% < %% %%")]
-pub facade fn lessThan(ent: Entity, score: Objective, other_ent: Entity, other: Objective);
+pub facade fn less_than(ent: Entity, score: Objective, other_ent: Entity, other: Objective);
 
 // Operations
 

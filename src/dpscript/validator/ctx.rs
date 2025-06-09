@@ -1,6 +1,6 @@
 use crate::{
-    fake_span, Block, Conditional, Enum, Export, ExportNode, Function, Import, Loop, Module,
-    Objective, Reference, Result, Subroutine, Type, TypeKind, ValidatorError, Variable,
+    Block, Conditional, Enum, Export, ExportNode, Function, Import, Loop, Module, Objective,
+    Reference, Result, Subroutine, Type, TypeKind, ValidatorError, Variable, fake_span,
 };
 use miette::{NamedSource, SourceOffset, SourceSpan};
 use serde::Serialize;

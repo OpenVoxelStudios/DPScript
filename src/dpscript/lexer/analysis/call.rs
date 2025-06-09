@@ -1,5 +1,5 @@
 use super::Analyzer;
-use crate::{check_token, AddSpan, Call, LexerError, Node, Result, Spanned, Token, TokenCursor};
+use crate::{AddSpan, Call, LexerError, Node, Result, Spanned, Token, TokenCursor, check_token};
 
 impl Analyzer<Call> for Call {
     fn analyze(
@@ -36,7 +36,7 @@ impl Analyzer<Call> for Call {
                         at: item.1,
                         err: format!("Unexpected token while parsing a nested call: {}", item.0),
                     }
-                    .into())
+                    .into());
                 }
             };
 

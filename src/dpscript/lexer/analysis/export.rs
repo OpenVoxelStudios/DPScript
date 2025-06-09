@@ -59,7 +59,7 @@ impl Analyzer<Export> for Export {
                             at: span.clone(),
                             err: format!("Unexpected token while parsing an export: {}", item),
                         }
-                        .into())
+                        .into());
                     }
                 };
 
@@ -77,7 +77,7 @@ impl Analyzer<Export> for Export {
                             at: span.clone(),
                             err: format!("Unexpected token while parsing an export: {}", item),
                         }
-                        .into())
+                        .into());
                     }
                 };
 
@@ -95,7 +95,7 @@ impl Analyzer<Export> for Export {
                             at: span.clone(),
                             err: format!("Unexpected token while parsing an export: {}", item),
                         }
-                        .into())
+                        .into());
                     }
                 };
 

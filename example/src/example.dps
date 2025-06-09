@@ -6,6 +6,7 @@ import std/{tellraw, sqrt, ALL_PLAYERS};
 fn say_hi() {
     // `const` means this is just something that gets substituted for the real value during compilation.
     // The `&` just adds those properties to the component.
+    // The `component: ""` syntax can be shortened to `c: ""`.
     const base = component: "Hello, " & nbt: { color: "green" };
     // this is syntactic sugar - this is really: new array, add(...), add(...)
     let text = [base, selector: "@s" & nbt: { color: "red" }, component: "!"];

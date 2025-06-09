@@ -1,6 +1,6 @@
 use crate::{
-    dump_ast_part, get_source_files, IRAst, IRCompiler, IRFinalizer, IRLexer, IRTokenizer,
-    IRValidator, Lexer, Lowerer, PackToml, Result, Tokenizer, Validator, AST,
+    AST, IRAst, IRCompiler, IRFinalizer, IRLexer, IRTokenizer, IRValidator, Lexer, Lowerer,
+    PackToml, Result, Tokenizer, Validator, dump_ast_part, get_source_files,
 };
 use indicatif::{ProgressIterator, ProgressStyle};
 use ron::ser::PrettyConfig;

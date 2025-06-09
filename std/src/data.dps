@@ -17,6 +17,9 @@ pub facade fn remove_data_index(stor: Store, pat: NBTPath, index: int);
 #[cmd("data modify storage %% %% set from storage %% %%")]
 pub facade fn clone(src: Store, src_path: NBTPath, dest: Store, dest_path: NBTPath);
 
+#[cmd("data modify storage %% %% set string entity %% %% %% %%")]
+pub facade fn set_string_entity(stor: Store, pat: NBTPath, entity: Selector, ent_pat: NBTPath, start: int, end: int);
+
 pub compiler fn set_data(storage: Store, pat: NBTPath, value: Any);
 
 pub inline fn get_data(storage: Store, pat: NBTPath) -> Any {

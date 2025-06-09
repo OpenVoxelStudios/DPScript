@@ -1,7 +1,7 @@
 use super::Analyzer;
 use crate::{
-    check_ir_token, IRArgumentOperation, IRGetArgument, IRNode, IRSetArgument, IRToken,
-    IRTokenCursor, Result, Spanned, UnnamedLexerError,
+    IRArgumentOperation, IRGetArgument, IRNode, IRSetArgument, IRToken, IRTokenCursor, Result,
+    Spanned, UnnamedLexerError, check_ir_token,
 };
 
 impl Analyzer<IRArgumentOperation> for IRArgumentOperation {
@@ -28,7 +28,7 @@ impl Analyzer<IRArgumentOperation> for IRArgumentOperation {
                                 at: it.1,
                                 err: format!("Unexpected token: {}", it.0),
                             }
-                            .into())
+                            .into());
                         }
                     };
 
@@ -45,7 +45,7 @@ impl Analyzer<IRArgumentOperation> for IRArgumentOperation {
                                 at: it.1,
                                 err: format!("Unexpected token: {}", it.0),
                             }
-                            .into())
+                            .into());
                         }
                     };
 
@@ -68,7 +68,7 @@ impl Analyzer<IRArgumentOperation> for IRArgumentOperation {
                                 at: it.1,
                                 err: format!("Unexpected token: {}", it.0),
                             }
-                            .into())
+                            .into());
                         }
                     };
 
@@ -105,7 +105,7 @@ impl Analyzer<IRArgumentOperation> for IRArgumentOperation {
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),
                     }
-                    .into())
+                    .into());
                 }
             })
         } else {

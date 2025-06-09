@@ -1,4 +1,4 @@
-use crate::{check_token, AddSpan, Enum, LexerError, Node, Result, Spanned, Token, TokenCursor};
+use crate::{AddSpan, Enum, LexerError, Node, Result, Spanned, Token, TokenCursor, check_token};
 
 use super::Analyzer;
 

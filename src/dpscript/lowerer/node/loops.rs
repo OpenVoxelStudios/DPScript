@@ -60,7 +60,7 @@ impl Lowerable for Loop {
                                         at: lit.span(),
                                         err: "Could not get a value out of a literal!".into(),
                                     }
-                                    .into())
+                                    .into());
                                 }
                             },
 
@@ -70,7 +70,7 @@ impl Lowerable for Loop {
                                     at: it.span(),
                                     err: "Could not get a value out of a node!".into(),
                                 }
-                                .into())
+                                .into());
                             }
                         },
                     }));

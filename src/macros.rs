@@ -375,3 +375,40 @@ macro_rules! command {
         }
     };
 }
+
+#[macro_export]
+macro_rules! take_until {
+    ($cursor: ident, $output: ident, $span: ident => $token: ident) => {
+        while let Some((tkn, sp)) = $cursor.next() {
+            let mut opens = [
+                0, // Brackets
+                0, // Braces
+                0, // Parenthesis
+            ];
+
+            if tkn == $crate::Token::$token && opens.iter().all(|it| *it == 0) {
+                $span = $span.add(sp);
+                break;
+            }
+
+            match tkn {
+                $crate::Token::LeftBracket => opens[0] += 1,
+                $crate::Token::LeftBrace => opens[1] += 1,
+                $crate::Token::LeftParen => opens[2] += 1,
+                $crate::Token::RightBracket => opens[0] -= 1,
+                $crate::Token::RightBrace => opens[1] -= 1,
+                $crate::Token::RightParen => opens[2] -= 1,
+                _ => $output.push((tkn.clone(), sp)),
+            };
+
+            if opens.iter().any(|it| *it < 0) {
+                return Err($crate::LexerError {
+                    src: $cursor.source(),
+                    at: sp,
+                    err: format!("Unexpected token: {}", tkn),
+                }
+                .into());
+            }
+        }
+    };
+}

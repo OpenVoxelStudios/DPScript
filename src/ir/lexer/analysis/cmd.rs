@@ -1,5 +1,5 @@
 use super::Analyzer;
-use crate::{check_ir_token, IRCommand, IRNode, IRToken, IRTokenCursor, Result, Spanned};
+use crate::{IRCommand, IRNode, IRToken, IRTokenCursor, Result, Spanned, check_ir_token};
 
 impl Analyzer<IRCommand> for IRCommand {
     fn analyze(

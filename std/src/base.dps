@@ -6,13 +6,22 @@ pub facade fn tellraw(who: Selector, message: Component[]);
 #[cmd("summon %%")]
 pub facade fn summon(ent: Entity);
 
-#[cmd("summon %% %% %% %%")]
-pub facade fn summon_at(ent: Entity, x: int, y: int, z: int);
+#[cmd("summon %% %%")]
+pub facade fn summon_at(ent: Entity, position: Pos3);
+
+#[cmd("summon %% %% %%")]
+pub facade fn summon_with(ent: Identifier, position: Pos3, data: NBT);
 
 // Guys I need an identifier type
 #[cmd("give %% %%")]
-pub facade fn give(ent: Entity, item: NBTPath);
+pub facade fn give(ent: Entity, item: Identifier);
 
 // Guys I need an identifier type
 #[cmd("give %% %% %%")]
-pub facade fn give_nbt(ent: Entity, item: NBTPath, data: NBT);
+pub facade fn give_nbt(ent: Entity, item: Identifier, data: NBT);
+
+#[cmd("forceload add %% %%")]
+pub facade fn forceload_add(position: Pos2);
+
+#[cmd("tp %% %%")]
+pub facade fn tp_pos(ent: Entity, position: Pos3);

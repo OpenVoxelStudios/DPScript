@@ -3,16 +3,17 @@ module std;
 export advops/*;
 export array/*;
 export base/*;
+export cond/*;
 export core/*;
 export data/*;
 export scoreboard/*;
 export selectors/*;
 
 import std/base/tellraw;
-import std/selectors/ALL_PLAYERS;
-import std/scoreboard/{notEqual, set_score};
+import std/selectors/all_players;
+import std/scoreboard/{not_equal, set_score};
 
-pub objective enableMessage: dummy = "enable_std_hello";
+pub objective enable_message: dummy = "enable_std_hello";
 pub const config = entity: "config";
 
 // FIXME: This shouldn't be necessary.
@@ -39,12 +40,12 @@ init {
     
     const hint = [hint_base, disable, cmd, click];
 
-    if notEqual(config, enableMessage, 0) {
-        set_score(config, enableMessage, 0);
+    if not_equal(config, enable_message, 0) {
+        set_score(config, enable_message, 0);
     }
 
-    if notEqual(config, enableMessage, 1) {
-        tellraw(ALL_PLAYERS, welcome);
-        tellraw(ALL_PLAYERS, hint);
+    if not_equal(config, enable_message, 1) {
+        tellraw(all_players, welcome);
+        tellraw(all_players, hint);
     }
 }

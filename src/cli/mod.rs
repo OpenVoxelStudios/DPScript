@@ -12,6 +12,7 @@ pub struct Cli {
 #[derive(Debug, Clone, Subcommand)]
 pub enum Commands {
     /// Build a project
+    #[clap(aliases = ["b"])]
     Build {
         #[arg(short, long = "config", default_value_os_t = PathBuf::from("./pack.toml"))]
         config_path: PathBuf,
@@ -36,6 +37,7 @@ pub enum Commands {
     },
 
     /// Compile a single file
+    #[clap(aliases = ["c"])]
     Compile {
         file: PathBuf,
 
@@ -88,7 +90,7 @@ impl Commands {
                 dump_tokens: _,
                 out_dir: _,
             } => {
-                todo!()
+                todo!("soon(TM)")
             }
         }
 

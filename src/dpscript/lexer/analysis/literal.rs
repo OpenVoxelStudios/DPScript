@@ -1,4 +1,7 @@
-use crate::{check_token, AddSpan, LexerError, Literal, Node, Result, Spanned, Token, TokenCursor};
+use crate::{
+    AddSpan, LexerError, Literal, Node, Result, Spanned, Token, TokenCursor, check_token,
+    take_until,
+};
 
 use super::Analyzer;
 
@@ -9,8 +12,56 @@ impl Analyzer<Literal> for Literal {
         _nodes: &mut Vec<Node>,
     ) -> Result<Option<Literal>> {
         Ok(match item.0 {
-            Token::Int(i) => Some(Literal::Int((i, item.1))),
-            Token::Float(f) => Some(Literal::Float((f, item.1))),
+            Token::Int(i) => match cursor.peek() {
+                Some((Token::Ident(id), _)) => match id.as_str() {
+                    "f" => Some(Literal::Float((i as f32, item.1))),
+                    "d" => Some(Literal::Double((i as f64, item.1))),
+
+                    "b" => match i {
+                        0 => Some(Literal::Bool((false, item.1))),
+                        1 => Some(Literal::Bool((true, item.1))),
+
+                        _ => {
+                            return Err(LexerError {
+                                src: cursor.source(),
+                                at: item.1,
+                                err: format!("Invalid value for boolean literal!"),
+                            }
+                            .into());
+                        }
+                    },
+
+                    val => {
+                        return Err(LexerError {
+                            src: cursor.source(),
+                            at: item.1,
+                            err: format!("Unknown numeric constant suffix: {}", val),
+                        }
+                        .into());
+                    }
+                },
+
+                _ => Some(Literal::Int((i, item.1))),
+            },
+
+            Token::Float(f) => match cursor.peek() {
+                Some((Token::Ident(id), _)) => match id.as_str() {
+                    "f" => Some(Literal::Float((f as f32, item.1))),
+                    "d" => Some(Literal::Double((f, item.1))),
+
+                    val => {
+                        return Err(LexerError {
+                            src: cursor.source(),
+                            at: item.1,
+                            err: format!("Unknown numeric constant suffix: {}", val),
+                        }
+                        .into());
+                    }
+                },
+
+                _ => Some(Literal::Double((f, item.1))),
+            },
+
             Token::Bool(b) => Some(Literal::Bool((b, item.1))),
             Token::String(s) => Some(Literal::String((s, item.1))),
 
@@ -28,7 +79,7 @@ impl Analyzer<Literal> for Literal {
                                 at: span,
                                 err: format!("Expected string, got: {}", tkn),
                             }
-                            .into())
+                            .into());
                         }
                     },
                     span,
@@ -49,7 +100,7 @@ impl Analyzer<Literal> for Literal {
                                 at: span,
                                 err: format!("Expected string, got: {}", tkn),
                             }
-                            .into())
+                            .into());
                         }
                     },
                     span,
@@ -70,7 +121,7 @@ impl Analyzer<Literal> for Literal {
                                 at: span,
                                 err: format!("Expected string, got: {}", tkn),
                             }
-                            .into())
+                            .into());
                         }
                     },
                     span,
@@ -91,7 +142,7 @@ impl Analyzer<Literal> for Literal {
                                 at: span,
                                 err: format!("Expected string, got: {}", tkn),
                             }
-                            .into())
+                            .into());
                         }
                     },
                     span,
@@ -112,11 +163,78 @@ impl Analyzer<Literal> for Literal {
                                 at: span,
                                 err: format!("Expected string, got: {}", tkn),
                             }
-                            .into())
+                            .into());
                         }
                     },
                     span,
                 )))
+            }
+
+            Token::Pos => {
+                let (_, s) = check_token!(remove cursor == Colon).unwrap();
+                let (_, s2) = check_token!(remove cursor == LeftBracket).unwrap();
+                let mut span = s.add(s2);
+                let mut x = Vec::new();
+                let mut y = Vec::new();
+                let mut z = Vec::new();
+
+                take_until!(cursor, x, span => Comma);
+                take_until!(cursor, y, span => Comma);
+
+                let mut opens = 0;
+
+                while let Some((tkn, sp)) = cursor.next() {
+                    if tkn == Token::RightBracket {
+                        if opens == 0 {
+                            span = span.add(sp);
+                            break;
+                        } else {
+                            opens -= 1;
+                        }
+                    }
+
+                    if tkn == Token::LeftBracket {
+                        opens += 1;
+                    }
+
+                    z.push((tkn, sp));
+                }
+
+                let mut x_out = Vec::new();
+                let mut y_out = Vec::new();
+                let mut z_out = Vec::new();
+
+                let mut x_cursor = TokenCursor::new_from_src(
+                    cursor.source().name(),
+                    cursor.source().inner().clone(),
+                    x,
+                );
+
+                let mut y_cursor = TokenCursor::new_from_src(
+                    cursor.source().name(),
+                    cursor.source().inner().clone(),
+                    y,
+                );
+
+                let mut z_cursor = TokenCursor::new_from_src(
+                    cursor.source().name(),
+                    cursor.source().inner().clone(),
+                    z,
+                );
+
+                while let Some(item) = x_cursor.next() {
+                    Node::analyze(item, &mut x_cursor, &mut x_out)?;
+                }
+
+                while let Some(item) = y_cursor.next() {
+                    Node::analyze(item, &mut y_cursor, &mut y_out)?;
+                }
+
+                while let Some(item) = z_cursor.next() {
+                    Node::analyze(item, &mut z_cursor, &mut z_out)?;
+                }
+
+                Some(Literal::Pos3(x_out, y_out, z_out, span.add(s)))
             }
 
             Token::Selector => {
@@ -133,7 +251,7 @@ impl Analyzer<Literal> for Literal {
                                 at: span,
                                 err: format!("Expected string, got: {}", tkn),
                             }
-                            .into())
+                            .into());
                         }
                     },
                     span,
@@ -169,14 +287,20 @@ impl Analyzer<Literal> for Literal {
                     span = span.add(tkn.1);
                 }
 
-                let buf = buf
-                    .iter()
-                    .map(|v| format!("{}", v.0))
-                    .collect::<Vec<_>>()
-                    .join("");
-                let buf = format!("{{{}}}", buf);
+                // let buf = buf
+                //     .iter()
+                //     .map(|v| format!("{}", v.0))
+                //     .collect::<Vec<_>>()
+                //     .join("");
 
-                Some(Literal::Nbt((json5::from_str(&buf)?, span)))
+                // let buf = format!("{{{}}}", buf);
+
+                // Some(Literal::Nbt((json5::from_str(&buf)?, span)))
+
+                // This is broken because json5 doesn't allow for variables, number suffixes notation, etc.
+                // This'll require a lot of setup to handle objects and arrays and nested objects/arrays properly
+                // as well as variables
+                todo!("Dynamic NBT Literal Parsing")
             }
 
             Token::LeftBracket => {
@@ -271,7 +395,7 @@ impl Analyzer<Literal> for Literal {
                                     tkn.0
                                 ),
                             }
-                            .into())
+                            .into());
                         }
                     };
 

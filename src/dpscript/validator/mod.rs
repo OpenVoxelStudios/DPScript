@@ -6,7 +6,7 @@ pub use checker::*;
 pub use ctx::*;
 pub use helpers::*;
 
-use crate::{Module, Result, AST};
+use crate::{AST, Module, Result};
 
 #[derive(Debug, Clone)]
 pub struct Validator {

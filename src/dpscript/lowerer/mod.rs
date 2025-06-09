@@ -8,7 +8,7 @@ pub use remap::*;
 
 use super::ExportNode;
 use crate::{
-    Error, IRAst, IRCall, IRDefinition, IRFunction, IRNode, IRTag, Result, VariableAlias, AST,
+    AST, Error, IRAst, IRCall, IRDefinition, IRFunction, IRNode, IRTag, Result, VariableAlias,
 };
 
 #[derive(Debug, Clone)]

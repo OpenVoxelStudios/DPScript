@@ -1,6 +1,6 @@
 use super::Analyzer;
 use crate::{
-    check_ir_token, IRLiteral, IRNode, IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError,
+    IRLiteral, IRNode, IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError, check_ir_token,
 };
 
 impl Analyzer<IRLiteral> for IRLiteral {

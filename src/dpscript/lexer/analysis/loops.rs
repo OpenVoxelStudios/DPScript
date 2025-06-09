@@ -1,6 +1,6 @@
 use super::Analyzer;
 
-use crate::{check_token, AddSpan, LexerError, Loop, Node, Result, Spanned, Token, TokenCursor};
+use crate::{AddSpan, LexerError, Loop, Node, Result, Spanned, Token, TokenCursor, check_token};
 
 impl Analyzer<Loop> for Loop {
     fn analyze(
@@ -23,7 +23,7 @@ impl Analyzer<Loop> for Loop {
                     at: var_name_span,
                     err: format!("Unexpected token while parsing a loop: {}", var_name),
                 }
-                .into())
+                .into());
             }
         };
 
@@ -40,7 +40,7 @@ impl Analyzer<Loop> for Loop {
                     at: array_span,
                     err: format!("Unexpected token while parsing a loop: {}", array),
                 }
-                .into())
+                .into());
             }
         };
 

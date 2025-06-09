@@ -1,3 +1,7 @@
 module std/selectors;
 
-pub const ALL_PLAYERS = selector: "@a";
+pub const self = selector: "@s";
+pub const nearest_player = selector: "@p";
+pub const random_player = selector: "@r";
+pub const all_players = selector: "@a";
+pub const all_entities = selector: "@e";

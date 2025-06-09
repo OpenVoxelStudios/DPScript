@@ -1,7 +1,7 @@
 use crate::{
-    add_return, check_token, Block, Call, Conditional, Enum, Export, Function, Import, LexerError,
-    Literal, Loop, Module, Node, Objective, Operation, Result, Return, Spanned, Subroutine, Token,
-    TokenCursor, Variable,
+    Assign, Block, Call, Conditional, Enum, Export, Function, Import, LexerError, Literal, Loop,
+    Module, Node, Objective, Operation, Result, Return, Spanned, Subroutine, Token, TokenCursor,
+    Variable, add_return, check_token,
 };
 
 use super::Analyzer;
@@ -33,6 +33,11 @@ impl Analyzer<Node> for Node {
 
         match Variable::analyze(item.clone(), cursor, nodes)? {
             Some(v) => add_return!(nodes += Variable(v)),
+            None => {}
+        };
+
+        match Assign::analyze(item.clone(), cursor, nodes)? {
+            Some(v) => add_return!(nodes += Assign(v)),
             None => {}
         };
 
@@ -103,7 +108,7 @@ impl Analyzer<Node> for Node {
                         at: it.1,
                         err: format!("Unexpected token while parsing a goto: {}", it.0),
                     }
-                    .into())
+                    .into());
                 }
             };
 

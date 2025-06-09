@@ -2,7 +2,7 @@ mod node;
 
 pub use node::*;
 
-use crate::{module_indexer_add, ModuleExport, Result};
+use crate::{ModuleExport, Result, module_indexer_add};
 use serde::Serialize;
 use std::collections::BTreeMap;
 

@@ -1,4 +1,4 @@
-use super::{bits::HasBits, HasSpan};
+use super::{HasSpan, bits::HasBits};
 use crate::{Result, TokenizerError, UnnamedTokenizerError};
 use miette::{NamedSource, SourceOffset, SourceSpan};
 
@@ -71,6 +71,51 @@ impl<T: HasBits + Clone, M> Cursor<T, M> {
 
     pub fn pos(&self) -> usize {
         self.pos
+    }
+}
+
+impl<T: HasBits + Clone, M> Cursor<T, M>
+where
+    T::Bit: PartialEq,
+{
+    pub fn peek_until(&self, end: impl Fn(&T::Bit) -> bool) -> Option<T::Bit> {
+        let mut it = None;
+        let mut n = 0;
+
+        while let Some(cur) = self.peek_ahead(n) {
+            if end(&cur) {
+                it = Some(cur);
+                break;
+            }
+
+            n += 1;
+        }
+
+        it
+    }
+
+    pub fn peek_until_if(
+        &self,
+        end: impl Fn(&T::Bit) -> bool,
+        check: impl Fn(&T::Bit) -> bool,
+    ) -> Option<T::Bit> {
+        let mut it = None;
+        let mut n = 0;
+
+        while let Some(cur) = self.peek_ahead(n) {
+            if end(&cur) {
+                it = Some(cur);
+                break;
+            }
+
+            if !check(&cur) {
+                break;
+            }
+
+            n += 1;
+        }
+
+        it
     }
 }
 

@@ -13,6 +13,7 @@ pub struct Type {
 pub enum TypeKind {
     Int,
     Float,
+    Double,
     Bool,
     String,
     NBT,
@@ -25,6 +26,7 @@ pub enum TypeKind {
     Any,
     Void,
     Entity,
+    Pos3,
     Ident(String),
     Array(Box<Type>),
 }
@@ -44,6 +46,7 @@ impl TypeKind {
         match self.clone() {
             Self::Int => "int".into(),
             Self::Float => "float".into(),
+            Self::Double => "double".into(),
             Self::Bool => "bool".into(),
             Self::String => "str".into(),
             Self::NBT => "NBT".into(),
@@ -56,6 +59,7 @@ impl TypeKind {
             Self::Any => "Any".into(),
             Self::Void => "void".into(),
             Self::Entity => "Entity".into(),
+            Self::Pos3 => "Pos3".into(),
             Self::Ident(id) => id,
             Self::Array(arr) => format!("{}[]", arr.kind.name()),
         }

@@ -1,5 +1,5 @@
 use crate::{
-    check_token, AddSpan, LexerError, Node, Result, Spanned, Token, TokenCursor, Type, Variable,
+    AddSpan, LexerError, Node, Result, Spanned, Token, TokenCursor, Type, Variable, check_token,
 };
 
 use super::Analyzer;
@@ -46,7 +46,7 @@ impl Analyzer<Variable> for Variable {
                     at: name_span,
                     err: format!("Unexpected token while parsing a variable: {}", name),
                 }
-                .into())
+                .into());
             }
         };
 

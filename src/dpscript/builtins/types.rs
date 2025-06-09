@@ -14,10 +14,12 @@ pub enum BuiltInTypes {
     NBT,
     Bool,
     Float,
+    Double,
     Int,
     String,
     Any,
     Entity,
+    Pos3,
     Enum(String),
     Array(Box<BuiltInTypes>),
     Void,
@@ -35,6 +37,7 @@ impl BuiltInTypes {
         match ty {
             TypeKind::Int => Self::Int,
             TypeKind::Float => Self::Float,
+            TypeKind::Double => Self::Double,
             TypeKind::Bool => Self::Bool,
             TypeKind::String => Self::String,
             TypeKind::NBT => Self::NBT,
@@ -47,6 +50,7 @@ impl BuiltInTypes {
             TypeKind::Any => Self::Any,
             TypeKind::Void => Self::Void,
             TypeKind::Entity => Self::Entity,
+            TypeKind::Pos3 => Self::Pos3,
             TypeKind::Ident(it) => Self::Enum(it), // `Type::Ident`s should always be enums
             TypeKind::Array(it) => Self::Array(Box::new(it.kind.into())),
         }
@@ -56,6 +60,7 @@ impl BuiltInTypes {
         match self {
             Self::Int => TypeKind::Int,
             Self::Float => TypeKind::Float,
+            Self::Double => TypeKind::Double,
             Self::Bool => TypeKind::Bool,
             Self::String => TypeKind::String,
             Self::NBT => TypeKind::NBT,
@@ -68,6 +73,7 @@ impl BuiltInTypes {
             Self::Any => TypeKind::Any,
             Self::Void => TypeKind::Void,
             Self::Entity => TypeKind::Entity,
+            Self::Pos3 => TypeKind::Pos3,
             Self::Enum(id) => TypeKind::Ident(id.clone()),
             Self::Array(it) => TypeKind::Array(Box::new(it.as_type(it.create_fake_span()))),
         }
@@ -96,6 +102,7 @@ impl BuiltInTypes {
             Self::String,
             Self::Any,
             Self::Void,
+            Self::Pos3,
         ]
     }
 
@@ -120,6 +127,7 @@ impl BuiltInTypes {
             Self::String,
             Self::Any,
             Self::Void,
+            Self::Pos3,
         ];
 
         all.extend(arrays);
@@ -143,12 +151,14 @@ impl BuiltInTypes {
             Self::NBT => "NBT".into(),
             Self::Bool => "bool".into(),
             Self::Float => "float".into(),
+            Self::Double => "double".into(),
             Self::Int => "int".into(),
             Self::String => "str".into(),
             Self::Any => "Any".into(),
             Self::Enum(it) => it.into(),
             Self::Array(ty) => format!("{}[]", ty.name()),
             Self::Void => "Void".into(),
+            Self::Pos3 => "Pos3".into(),
         }
     }
 
