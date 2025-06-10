@@ -1,8 +1,8 @@
-module std/advops;
+module std::advops;
 
-// import std/data/{set_data, get_data, clone};
+// import std::data::{set_data, get_data, clone};
 
-export std/gm/sqrt/*;
+export std::gm::sqrt::*;
 
 // pub fn sin(num: float) -> float {
 //     const stor = store: "dpscript:temp/ops/sin";

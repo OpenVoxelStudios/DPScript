@@ -1,6 +1,6 @@
-module std/gm/simple;
+module std::gm::simple;
 
-import std/gm/core/{gm_std, math_entity};
+import std::gm::core::{gm_std, math_entity};
 
 fn add(x: float, y: float) -> float {
     at pos: [~, x, ~] {

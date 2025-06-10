@@ -8,3 +8,5 @@ std/out
 example/out
 tsconfig.tsbuildinfo
 dist
+vscode-test-web
+.vscode-test-web

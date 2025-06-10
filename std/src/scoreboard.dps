@@ -1,4 +1,4 @@
-module std/scoreboard;
+module std::scoreboard;
 
 // Basics
 

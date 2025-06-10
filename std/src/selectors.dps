@@ -1,4 +1,4 @@
-module std/selectors;
+module std::selectors;
 
 pub const self = selector: "@s";
 pub const nearest_player = selector: "@p";

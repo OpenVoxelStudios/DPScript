@@ -1,6 +1,6 @@
-module std/data;
+module std::data;
 
-import std/core/{storeof, keyof};
+import std::core::{storeof, keyof};
 
 #[cmd("data modify storage %% %% append from storage %% %%")]
 pub facade fn append_data(src: Store, src_path: NBTPath, dest: Store, dest_path: NBTPath);

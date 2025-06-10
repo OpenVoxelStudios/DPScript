@@ -1,8 +1,8 @@
-module std/gm/sqrt;
+module std::gm::sqrt;
 
-import std/base/{tp_pos};
-import std/data/{set_string_entity};
-import std/gm/core/{gm_std, math_entity};
+import std::base::{tp_pos};
+import std::data::{set_string_entity};
+import std::gm::core::{gm_std, math_entity};
 
 const looper = selector: "__sqrt_loop";
 

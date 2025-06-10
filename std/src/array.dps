@@ -1,4 +1,4 @@
-module std/array;
+module std::array;
 
 pub objective array_len: dummy = "__dpscript_array_len";
 pub objective array_pos: dummy = "__dpscript_array_pos";
