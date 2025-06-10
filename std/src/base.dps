@@ -10,15 +10,13 @@ pub facade fn summon(ent: Entity);
 pub facade fn summon_at(ent: Entity, position: Pos3);
 
 #[cmd("summon %% %% %%")]
-pub facade fn summon_with(ent: Identifier, position: Pos3, data: NBT);
+pub facade fn summon_with(#[id(entity_type)] ent: Identifier, position: Pos3, data: NBT);
 
-// Guys I need an identifier type
 #[cmd("give %% %%")]
-pub facade fn give(ent: Entity, item: Identifier);
+pub facade fn give(ent: Entity, #[id(item)] item: Identifier);
 
-// Guys I need an identifier type
 #[cmd("give %% %% %%")]
-pub facade fn give_nbt(ent: Entity, item: Identifier, data: NBT);
+pub facade fn give_nbt(ent: Entity, #[id(item)] item: Identifier, data: NBT);
 
 #[cmd("forceload add %% %%")]
 pub facade fn forceload_add(position: Pos2);

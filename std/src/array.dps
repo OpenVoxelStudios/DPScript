@@ -1,71 +1,22 @@
 module std/array;
 
-import std/data/{
-    append_data,
-    append_data_from_index,
-    remove_data_index,
-};
+pub objective array_len: dummy = "__dpscript_array_len";
+pub objective array_pos: dummy = "__dpscript_array_pos";
 
-import std/core/{keyof, storeof};
-import std/core/stores/arrayLength;
-import std/core/stores/tempStorage;
-import std/core/players/temp;
+pub const array_state = selector: "__dpscript_state";
 
-objective tempArrayLength: dummy = "__dpscript_tmp_array_add_length";
-objective tempArrayPos: dummy = "__dpscript_tmp_array_add_pos";
-objective tempInputLen: dummy = "__dpscript_tmp_array_input_len";
-objective tempOutputLen: dummy = "__dpscript_tmp_array_output_len";
+pub fn array_add_all(ref arr: Any[], add: Any[]) {
+    #[gen] const state: Selector;
 
-pub fn array_add(arr: Any[], add: Any) {
-    const stor = storeof(arr);
-    const key = keyof(arr);
-
-    tempArrayLength[temp] = arrayLength[key];
-    append_data(stor, key, storeof(add), keyof(add));
-    tempArrayLength[temp] += 1;
-    stor[key] = tempArrayLength[temp];
-    reset tempArrayLength[temp];
-}
-
-pub fn array_add_all(arr: Any[], add: Any[]) {
-    const stor = storeof(arr);
-    const key = keyof(arr);
-    const addStore = storeof(add);
-    const addKey = keyof(add);
-    
-    tempArrayLength[temp] = arrayLength[key];
-    tempOutputLen[temp] = arrayLength[key];
-    tempInputLen[temp] = arrayLength[addKey];
-    tempArrayPos[temp] = 0;
-
-    // tempStorage[path: "arr_copy"] = stor[key];
-    // tempStorage[path: "add_copy"] = addStore[addKey];
-
-    // const arrCopyPath = path: "arr_copy";
-    // const addCopyPath = path: "add_copy";
-
-    // let arrCopy = tempStorage[arrCopyPath];
-    // let addCopy = tempStorage[addCopyPath];
-
-    let cloned arrCopy = stor[key];
-    let cloned addCopy = addStore[addKey];
+    array_pos[state] = 0;
+    array_len[state] = len(add);
 
     goto appender;
 
-    stor[key] = arrCopy;
-    reset tempArrayLength[temp];
-    reset tempArrayPos[temp];
-    tempOutputLen[temp] += tempInputLen[temp];
-    arrayLength[key] = tempOutputLen[temp];
-    reset tempOutputLen[temp];
-    reset tempInputLen[temp];
-
     sub appender {
-        append_data_from_index(tempStorage, path: "arr_copy", tempStorage, path: "add_copy", 0);
-        remove_data_index(tempStorage, path: "add_copy", 0);
-        tempArrayPos[temp] += 1;
-
-        if tempArrayPos[temp] < tempArrayLength[temp] {
+        if array_pos[state] < array_len[state] {
+            arr.push(add[array_pos[state]]);
+            array_pos[state]++;
             goto appender;
         }
     }

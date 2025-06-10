@@ -20,12 +20,12 @@ pub const config = entity: "config";
 import std/config;
 
 init {
-    const welcome = [component: "Thank you for using DPScript!" & nbt: { bold: true }];
-    const hint_base = component: "Hint: " & nbt: { bold: true, color: "gold" };
-    const disable = component: "You can disable this message by running:\n" & nbt: { color: "dark_aqua" };
-    const cmd = component: "/scoreboard players set config enable_std_hello 0\n" & nbt: { bold: true, color: "gray" };
+    const welcome = [c: "Thank you for using DPScript!" & nbt: { bold: true }];
+    const hint_base = c: "Hint: " & nbt: { bold: true, color: "gold" };
+    const disable = c: "You can disable this message by running:\n" & nbt: { color: "dark_aqua" };
+    const cmd = c: "/scoreboard players set config enable_std_hello 0\n" & nbt: { bold: true, color: "gray" };
     
-    const click = component: "[Click to copy!]" & nbt: {
+    const click = c: "[Click to copy!]" & nbt: {
         bold: true,
         color: "dark_aqua",
         clickEvent: {
@@ -40,11 +40,9 @@ init {
     
     const hint = [hint_base, disable, cmd, click];
 
-    if not_equal(config, enable_message, 0) {
-        set_score(config, enable_message, 0);
-    }
-
-    if not_equal(config, enable_message, 1) {
+    if enable_message[config] != 0 && enable_message[config] != 1 {
+        enable_message[config] = 1;
+    } else if enable_message[config] != 0 {
         tellraw(all_players, welcome);
         tellraw(all_players, hint);
     }

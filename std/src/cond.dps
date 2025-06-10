@@ -1,7 +1,0 @@
-module std/cond;
-
-#[cmd(execute, "if entity %%")]
-pub facade fn entity_exists(ent: Selector);
-
-#[cmd(execute, "unless entity %%")]
-pub facade fn not_entity_exists(ent: Selector);
