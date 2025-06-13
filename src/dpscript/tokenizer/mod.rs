@@ -1,7 +1,9 @@
 mod inner;
 mod token;
+mod misc;
 
 pub use token::*;
+pub use misc::*;
 
 use crate::{Result, Spanned, util::Cursor};
 use miette::NamedSource;
@@ -23,8 +25,8 @@ impl Tokenizer {
     }
 
     pub fn run(&mut self) -> Result<&mut Self> {
-        while let Some(ch) = self.cursor.next() {
-            self.tokenize_inner(ch)?;
+        while self.cursor.has_next() {
+            self.tokenize_inner()?;
         }
 
         Ok(self)

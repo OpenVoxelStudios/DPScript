@@ -8,8 +8,11 @@ pub enum Token {
     /// n
     Int(i64),
 
-    /// n.n
-    Float(f64),
+    /// n.n (float)
+    Float(f32),
+
+    /// n.n (double)
+    Double(f64),
 
     /// "\\"...\\""
     String(String),
@@ -193,7 +196,8 @@ impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.clone() {
             Self::Int(i) => write!(f, "{}", i),
-            Self::Float(v) => write!(f, "{}", v),
+            Self::Float(v) => write!(f, "{}f", v),
+            Self::Double(v) => write!(f, "{}d", v),
             Self::String(s) => write!(f, "\"{}\"", s),
             Self::Bool(b) => write!(f, "{}", b),
             Self::Ident(i) => write!(f, "{}", i),

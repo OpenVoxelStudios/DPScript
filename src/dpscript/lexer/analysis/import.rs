@@ -26,9 +26,10 @@ impl Analyzer<Import> for Import {
         let mut imports = Vec::new();
         let mut open = false;
 
+        // FIXME: This doesn't work.
         for (i, (item, span)) in buf.iter().enumerate() {
             match item.clone() {
-                Token::Slash | Token::Comma => continue,
+                Token::Colon | Token::Comma => continue,
                 _ => {}
             };
 

@@ -1,447 +1,263 @@
 use super::{Token, Tokenizer};
-use crate::{Result, TokenizerError, util::IsNotIdent};
+use crate::{Designator, Result, Spanned, TokenizerError, util::IsNotIdent};
 
 impl Tokenizer {
-    pub(super) fn tokenize_inner(&mut self, ch: char) -> Result<()> {
+    pub(super) fn tokenize_inner(&mut self) -> Result<()> {
+        let Some(ch) = self.cursor.peek() else {
+            // TODO: Should this be an error?
+            return Ok(());
+        };
+
         if ch.is_whitespace() {
+            self.cursor.skip(1);
             return Ok(());
         }
 
-        if ch == '/' {
-            if self.cursor.peek().is_some_and(|v| v == '/') {
-                // println!("==>>> SKIPPING COMMENT");
-
-                while let Some(ch) = self.cursor.next() {
-                    if ch == '\n' {
-                        break;
-                    }
+        if ch == '/' && self.cursor.peek().is_some_and(|v| v == '/') {
+            while let Some(ch) = self.cursor.next() {
+                if ch == '\n' {
+                    break;
                 }
-
-                return Ok(());
             }
+
+            return Ok(());
         }
 
-        let sym = match ch {
-            ':' => Some((Token::Colon, self.cursor.span(1))),
-            ',' => Some((Token::Comma, self.cursor.span(1))),
-            '[' => Some((Token::LeftBracket, self.cursor.span(1))),
-            ']' => Some((Token::RightBracket, self.cursor.span(1))),
-            '{' => Some((Token::LeftBrace, self.cursor.span(1))),
-            '}' => Some((Token::RightBrace, self.cursor.span(1))),
-            '(' => Some((Token::LeftParen, self.cursor.span(1))),
-            ')' => Some((Token::RightParen, self.cursor.span(1))),
-            '<' => Some((Token::LeftAngle, self.cursor.span(1))),
-            '>' => Some((Token::RightAngle, self.cursor.span(1))),
-            ';' => Some((Token::Semi, self.cursor.span(1))),
-            '=' => Some((Token::Equal, self.cursor.span(1))),
-            '-' => Some((Token::Minus, self.cursor.span(1))),
-            '+' => Some((Token::Plus, self.cursor.span(1))),
-            '*' => Some((Token::Star, self.cursor.span(1))),
-            '/' => Some((Token::Slash, self.cursor.span(1))),
-            '&' => Some((Token::And, self.cursor.span(1))),
-            '#' => Some((Token::Hash, self.cursor.span(1))),
-            '!' => Some((Token::Exclamation, self.cursor.span(1))),
-            '~' => Some((Token::Tilde, self.cursor.span(1))),
+        let basic = match ch {
+            ':' => self.skip_1(Token::Colon),
+            ',' => self.skip_1(Token::Comma),
+            '[' => self.skip_1(Token::LeftBracket),
+            ']' => self.skip_1(Token::RightBracket),
+            '{' => self.skip_1(Token::LeftBrace),
+            '}' => self.skip_1(Token::RightBrace),
+            '(' => self.skip_1(Token::LeftParen),
+            ')' => self.skip_1(Token::RightParen),
+            '<' => self.skip_1(Token::LeftAngle),
+            '>' => self.skip_1(Token::RightAngle),
+            ';' => self.skip_1(Token::Semi),
+            '=' => self.skip_1(Token::Equal),
+            '-' => self.skip_1(Token::Minus),
+            '+' => self.skip_1(Token::Plus),
+            '*' => self.skip_1(Token::Star),
+            '/' => self.skip_1(Token::Slash),
+            '&' => self.skip_1(Token::And),
+            '#' => self.skip_1(Token::Hash),
+            '!' => self.skip_1(Token::Exclamation),
+            '~' => self.skip_1(Token::Tilde),
 
             '.' => {
                 if self.cursor.peek().is_some_and(|v| v == '.')
                     && self.cursor.peek_ahead(1).is_some_and(|v| v == '.')
                 {
                     let span = self.cursor.span(3);
-                    self.cursor.skip(2);
+                    self.cursor.skip(3);
                     Some((Token::Ellipsis, span))
                 } else if self.cursor.peek().is_some_and(|v| v == '.') {
                     let span = self.cursor.span(2);
-                    self.cursor.skip(1);
+                    self.cursor.skip(2);
                     Some((Token::Range, span))
                 } else {
-                    Some((Token::Dot, self.cursor.span(1)))
+                    self.skip_1(Token::Dot)
                 }
             }
 
-            _ => None,
+            '"' => {
+                let mut buf = Vec::new();
+
+                self.cursor.skip(1);
+
+                while let Some(ch) = self.cursor.next() {
+                    if ch == '\\' && self.cursor.peek().is_some_and(|v| v == '"') {
+                        self.cursor.skip(1);
+                        buf.push('"');
+                        continue;
+                    }
+
+                    if ch == '"' {
+                        break;
+                    } else {
+                        buf.push(ch);
+                    }
+                }
+
+                let len = buf.len();
+
+                Some((
+                    Token::String(String::from_iter(buf)),
+                    self.cursor.span_prev(len, len),
+                ))
+            }
+
+            other => {
+                if other.is_ascii_digit() {
+                    self.cursor.skip(1);
+
+                    let mut buf = Vec::new();
+
+                    buf.push(ch);
+
+                    while let Some(ch) = self.cursor.peek() {
+                        if ch.is_ascii_digit() || (ch == '.' && !buf.contains(&'.')) {
+                            buf.push(ch);
+                            self.cursor.skip(1);
+                        } else {
+                            break;
+                        }
+                    }
+
+                    let designator = match self.cursor.peek() {
+                        Some('d') => Some(Designator::Double),
+                        Some('f') => Some(Designator::Float),
+                        Some('b') => Some(Designator::Bool),
+                        Some(other) => {
+                            if other.is_alphabetic() {
+                                return Err(TokenizerError {
+                                    src: self.cursor.source(),
+                                    at: self.cursor.span(1),
+                                    err: format!("Unknown suffix for literal number: {other}"),
+                                }
+                                .into());
+                            } else {
+                                None
+                            }
+                        }
+                        _ => None,
+                    };
+
+                    let span = match designator {
+                        Some(_) => {
+                            self.cursor.skip(1);
+                            self.cursor.span_prev(buf.len() + 1, buf.len() + 1)
+                        }
+
+                        _ => self.cursor.span_prev(buf.len(), buf.len()),
+                    };
+
+                    if buf.contains(&'.') {
+                        if let Ok(it) = buf.iter().collect::<String>().parse() {
+                            match designator {
+                                Some(Designator::Bool) => match it {
+                                    0.0 => Some((Token::Bool(false), span)),
+                                    1.0 => Some((Token::Bool(true), span)),
+                                    _ => {
+                                        return Err(TokenizerError {
+                                            src: self.cursor.source(),
+                                            at: span,
+                                            err: format!("Invalid value for boolean literal: {it}"),
+                                        }
+                                        .into());
+                                    }
+                                },
+                                Some(Designator::Float) => Some((Token::Float(it as f32), span)),
+                                _ => Some((Token::Double(it), span)),
+                            }
+                        } else {
+                            return Err(TokenizerError {
+                                src: self.cursor.source(),
+                                at: span,
+                                err: format!(
+                                    "Could not parse a float or double: {}",
+                                    buf.iter().collect::<String>()
+                                ),
+                            }
+                            .into());
+                        }
+                    } else {
+                        if let Ok(it) = buf.iter().collect::<String>().parse() {
+                            match designator {
+                                Some(Designator::Bool) => match it {
+                                    0 => Some((Token::Bool(false), span)),
+                                    1 => Some((Token::Bool(true), span)),
+                                    _ => {
+                                        return Err(TokenizerError {
+                                            src: self.cursor.source(),
+                                            at: span,
+                                            err: format!("Invalid value for boolean literal: {it}"),
+                                        }
+                                        .into());
+                                    }
+                                },
+                                Some(Designator::Float) => Some((Token::Float(it as f32), span)),
+                                Some(Designator::Double) => Some((Token::Double(it as f64), span)),
+                                _ => Some((Token::Int(it), span)),
+                            }
+                        } else {
+                            return Err(TokenizerError {
+                                src: self.cursor.source(),
+                                at: span,
+                                err: format!(
+                                    "Could not parse an int: {}",
+                                    buf.iter().collect::<String>()
+                                ),
+                            }
+                            .into());
+                        }
+                    }
+                } else {
+                    None
+                }
+            }
         };
 
-        if let Some(tkn) = sym {
+        if let Some(tkn) = basic {
             self.tokens.push(tkn);
             return Ok(());
         }
 
-        let kw = match ch {
-            'i' => {
-                if let Some(next) = self.cursor.peek() {
-                    let it = match next {
-                        'f' => Some((Token::If, self.cursor.span(2))),
-                        'd' => Some((Token::Id, self.cursor.span(2))),
+        let kw = match self.cursor.next_group_spanned(|it| it.is_not_ident()) {
+            Some((group, span)) => match group.as_str() {
+                "if" => Some((Token::If, span)),
+                "id" => Some((Token::Id, span)),
+                "in" => Some((Token::In, span)),
+                "init" => Some((Token::Init, span)),
+                "inline" => Some((Token::Inline, span)),
+                "import" => Some((Token::Import, span)),
+                "sub" => Some((Token::Sub, span)),
+                "store" => Some((Token::Store, span)),
+                "selector" => Some((Token::Selector, span)),
+                "export" => Some((Token::Export, span)),
+                "enum" => Some((Token::Enum, span)),
+                "else" => Some((Token::Else, span)),
+                "fn" => Some((Token::Fn, span)),
+                "for" => Some((Token::For, span)),
+                "facade" => Some((Token::Facade, span)),
+                "false" => Some((Token::Bool(false), span)),
+                "pub" => Some((Token::Pub, span)),
+                "pos" => Some((Token::Pos, span)),
+                "path" => Some((Token::Path, span)),
+                "const" => Some((Token::Const, span)),
+                "compiler" => Some((Token::Compiler, span)),
+                "component" => Some((Token::Component, span)),
+                "c" => Some((Token::ComponentShort, span)),
+                "let" => Some((Token::Let, span)),
+                "return" => Some((Token::Return, span)),
+                "ref" => Some((Token::Ref, span)),
+                "objective" => Some((Token::Objective, span)),
+                "module" => Some((Token::Module, span)),
+                "nbt" => Some((Token::Nbt, span)),
+                "goto" => Some((Token::Goto, span)),
+                "tick" => Some((Token::Tick, span)),
+                "true" => Some((Token::Bool(true), span)),
 
-                        'n' => {
-                            if self.cursor.peek_ahead(1).is_some_and(|v| v.is_not_ident()) {
-                                Some((Token::In, self.cursor.span(2)))
-                            } else if self.cursor.peek_many(1, 2).is_some_and(|v| v == "it")
-                                && self.cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
-                            {
-                                let span = self.cursor.span(4);
-                                self.cursor.skip(2);
-                                Some((Token::Init, span))
-                            } else if self.cursor.peek_many(1, 4).is_some_and(|v| v == "line")
-                                && self.cursor.peek_ahead(5).is_some_and(|v| v.is_not_ident())
-                            {
-                                let span = self.cursor.span(6);
-                                self.cursor.skip(4);
-                                Some((Token::Inline, span))
-                            } else {
-                                None
-                            }
+                other => {
+                    if other.is_empty() {
+                        None
+                    } else {
+                        if other.chars().next().unwrap().is_numeric() {
+                            None
+                        } else {
+                            Some((Token::Ident(other.into()), span))
                         }
-
-                        'm' => {
-                            if self.cursor.peek_many(1, 4).is_some_and(|v| v == "port")
-                                && self.cursor.peek_ahead(5).is_some_and(|v| v.is_not_ident())
-                            {
-                                let span = self.cursor.span(6);
-                                self.cursor.skip(4);
-                                Some((Token::Import, span))
-                            } else {
-                                None
-                            }
-                        }
-
-                        _ => None,
-                    };
-
-                    if it.is_some() {
-                        self.cursor.skip(1);
                     }
-
-                    it
-                } else {
-                    None
                 }
-            }
+            },
 
-            's' => {
-                if self.cursor.peek_many(0, 2).is_some_and(|v| v == "ub")
-                    && self.cursor.peek_ahead(2).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(3);
-                    self.cursor.skip(2);
-                    Some((Token::Sub, span))
-                } else if self.cursor.peek_many(0, 4).is_some_and(|v| v == "tore")
-                    && self.cursor.peek_ahead(4).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(5);
-                    self.cursor.skip(4);
-                    Some((Token::Store, span))
-                } else if self.cursor.peek_many(0, 7).is_some_and(|v| v == "elector")
-                    && self.cursor.peek_ahead(7).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(8);
-                    self.cursor.skip(7);
-                    Some((Token::Selector, span))
-                } else {
-                    None
-                }
-            }
-
-            'e' => {
-                if self.cursor.peek_many(0, 5).is_some_and(|v| v == "xport")
-                    && self.cursor.peek_ahead(5).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(6);
-                    self.cursor.skip(5);
-                    Some((Token::Export, span))
-                } else if self.cursor.peek_many(0, 3).is_some_and(|v| v == "num")
-                    && self.cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(4);
-                    self.cursor.skip(3);
-                    Some((Token::Enum, span))
-                } else if self.cursor.peek_many(0, 3).is_some_and(|v| v == "lse")
-                    && self.cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(4);
-                    self.cursor.skip(3);
-                    Some((Token::Else, span))
-                } else {
-                    None
-                }
-            }
-
-            'f' => {
-                if self.cursor.peek_many(0, 1).is_some_and(|v| v == "n")
-                    && self.cursor.peek_ahead(1).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(2);
-                    self.cursor.skip(1);
-                    Some((Token::Fn, span))
-                } else if self.cursor.peek_many(0, 2).is_some_and(|v| v == "or")
-                    && self.cursor.peek_ahead(2).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(3);
-                    self.cursor.skip(2);
-                    Some((Token::For, span))
-                } else if self.cursor.peek_many(0, 5).is_some_and(|v| v == "acade")
-                    && self.cursor.peek_ahead(5).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(6);
-                    self.cursor.skip(5);
-                    Some((Token::Facade, span))
-                } else if self.cursor.peek_many(0, 4).is_some_and(|v| v == "alse")
-                    && self.cursor.peek_ahead(4).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(5);
-                    self.cursor.skip(4);
-                    Some((Token::Bool(false), span))
-                } else {
-                    None
-                }
-            }
-
-            'p' => {
-                if self.cursor.peek_many(0, 2).is_some_and(|v| v == "ub")
-                    && self.cursor.peek_ahead(2).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(3);
-                    self.cursor.skip(2);
-                    Some((Token::Pub, span))
-                } else if self.cursor.peek_many(0, 2).is_some_and(|v| v == "os")
-                    && self.cursor.peek_ahead(2).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(3);
-                    self.cursor.skip(2);
-                    Some((Token::Pos, span))
-                } else if self.cursor.peek_many(0, 3).is_some_and(|v| v == "ath")
-                    && self.cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(4);
-                    self.cursor.skip(3);
-                    Some((Token::Path, span))
-                } else {
-                    None
-                }
-            }
-
-            'c' => {
-                if self.cursor.peek_many(0, 4).is_some_and(|v| v == "onst")
-                    && self.cursor.peek_ahead(4).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(5);
-                    self.cursor.skip(4);
-                    Some((Token::Const, span))
-                } else if self.cursor.peek_many(0, 7).is_some_and(|v| v == "ompiler")
-                    && self.cursor.peek_ahead(7).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(8);
-                    self.cursor.skip(7);
-                    Some((Token::Compiler, span))
-                } else if self.cursor.peek_many(0, 8).is_some_and(|v| v == "omponent")
-                    && self.cursor.peek_ahead(8).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(9);
-                    self.cursor.skip(8);
-                    Some((Token::Component, span))
-                } else if self.cursor.peek_ahead(1).is_some_and(|v| v.is_not_ident()) {
-                    let span = self.cursor.span(1);
-                    Some((Token::ComponentShort, span))
-                } else {
-                    None
-                }
-            }
-
-            'l' => {
-                if self.cursor.peek_many(0, 2).is_some_and(|v| v == "et")
-                    && self.cursor.peek_ahead(2).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(3);
-                    self.cursor.skip(2);
-                    Some((Token::Let, span))
-                } else {
-                    None
-                }
-            }
-
-            'r' => {
-                if self.cursor.peek_many(0, 5).is_some_and(|v| v == "eturn")
-                    && self.cursor.peek_ahead(5).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(6);
-                    self.cursor.skip(5);
-                    Some((Token::Return, span))
-                } else if self.cursor.peek_many(0, 2).is_some_and(|v| v == "ef")
-                    && self.cursor.peek_ahead(2).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(3);
-                    self.cursor.skip(2);
-                    Some((Token::Ref, span))
-                } else {
-                    None
-                }
-            }
-
-            'o' => {
-                if self.cursor.peek_many(0, 8).is_some_and(|v| v == "bjective")
-                    && self.cursor.peek_ahead(8).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(9);
-                    self.cursor.skip(8);
-                    Some((Token::Objective, span))
-                } else {
-                    None
-                }
-            }
-
-            'm' => {
-                if self.cursor.peek_many(0, 5).is_some_and(|v| v == "odule")
-                    && self.cursor.peek_ahead(5).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(6);
-                    self.cursor.skip(5);
-                    Some((Token::Module, span))
-                } else {
-                    None
-                }
-            }
-
-            'n' => {
-                if self.cursor.peek_many(0, 2).is_some_and(|v| v == "bt")
-                    && self.cursor.peek_ahead(2).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(3);
-                    self.cursor.skip(2);
-                    Some((Token::Nbt, span))
-                } else {
-                    None
-                }
-            }
-
-            'g' => {
-                if self.cursor.peek_many(0, 3).is_some_and(|v| v == "oto")
-                    && self.cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(4);
-                    self.cursor.skip(3);
-                    Some((Token::Goto, span))
-                } else {
-                    None
-                }
-            }
-
-            't' => {
-                if self.cursor.peek_many(0, 3).is_some_and(|v| v == "ick")
-                    && self.cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(4);
-                    self.cursor.skip(3);
-                    Some((Token::Tick, span))
-                } else if self.cursor.peek_many(0, 3).is_some_and(|v| v == "rue")
-                    && self.cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(4);
-                    self.cursor.skip(3);
-                    Some((Token::Bool(true), span))
-                } else {
-                    None
-                }
-            }
-
-            _ => None,
+            // TODO: Should this be an error?
+            None => return Ok(()),
         };
 
         if let Some(tkn) = kw {
             self.tokens.push(tkn);
-
-            return Ok(());
-        }
-
-        if ch == '"' {
-            let mut s = Vec::new();
-            let c2 = self.cursor.clone();
-
-            while let Some(tkn) = self.cursor.next() {
-                if tkn == '\\' && self.cursor.peek().is_some_and(|v| v == '"') {
-                    self.cursor.skip(1);
-                    s.push('"');
-                    continue;
-                }
-
-                if tkn == '"' {
-                    break;
-                } else {
-                    s.push(tkn);
-                }
-            }
-
-            self.tokens
-                .push((Token::String(s.iter().collect()), c2.span(s.len() + 2)));
-
-            return Ok(());
-        }
-
-        if ch.is_ascii_digit() {
-            let mut buf = Vec::new();
-            let c2 = self.cursor.clone();
-
-            buf.push(ch);
-
-            while let Some(tkn) = self.cursor.peek() {
-                if tkn.is_ascii_digit() || (tkn == '.' && !buf.contains(&'.')) {
-                    buf.push(tkn);
-                    self.cursor.skip(1);
-                } else {
-                    break;
-                }
-            }
-
-            let span = c2.span(buf.len());
-
-            if buf.contains(&'.') {
-                if let Ok(it) = buf.iter().collect::<String>().parse() {
-                    self.tokens.push((Token::Float(it), span));
-                } else {
-                    return Err(TokenizerError {
-                        src: self.cursor.source(),
-                        at: span,
-                        err: format!(
-                            "Could not parse a float: {}",
-                            buf.iter().collect::<String>()
-                        ),
-                    }
-                    .into());
-                }
-            } else {
-                if let Ok(it) = buf.iter().collect::<String>().parse() {
-                    self.tokens.push((Token::Int(it), span));
-                } else {
-                    return Err(TokenizerError {
-                        src: self.cursor.source(),
-                        at: span,
-                        err: format!("Could not parse an int: {}", buf.iter().collect::<String>()),
-                    }
-                    .into());
-                }
-            }
-
-            return Ok(());
-        }
-
-        if ch.is_ascii_alphabetic() || ch == '_' {
-            let mut ident = Vec::new();
-            let c2 = self.cursor.clone();
-
-            ident.push(ch);
-
-            while let Some(tkn) = self.cursor.peek() {
-                if tkn.is_ascii_alphanumeric() || tkn == '_' {
-                    ident.push(tkn);
-                    self.cursor.skip(1);
-                } else {
-                    break;
-                }
-            }
-
-            self.tokens
-                .push((Token::Ident(ident.iter().collect()), c2.span(ident.len())));
-
             return Ok(());
         }
 
@@ -451,5 +267,10 @@ impl Tokenizer {
             err: format!("Unexpected character: {}", ch),
         }
         .into())
+    }
+
+    fn skip_1(&mut self, res: Token) -> Option<Spanned<Token>> {
+        self.cursor.skip(1);
+        Some((res, self.cursor.span(1)))
     }
 }

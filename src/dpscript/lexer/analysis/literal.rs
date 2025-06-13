@@ -12,55 +12,9 @@ impl Analyzer<Literal> for Literal {
         _nodes: &mut Vec<Node>,
     ) -> Result<Option<Literal>> {
         Ok(match item.0 {
-            Token::Int(i) => match cursor.peek() {
-                Some((Token::Ident(id), _)) => match id.as_str() {
-                    "f" => Some(Literal::Float((i as f32, item.1))),
-                    "d" => Some(Literal::Double((i as f64, item.1))),
-
-                    "b" => match i {
-                        0 => Some(Literal::Bool((false, item.1))),
-                        1 => Some(Literal::Bool((true, item.1))),
-
-                        _ => {
-                            return Err(LexerError {
-                                src: cursor.source(),
-                                at: item.1,
-                                err: format!("Invalid value for boolean literal!"),
-                            }
-                            .into());
-                        }
-                    },
-
-                    val => {
-                        return Err(LexerError {
-                            src: cursor.source(),
-                            at: item.1,
-                            err: format!("Unknown numeric constant suffix: {}", val),
-                        }
-                        .into());
-                    }
-                },
-
-                _ => Some(Literal::Int((i, item.1))),
-            },
-
-            Token::Float(f) => match cursor.peek() {
-                Some((Token::Ident(id), _)) => match id.as_str() {
-                    "f" => Some(Literal::Float((f as f32, item.1))),
-                    "d" => Some(Literal::Double((f, item.1))),
-
-                    val => {
-                        return Err(LexerError {
-                            src: cursor.source(),
-                            at: item.1,
-                            err: format!("Unknown numeric constant suffix: {}", val),
-                        }
-                        .into());
-                    }
-                },
-
-                _ => Some(Literal::Double((f, item.1))),
-            },
+            Token::Int(i) => Some(Literal::Int((i, item.1))),
+            Token::Float(f) => Some(Literal::Float((f, item.1))),
+            Token::Double(d) => Some(Literal::Double((d, item.1))),
 
             Token::Bool(b) => Some(Literal::Bool((b, item.1))),
             Token::String(s) => Some(Literal::String((s, item.1))),

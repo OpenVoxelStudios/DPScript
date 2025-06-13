@@ -1,5 +1,5 @@
 use super::{HasSpan, bits::HasBits};
-use crate::{Result, TokenizerError, UnnamedTokenizerError};
+use crate::{FromBits, Result, Spanned, TokenizerError, UnnamedTokenizerError};
 use miette::{NamedSource, SourceOffset, SourceSpan};
 
 #[derive(Debug, Clone)]
@@ -71,6 +71,50 @@ impl<T: HasBits + Clone, M> Cursor<T, M> {
 
     pub fn pos(&self) -> usize {
         self.pos
+    }
+}
+
+impl<T: HasBits + Clone + FromBits, M> Cursor<T, M>
+where
+    T::Bit: PartialEq,
+{
+    pub fn next_group(&mut self, end: impl Fn(&T::Bit) -> bool) -> Option<T> {
+        if !self.has_next() {
+            return None;
+        }
+
+        let mut bits = Vec::new();
+
+        while let Some(bit) = self.next() {
+            if end(&bit) {
+                self.pos -= 1;
+                break;
+            }
+
+            bits.push(bit);
+        }
+
+        Some(T::from_bits(bits))
+    }
+
+    pub fn peek_group(&self, end: impl Fn(&T::Bit) -> bool) -> Option<T> {
+        if !self.has_next() {
+            return None;
+        }
+
+        let mut bits = Vec::new();
+        let mut pos = 0;
+
+        while let Some(bit) = self.peek_ahead(pos) {
+            if end(&bit) {
+                break;
+            }
+
+            bits.push(bit);
+            pos += 1;
+        }
+
+        Some(T::from_bits(bits))
     }
 }
 
@@ -239,10 +283,10 @@ impl Cursor<String, NamedSource<String>> {
         }
     }
 
-    fn find_line(&self) -> usize {
+    fn find_line(&self, pos: usize) -> usize {
         let mut lines = 0;
 
-        for item in &self.inner[0..self.pos] {
+        for item in &self.inner[0..pos] {
             if *item == '\n' {
                 lines += 1;
             }
@@ -251,12 +295,12 @@ impl Cursor<String, NamedSource<String>> {
         lines
     }
 
-    fn find_char(&self) -> usize {
-        let line = self.find_line();
+    fn find_char(&self, pos: usize) -> usize {
+        let line = self.find_line(pos);
         let mut lines = 0;
         let mut chars = 0;
 
-        for item in &self.inner[0..self.pos] {
+        for item in &self.inner[0..pos] {
             if *item == '\n' {
                 lines += 1;
             } else {
@@ -271,8 +315,58 @@ impl Cursor<String, NamedSource<String>> {
 
     pub fn span(&self, length: usize) -> SourceSpan {
         SourceSpan::new(
-            SourceOffset::from_location(&self.src, self.find_line() + 1, self.find_char()),
+            SourceOffset::from_location(&self.src, self.find_line(self.pos) + 1, self.find_char(self.pos)),
             length,
         )
+    }
+
+    pub fn span_prev(&self, length: usize, back: usize) -> SourceSpan {
+        SourceSpan::new(
+            SourceOffset::from_location(&self.src, self.find_line(self.pos - back) + 1, self.find_char(self.pos - back)),
+            length,
+        )
+    }
+
+    pub fn next_group_spanned(&mut self, end: impl Fn(&char) -> bool) -> Option<Spanned<String>> {
+        if !self.has_next() {
+            return None;
+        }
+
+        let mut bits = Vec::new();
+
+        while let Some(bit) = self.next() {
+            if end(&bit) {
+                self.pos -= 1;
+                break;
+            }
+
+            bits.push(bit);
+        }
+
+        let span = self.span_prev(bits.len(), bits.len());
+
+        Some((String::from_bits(bits), span))
+    }
+
+    pub fn peek_group_spanned(&self, end: impl Fn(&char) -> bool) -> Option<Spanned<String>> {
+        if !self.has_next() {
+            return None;
+        }
+
+        let mut bits = Vec::new();
+        let mut pos = 0;
+
+        while let Some(bit) = self.peek_ahead(pos) {
+            if end(&bit) {
+                break;
+            }
+
+            bits.push(bit);
+            pos += 1;
+        }
+
+        let span = self.span(bits.len());
+
+        Some((String::from_bits(bits), span))
     }
 }

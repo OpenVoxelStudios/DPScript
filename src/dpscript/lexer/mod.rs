@@ -15,6 +15,7 @@ pub struct Lexer {
     nodes: Vec<Node>,
 }
 
+// FIXME: Unary operators, NBT parsing, etc.
 impl Lexer {
     pub fn new(
         file: impl AsRef<str>,

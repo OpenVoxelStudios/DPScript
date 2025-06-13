@@ -1,5 +1,7 @@
-import std::base::tellraw;
-import std::selectors::all_players;
+import std::{
+    base::tellraw,
+    selectors::all_players,
+};
 
 pub objective enable_message: dummy = "enable_std_hello";
 pub const config = selector: "config";
