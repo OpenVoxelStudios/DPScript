@@ -10,7 +10,7 @@ fn say_hi() {
     // The `&` just adds those properties to the component.
     // The `component: ""` syntax can be shortened to `c: ""`.
     const base = component: "Hello, " & nbt: { color: "green" };
-    // this is syntactic sugar - this is really: new array, add(...), add(...)
+    // this is syntactic sugar - this is really: new array, push(...), push(...)
     let text = [base, selector: "@s" & nbt: { color: "red" }, component: "!"];
 
     tellraw(selector: "@s", text);

@@ -1,127 +1,211 @@
 {
-    "fileTypes": ["dps"],
-    "name": "dpscript",
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "DPScript",
     "patterns": [
         {
-            "include": "#main"
+            "include": "#all"
         }
     ],
-    "scopeName": "source.dpscript",
-    "uuid": "dbaa50d5-d092-4812-8401-2a0cf1f55e99",
     "repository": {
-        "main": {
+        "all": {
             "patterns": [
                 {
-                    "match": "\\b(fn|module|import|const|let|for|if|objective|facade|id|path|return|init|tick|in|pub|compiler|enum|sub|goto)",
-                    "name": "keyword.dpscript"
+                    "include": "#comments"
                 },
                 {
-                    "match": "\\b(storeof|keyof)",
-                    "name": "support.function.dpscript"
+                    "include": "#block-comments"
                 },
                 {
-                    "match": "\\b(str|component|selector|Identifier|NBTPath|float|int|str|double|bool|dummy|NBT|Selector|Component|store|player)\\b",
-                    "name": "entity.name.type.dpscript"
+                    "include": "#keywords"
                 },
                 {
-                    "match": "\\b([a-z_\\x{0024}][\\w\\x{0024}]*)\\b(\\()",
+                    "include": "#storage"
+                },
+                {
+                    "include": "#support"
+                },
+                {
+                    "include": "#numbers"
+                },
+                {
+                    "include": "#strings"
+                },
+                {
+                    "include": "#other"
+                }
+            ]
+        },
+        "comments": {
+			"patterns": [
+				{
+					"comment": "line comments",
+					"name": "comment.line.double-slash.dpscript",
+					"match": "(//).*$",
+					"captures": {
+						"1": {
+							"name": "punctuation.definition.comment.dpscript"
+						}
+					}
+				}
+			]
+		},
+		"block-comments": {
+			"patterns": [
+				{
+					"comment": "empty block comments",
+					"name": "comment.block.dpscript",
+					"match": "/\\*\\*/"
+				},
+				{
+					"comment": "block comments",
+					"name": "comment.block.dpscript",
+					"begin": "/\\*(?!\\*)",
+					"end": "\\*/",
+					"patterns": [
+						{
+							"include": "#block-comments"
+						}
+					]
+				}
+			]
+		},
+        "keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.control.dpscript",
+                    "match": "\\b(if|else|for|return|export|import|goto|init|tick|at)\\b"
+                },
+                {
+                    "name": "entity.name.type.dpscript",
+                    "match": "\\b(component|selector|c|entity|path|pos|nbt|store)\\s*:\\b"
+                },
+                {
+					"name": "keyword.operator.logical.dpscript",
+					"match": "(\\|\\||&&|!)"
+				},
+                {
+					"name": "keyword.operator.comparison.dpscript",
+					"match": "(=(=)?(?!>)|!=|<=|(?<!=)>=)"
+				}
+            ]
+        },
+        "storage": {
+            "patterns": [
+                {
+                    "name": "storage.type.function.dpscript",
+                    "match": "\\b(?:fn)\\s+([A-Za-z0-9_]+)\\b",
                     "captures": {
                         "1": {
                             "name": "entity.name.function.dpscript"
-                        },
-                        "2": {
-                            "name": "punctuation.dpscript"
                         }
                     }
                 },
                 {
-                    "match": "\\b([a-z_\\x{0024}][\\w\\x{0024}]*)",
-                    "name": "entity.name.dpscript"
-                },
-                {
-                    "match": "\\b([A-Z][\\w\\$]*)",
-                    "name": "entity.name.type.dpscript"
-                },
-                {
-                    "include": "#numeric"
-                },
-                {
-                    "begin": "(\\{)",
-                    "beginCaptures": {
+                    "name": "storage.type.block.dpscript",
+                    "match": "\\b(?:sub)\\s+([A-Za-z0-9_]+)\\b",
+                    "captures": {
                         "1": {
-                            "name": "punctuation.dpscript"
+                            "name": "variable.other.dpscript"
                         }
-                    },
+                    }
+                },
+                {
+                    "name": "storage.type.module.dpscript",
+                    "match": "\\b(?:module)\\s+([A-Za-z0-9_]+)\\b",
+                    "captures": {
+                        "1": {
+                            "name": "entity.name.class.dpscript"
+                        }
+                    }
+                },
+                {
+                    "name": "storage.type.variable.dpscript",
+                    "match": "\\b(?:let|objective|const)\\s+([A-Za-z0-9_]+)\\b",
+                    "captures": {
+                        "1": {
+                            "name": "variable.name.dpscript"
+                        }
+                    }
+                },
+                {
+                    "name": "storage.modifier.dpscript",
+                    "match": "\\b(pub|ref|facade|compiler|inline)\\b"
+                }
+            ]
+        },
+        "support": {
+            "patterns": [
+                {
+                    "name": "support.type.dpscript",
+                    "match": "\\b(Identifier|NBTPath|Store|NBT|Selector|Component|Pos2|Entity|Pos3|Any|float|int|double)\\b"
+                },
+                {
+                    "name": "constant.language.bool.dpscript",
+                    "match": "\\b(true|false)\\b"
+                },
+                {
+                    "name": "meta.function.call.dpscript",
+                    "match": "((?:[A-Za-z0-9_]+\\.?)+)\\s*(?:\\()",
+                    "captures": {
+                        "1": {
+                            "name": "entity.name.function.dpscript"
+                        }
+                    }
+                },
+                {
+                    "name": "meta.preprocessor.dpscript",
+                    "begin": "#\\[",
+                    "end": "\\]",
                     "patterns": [
                         {
-                            "include": "#main__1"
+                            "include": "#strings"
+                        },
+                        {
+                            "include": "#numbers"
+                        },
+                        {
+                            "name": "keyword.other.dpscript",
+                            "match": "\\b(gen|item|entity_type|block|any|sound_event)\\b"
                         }
-                    ],
-                    "end": "(\\};)",
-                    "endCaptures": {
-                        "1": {
-                            "name": "punctuation.dpscript"
-                        }
-                    }
-                },
-                {
-                    "match": "\\b([\\x{003b}.\\x{002c}\\x{003a}\\x{0026}-\\x{003e}\\x{003c}\\x{0023}]+)",
-                    "name": "punctuation.dpscript"
-                },
-                {
-                    "match": "(&|=|;|,)",
-                    "name": "punctuation.dpscript"
-                },
-                {
-                    "match": "(->)",
-                    "name": "punctuation.dpscript"
-                },
-                {
-                    "begin": "(\\\")",
-                    "beginCaptures": {
-                        "1": {
-                            "name": "string.dpscript"
-                        }
-                    },
-                    "contentName": "string.dpscript",
-                    "end": "([^\\x{005c}]\\\")",
-                    "endCaptures": {
-                        "1": {
-                            "name": "string.dpscript"
-                        }
-                    }
-                },
-                {
-                    "match": "(\\(|\\)|\\{|\\}|\\[|\\]|\\.|#|\\+|\\*|\\-|\\/[^\\/])",
-                    "name": "punctuation.dpscript"
-                },
-                {
-                    "match": "(//.*)",
-                    "name": "comment.dpscript"
-                },
-                {
-                    "match": "([^\\s])",
-                    "name": "invalid.dpscript"
+                    ]
                 }
             ]
         },
-        "main__1": {
+        "numbers": {
             "patterns": [
                 {
-                    "include": "#main"
+                    "name": "constant.numeric.dpscript",
+                    "match": "\\b[+-]?\\d[\\d]*(\\.?)[\\d]*(f|d|s|b)?\\b",
+                    "captures": {
+                        "1": {
+                            "name": "punctuation.separator.dot.decimal.dpscript"
+                        },
+                        "2": {
+                            "name": "entity.name.type.numeric.dpscript"
+                        }
+                    }
                 }
             ]
         },
-        "main__2": {
-            "patterns": []
-        },
-        "numeric": {
+        "strings": {
+            "name": "string.quoted.double.dpscript",
+            "begin": "\"",
+            "end": "\"",
             "patterns": [
                 {
-                    "match": "(\\b\\d+)",
-                    "name": "constant.numeric.dpscript"
+                    "name": "constant.character.escape.dpscript",
+                    "match": "\\\\."
+                }
+            ]
+        },
+        "other": {
+            "patterns": [
+                {
+                    "name": "variable.name",
+                    "match": "[A-Za-z0-9_]+"
                 }
             ]
         }
-    }
+    },
+    "scopeName": "source.dpscript"
 }

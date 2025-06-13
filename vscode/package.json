@@ -1,9 +1,9 @@
 {
     "name": "dpscript",
-    "displayName": "DPScript Language Support",
-    "description": "Language support for DPScript",
-    "version": "0.0.1",
     "license": "MIT",
+    "displayName": "DPScript",
+    "description": "Syntax highlighting & support for the DPScript language.",
+    "version": "0.0.1",
     "repository": {
         "type": "git",
         "url": "https://github.com/RedstoneWizard08/DPScript"
@@ -12,7 +12,7 @@
         "RedstoneWizard08"
     ],
     "engines": {
-        "vscode": "^1.85.0"
+        "vscode": "^1.90.0"
     },
     "categories": [
         "Programming Languages"
@@ -22,29 +22,11 @@
             {
                 "id": "dpscript",
                 "aliases": [
-                    "dps",
+                    "DPScript",
                     "dpscript"
                 ],
                 "extensions": [
                     ".dps"
-                ],
-                "configuration": "./language-configuration.json"
-            },
-            {
-                "id": "dpscript_ir",
-                "aliases": [
-                    "dps_ir",
-                    "dpscript_ir"
-                ],
-                "extensions": [
-                    ".dpir"
-                ],
-                "configuration": "./language-configuration.json"
-            },
-            {
-                "id": "iro",
-                "extensions": [
-                    ".iro"
                 ],
                 "configuration": "./language-configuration.json"
             }
@@ -54,55 +36,17 @@
                 "language": "dpscript",
                 "scopeName": "source.dpscript",
                 "path": "./syntaxes/dpscript.tmLanguage.json"
-            },
-            {
-                "language": "dpscript_ir",
-                "scopeName": "source.dpscript_ir",
-                "path": "./syntaxes/dpscript_ir.tmLanguage.json"
-            },
-            {
-                "language": "iro",
-                "scopeName": "source.iro",
-                "path": "./syntaxes/iro.tmLanguage.json"
             }
-        ],
-        "configuration": {
-            "type": "object",
-            "title": "dscls",
-            "properties": {
-                "dscls.trace.server": {
-                    "type": "string",
-                    "scope": "window",
-                    "enum": [
-                        "off",
-                        "messages",
-                        "verbose"
-                    ],
-                    "enumDescriptions": [
-                        "No traces",
-                        "Error only",
-                        "Full log"
-                    ],
-                    "default": "off",
-                    "description": "Traces the communication between VSCode and the language server."
-                }
-            }
-        }
+        ]
+    },
+    "devDependencies": {
+        "@vscode/test-cli": "^0.0.11",
+        "@vscode/test-web": "^0.0.70",
+        "@vscode/vsce": "^3.5.0",
+        "prettier": "^3.5.3"
     },
     "scripts": {
         "fmt": "prettier --write .",
-        "vspack": "vsce package",
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -b",
-        "watch": "tsc -b -w",
-        "postinstall": "cd client && bun i"
-    },
-    "devDependencies": {
-        "@types/node": "^22.7.5",
-        "@vscode/test-cli": "^0.0.10",
-        "@vscode/vsce": "^3.1.1",
-        "prettier": "^3.3.3",
-        "typescript": "^5.6.3",
-        "vscode-test": "^1.6.1"
+        "pack": "vsce package"
     }
 }

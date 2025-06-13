@@ -1,17 +1,23 @@
 {
-  "name": "@dpscript/docs",
-  "type": "module",
-  "version": "0.0.1",
-  "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
-  },
-  "dependencies": {
-    "@astrojs/starlight": "^0.34.4",
-    "astro": "^5.6.1",
-    "sharp": "^0.32.5"
-  }
+    "name": "@dpscript/docs",
+    "type": "module",
+    "version": "0.0.1",
+    "scripts": {
+        "dev": "astro dev",
+        "start": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview",
+        "astro": "astro",
+        "fmt": "prettier --write ."
+    },
+    "dependencies": {
+        "@astrojs/starlight": "^0.34.4",
+        "astro": "^5.6.1",
+        "sharp": "^0.32.5",
+        "starlight-ion-theme": "^2.2.3"
+    },
+    "devDependencies": {
+        "prettier": "^3.5.3",
+        "prettier-plugin-astro": "^0.14.1"
+    }
 }

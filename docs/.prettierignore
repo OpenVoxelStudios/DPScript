@@ -1,5 +1,6 @@
-*.md
 node_modules
-pnpm-lock.yaml
+build
 dist
+*.md
+public
 bun.lock
