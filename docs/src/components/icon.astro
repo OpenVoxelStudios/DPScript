@@ -6,10 +6,10 @@
         ["   ###  ", "  ###   "],
         [" ##     ", "     ## "],
         ["#       ", "       #"],
-        ["#   ##  ", "  ##   #"],
-        ["#  #  # ", " #  #  #"],
-        ["#   ##  ", "  ##   #"],
-        ["#       ", "       #"],
+        ["# ", " #"],
+        ["# ", " #"],
+        ["# ", " #"],
+        ["# ", " #"],
         ["#       ", "       #"],
         ["#    #  ", "  #    #"],
         ["#     ##", "##     #"],
@@ -19,12 +19,37 @@
         [" ##  ## ", " ##  ## "],
     ];
 
-    const eye = ["------", "------", "------", "------"];
-    const layers = [];
+    const eye = ["  ##  ", " #  # ", "  ##  ", "      "];
+    const eyeClosed = ["      ", " #### ", "  ##  ", "      "];
 
-    icon.innerText = mascot
-        .map((row, i) => {
-            return row[0] + row[1];
-        })
-        .join("\n");
+    function getEye(row: number, index: number): string {
+        if (Math.abs(index % 10 - 2) < 2) {
+            return eyeClosed[row];
+        }
+        return eye[row];
+    }
+
+    function getMiddle(row: number, index: number): string {
+        if (4 <= row && row <= 7) {
+            return getEye(row - 4, index) + getEye(row - 4, index);
+        }
+
+        return "";
+    }
+
+    function getMascot(index: number): string {
+        return mascot
+            .map((row, i) => {
+                return row[0] + getMiddle(i, index) + row[1];
+            })
+            .join("\n");
+    }
+
+    let index = 0;
+    setInterval(() => {
+        index++;
+        if (index >= 100) index = 0;
+
+        icon.innerText = getMascot(index);
+    }, 100);
 </script>
