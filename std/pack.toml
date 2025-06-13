@@ -5,8 +5,7 @@ authors = ["RedstoneWizard08"]
 description = "DPScript Standard Library"
 
 [version]
-minecraft = "1.21.1"
-mods = ["dpscriptutil"]
+minecraft = "1.21.4"
 
 [build]
 output = "./out"

@@ -1,5 +1,3 @@
-module std::gm::sqrt;
-
 import std::base::{tp_pos};
 import std::data::{set_string_entity};
 import std::gm::core::{gm_std, math_entity};
@@ -21,7 +19,7 @@ pub fn sqrt(x: float) -> float {
 
 fn sqrt_handling(var1: float, var2: float, ref temp: NBT) {
     at pos: [~, var1, ~] {
-        math_entity.move(pos: [29999999, ~var2, 91665]);
+        math_entity.tp(pos: [29999999, ~var2, 91665]);
     }
 
     temp.var3[3] = math_entity.Pos[1];
@@ -38,7 +36,7 @@ fn sqrt_handling(var1: float, var2: float, ref temp: NBT) {
         sqrt_handling(temp.var1, temp.var2, &temp);
     }
 
-    tp_pos(math_entity, pos: [29999999, 0, 91665]);
+    math_entity.tp(pos: [29999999, 0, 91665]);
 
     return temp.var1;
 }
@@ -46,7 +44,7 @@ fn sqrt_handling(var1: float, var2: float, ref temp: NBT) {
 fn positive_subtract(ref temp: NBT) {
     at pos: [~, temp.var1, ~] {
         at pos: [~, ~-0.000000001, ~] {
-            tp_pos(math_entity, pos: [29999999, ~-var2, 91665]);
+            math_entity.tp(pos: [29999999, ~-var2, 91665]);
         }
     }
 

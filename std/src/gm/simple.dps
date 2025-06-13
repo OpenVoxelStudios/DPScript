@@ -1,15 +1,13 @@
-module std::gm::simple;
-
 import std::gm::core::{gm_std, math_entity};
 
 fn add(x: float, y: float) -> float {
     at pos: [~, x, ~] {
-        math_entity.move(pos: [29999999, ~y, 91665]);
+        math_entity.tp(pos: [29999999, ~y, 91665]);
     }
 
     let result = math_entity.Pos[1];
 
-    math_entity.move(pos: [29999999, 0, 91665]);
+    math_entity.tp(pos: [29999999, 0, 91665]);
 
     return result;
 }

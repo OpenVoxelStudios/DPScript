@@ -1,5 +1,3 @@
-module std::core;
-
 /// Gets the key in data of the provided variable or argument.
 /// This is pre-determined at compile time.
 pub compiler fn keyof(obj: Any) -> NBTPath;

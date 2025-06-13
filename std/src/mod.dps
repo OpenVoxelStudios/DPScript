@@ -1,23 +1,8 @@
-module std;
-
-export advops::*;
-export array::*;
-export base::*;
-export cond::*;
-export core::*;
-export data::*;
-export scoreboard::*;
-export selectors::*;
-
 import std::base::tellraw;
 import std::selectors::all_players;
-import std::scoreboard::{not_equal, set_score};
 
 pub objective enable_message: dummy = "enable_std_hello";
-pub const config = entity: "config";
-
-// FIXME: This shouldn't be necessary.
-import std::config;
+pub const config = selector: "config";
 
 init {
     const welcome = [c: "Thank you for using DPScript!" & nbt: { bold: true }];

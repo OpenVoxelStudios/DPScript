@@ -1,5 +1,3 @@
-module std::advops;
-
 // import std::data::{set_data, get_data, clone};
 
 export std::gm::sqrt::*;

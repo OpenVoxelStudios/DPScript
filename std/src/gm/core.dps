@@ -1,5 +1,3 @@
-module std::gm::core;
-
 import std::base::{forceload_add, summon_with};
 
 pub objective gm_std: dummy = "gm.std";

@@ -5,9 +5,10 @@ authors = ["RedstoneWizard08"]
 description = "Example Project"
 
 [version]
-minecraft = "1.21.1"
+minecraft = "1.21.4"
 
 [dependencies]
+# This isn't actually necessary, but it's good as an example.
 std = "../std"
 
 [build]

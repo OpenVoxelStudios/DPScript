@@ -1,6 +1,8 @@
-module example;
-
-import std/{tellraw, sqrt, ALL_PLAYERS};
+import std::{
+    base::tellraw,
+    math::sqrt,
+    selectors::all_players,
+};
 
 // This is a basic function:
 fn say_hi() {
@@ -21,16 +23,16 @@ init {
     const base = component: "The square root of 100 is: ";
     let msg = [base, data];
 
-    tellraw(ALL_PLAYERS, [txt]);
-    tellraw(ALL_PLAYERS, msg);
+    tellraw(all_players, [txt]);
+    tellraw(all_players, msg);
 
     const calc_base = component: "1 + 2 is: ";
     let calc_msg = [base, 1 + 2];
 
-    tellraw(ALL_PLAYERS, calc_msg);
+    tellraw(all_players, calc_msg);
 
     // execute as @a run ...
-    for player in ALL_PLAYERS {
+    for player in all_players {
         say_hi();
     }
 }

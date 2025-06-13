@@ -1,6 +1,4 @@
-module std::base;
-
-#[cmd("tellraw %% [\"\", %%]")]
+#[cmd("tellraw %% %%")]
 pub facade fn tellraw(who: Selector, message: Component[]);
 
 #[cmd("summon %%")]

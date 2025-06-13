@@ -73,7 +73,7 @@
             "patterns": [
                 {
                     "name": "keyword.control.dpscript",
-                    "match": "\\b(if|for|return|export|import|goto|init|tick|at)\\b"
+                    "match": "\\b(if|else|for|return|export|import|goto|init|tick|at)\\b"
                 },
                 {
                     "name": "entity.name.type.dpscript",

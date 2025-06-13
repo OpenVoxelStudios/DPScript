@@ -149,27 +149,6 @@ impl Analyzer<Literal> for Literal {
                 )))
             }
 
-            Token::Entity => {
-                let (_, s) = check_token!(remove cursor == Colon).unwrap();
-                let (tkn, span) = cursor.next_or_die(s)?;
-
-                Some(Literal::Entity((
-                    match tkn {
-                        Token::String(s) => s,
-
-                        _ => {
-                            return Err(LexerError {
-                                src: cursor.source(),
-                                at: span,
-                                err: format!("Expected string, got: {}", tkn),
-                            }
-                            .into());
-                        }
-                    },
-                    span,
-                )))
-            }
-
             Token::Pos => {
                 let (_, s) = check_token!(remove cursor == Colon).unwrap();
                 let (_, s2) = check_token!(remove cursor == LeftBracket).unwrap();

@@ -121,9 +121,6 @@ pub enum Token {
     /// "export"
     Export,
 
-    /// "entity"
-    Entity,
-
     /// "enum"
     Enum,
 
@@ -231,7 +228,6 @@ impl fmt::Display for Token {
             Self::Store => write!(f, "store"),
             Self::Selector => write!(f, "selector"),
             Self::Export => write!(f, "export"),
-            Self::Entity => write!(f, "entity"),
             Self::Enum => write!(f, "enum"),
             Self::Else => write!(f, "else"),
             Self::Fn => write!(f, "fn"),

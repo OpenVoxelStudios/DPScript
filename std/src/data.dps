@@ -1,5 +1,3 @@
-module std::data;
-
 import std::core::{storeof, keyof};
 
 #[cmd("data modify storage %% %% append from storage %% %%")]
