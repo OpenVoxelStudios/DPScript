@@ -5,7 +5,7 @@ template: splash
 hero:
     tagline: Merging the power of real Programming with vanilla Minecraft :)
     image:
-        html: '<pre id="icon" style="font-family: monospace; white-space: pre; line-height: 1; letter-spacing: 0" />'
+        html: '<div style="width: 100%; display: flex; justify-content: center;"><pre id="icon" style="font-family: monospace; white-space: pre; line-height: 1; letter-spacing: 0;"></pre></div>'
     actions:
         - text: Getting Started
           link: /guides/getting_started/
@@ -14,6 +14,8 @@ hero:
           link: https://github.com/OpenVoxelStudios/DPScript
           icon: external
           variant: minimal
+          attrs:
+              target: "_blank"
 ---
 
 import { Card, CardGrid } from "@astrojs/starlight/components";

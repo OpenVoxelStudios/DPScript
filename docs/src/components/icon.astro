@@ -1,55 +1,129 @@
 <script>
     const icon = document.getElementById("icon")!;
+    let index = 0;
+    let eyeEffect = 0;
+    let mouthEffect = 0;
+    const SPEED = 2;
 
-    const mascot = [
-        ["      ##", "##      "],
-        ["   ###  ", "  ###   "],
-        [" ##     ", "     ## "],
-        ["#       ", "       #"],
-        ["# ", " #"],
-        ["# ", " #"],
-        ["# ", " #"],
-        ["# ", " #"],
-        ["#       ", "       #"],
-        ["#    #  ", "  #    #"],
-        ["#     ##", "##     #"],
-        ["#       ", "       #"],
-        ["#       ", "       #"],
-        ["#  ##  #", "#  ##  #"],
-        [" ##  ## ", " ##  ## "],
-    ];
-
-    const eye = ["  ##  ", " #  # ", "  ##  ", "      "];
-    const eyeClosed = ["      ", " #### ", "  ##  ", "      "];
-
-    function getEye(row: number, index: number): string {
-        if (Math.abs(index % 10 - 2) < 2) {
-            return eyeClosed[row];
-        }
-        return eye[row];
+    function h(i: number): string {
+        return Math.abs(index - i) <= SPEED ? "-" : "#";
     }
 
-    function getMiddle(row: number, index: number): string {
+    const eyes = {
+        closed: ["      ", " #### ", "  ##  ", "      "],
+        left: [" ##   ", "# #   ", " ##   ", "      "],
+        right: ["   ## ", "   # #", "   ## ", "      "],
+        D: ["  ##  ", " #  # ", "  ##  ", "      "],
+        P: ["  ##  ", " #  # ", "  ##  ", "      "],
+
+        default: ["  ##  ", " #  # ", "  ##  ", "      "],
+    };
+    const mouth = {
+        default: ["   #    #   ", "    ####    ", "            "],
+        neutral: ["            ", "    ####    ", "            "],
+        bottom: ["            ", "            ", "    ####    "],
+        w: ["   # ## #   ", "    #  #    ", "            "],
+    };
+
+    function getMouth(row: number): string {
+        if (mouthEffect == 1) {
+            return mouth.w[row];
+        }
+        if (mouthEffect == 2) {
+            if ((index % 20) < 10) {
+                return mouth.neutral[row];
+            }
+            return mouth.bottom[row];
+        }
+
+        return mouth.default[row];
+    }
+
+    function getEye(row: number, side: "left" | "right"): string {
+        if (eyeEffect === 0) {
+            return eyes.default[row];
+        }
+        if (eyeEffect === 1) {
+            if (Math.abs((index % 20) - 2) < 2) {
+                return eyes.closed[row];
+            }
+            return eyes.default[row];
+        }
+        if (eyeEffect === 2) {
+            if (index <= 15) {
+                return eyes.left[row];
+            }
+            if (index <= 25) {
+                return eyes.default[row];
+            }
+            if (index <= 35) {
+                return eyes.right[row];
+            }
+            return eyes.default[row];
+        }
+
+        return eyes.default[row];
+    }
+
+    function getMiddle(row: number): string {
         if (4 <= row && row <= 7) {
-            return getEye(row - 4, index) + getEye(row - 4, index);
+            return getEye(row - 4, "left") + getEye(row - 4, "right");
+        }
+
+        if (9 <= row && row <= 11) {
+            return getMouth(row - 9);
         }
 
         return "";
     }
 
-    function getMascot(index: number): string {
+    function getMascot(): string {
+        const mascot = [
+            ["      ##", "##      "],
+            ["   ###  ", "  ###   "],
+            [" ##     ", "     ## "],
+            ["#       ", "       #"],
+            ["# ", " #"],
+            ["# ", " #"],
+            ["# ", " #"],
+            ["# ", " #"],
+            ["#       ", "       #"],
+            ["# ", " #"],
+            ["# ", " #"],
+            [h(SPEED * 20) + " ", " " + h(SPEED)],
+            [h(SPEED * 19) + "       ", "       " + h(SPEED * 2)],
+            [
+                `${h(SPEED * 18)}  ${h(SPEED * 15)}${h(SPEED * 14)}  ${h(SPEED * 11)}`,
+                `${h(SPEED * 10)}  ${h(SPEED * 7)}${h(SPEED * 6)}  ${h(SPEED * 3)}`,
+            ],
+            [
+                ` ${h(SPEED * 17)}${h(SPEED * 16)}  ${h(SPEED * 14)}${h(SPEED * 12)} `,
+                ` ${h(SPEED * 9)}${h(SPEED * 8)}  ${h(SPEED * 5)}${h(SPEED * 4)} `,
+            ],
+        ];
+
         return mascot
             .map((row, i) => {
-                return row[0] + getMiddle(i, index) + row[1];
+                return (
+                    (Math.abs(index - 10 - i) < 5 ? " " : "") +
+                    row[0] +
+                    getMiddle(i) +
+                    row[1]
+                );
             })
             .join("\n");
     }
 
-    let index = 0;
     setInterval(() => {
         index++;
-        if (index >= 100) index = 0;
+        if (index >= 50) {
+            index = 0;
+            eyeEffect = Math.floor(Math.random() * 3);
+            mouthEffect = Math.floor(Math.random() * 3);
 
-        icon.innerText = getMascot(index);
+            console.log(eyeEffect, mouthEffect);
+        }
+
+        icon.innerText = getMascot();
     }, 100);
 </script>
