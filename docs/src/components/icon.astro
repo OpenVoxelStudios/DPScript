@@ -20,8 +20,8 @@
     };
     const mouth = {
         default: ["   #    #   ", "    ####    ", "            "],
-        neutral: ["            ", "    ####    ", "            "],
-        bottom: ["            ", "            ", "    ####    "],
+        neutral: ["    ####    ", "            ", "            "],
+        bottom: ["            ", "    ####    ", "            "],
         w: ["   # ## #   ", "    #  #    ", "            "],
     };
 
@@ -30,7 +30,7 @@
             return mouth.w[row];
         }
         if (mouthEffect == 2) {
-            if ((index % 20) < 10) {
+            if (index % 20 < 10) {
                 return mouth.neutral[row];
             }
             return mouth.bottom[row];
@@ -120,8 +120,6 @@
             index = 0;
             eyeEffect = Math.floor(Math.random() * 3);
             mouthEffect = Math.floor(Math.random() * 3);
-
-            console.log(eyeEffect, mouthEffect);
         }
 
         icon.innerText = getMascot();

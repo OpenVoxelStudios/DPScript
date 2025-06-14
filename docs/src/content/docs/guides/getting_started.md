@@ -1,11 +1,10 @@
 ---
 title: Getting Started
-description: A guide in my new Starlight docs site.
+description: How to get started with DPScript? You'll know everything here!
 ---
 
-Guides lead a user through a specific task they want to accomplish, often with a sequence of steps.
-Writing a good guide requires thinking about what your users are trying to do.
+# E.
+yeah its like todo but yes.
 
-## Further reading
-
-- Read [about how-to guides](https://diataxis.fr/how-to-guides/) in the Diátaxis framework
+## Installing the VSCode extension
+Installing the extension will allow syntax highlighting which yk... its useful lol

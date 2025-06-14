@@ -3,6 +3,7 @@ import starlight from "@astrojs/starlight";
 import { ion } from "starlight-ion-theme";
 
 export default defineConfig({
+    site: 'https://dpscript.openvoxel.studio',
     integrations: [
         starlight({
             title: "DPScript Docs",
@@ -12,20 +13,28 @@ export default defineConfig({
                     label: "GitHub",
                     href: "https://github.com/OpenVoxelStudios/DPScript",
                 },
+                {
+                    icon: "discord",
+                    label: "Discord",
+                    href: "https://discord.gg/Xhvb2wujVh",
+                },
             ],
             sidebar: [
                 {
-                    label: "Docs",
+                    label: "Guides",
                     items: [
                         {
-                            label: "Getting Started",
                             slug: "guides/getting_started",
                         },
                     ],
                 },
                 {
-                    label: "Reference",
-                    autogenerate: { directory: "reference" },
+                    label: "Documentation",
+                    items: [
+                        {
+                            slug: "docs/file_structure",
+                        },
+                    ],
                 },
             ],
             plugins: [ion()],
