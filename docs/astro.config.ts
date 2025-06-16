@@ -3,7 +3,7 @@ import starlight from "@astrojs/starlight";
 import { ion } from "starlight-ion-theme";
 
 export default defineConfig({
-    site: 'https://dpscript.openvoxel.studio',
+    site: "https://dpscript.openvoxel.studio",
     integrations: [
         starlight({
             title: "DPScript Docs",
