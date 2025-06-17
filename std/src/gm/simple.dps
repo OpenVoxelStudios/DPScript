@@ -1,6 +1,6 @@
 import std::gm::{gm_std, math_entity};
 
-fn add(x: float, y: float) -> float {
+pub fn add(x: float, y: float) -> float {
     at pos: [~, x, ~] {
         math_entity.tp(pos: [29999999, ~y, 91665]);
     }
@@ -12,6 +12,6 @@ fn add(x: float, y: float) -> float {
     return result;
 }
 
-fn subtract(x: float, y: float) -> float {
+pub fn subtract(x: float, y: float) -> float {
     // TODO
 }

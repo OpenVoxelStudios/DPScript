@@ -5,6 +5,7 @@ pub mod cond;
 pub mod constant;
 pub mod enums;
 pub mod func;
+pub mod literal;
 pub mod loops;
 pub mod node;
 pub mod objective;
