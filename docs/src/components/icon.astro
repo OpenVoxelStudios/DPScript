@@ -1,22 +1,32 @@
 <script>
     const icon = document.getElementById("icon")!;
+    const SPEED = 2;
     let index = 0;
     let eyeEffect = 0;
     let mouthEffect = 0;
-    const SPEED = 2;
+    let deltaX = 0;
+    let deltaY = 0;
+
+    document.addEventListener("mousemove", (e) => {
+        if (!e) {
+            deltaX = 0;
+            deltaY = 0;
+            return;
+        }
+        const rect = icon.getBoundingClientRect();
+        deltaX = e.clientX - rect.left - rect.width / 2;
+        deltaY = e.clientY - rect.top - rect.height / 2;
+    });
 
     function h(i: number): string {
         return Math.abs(index - i) <= SPEED ? "-" : "#";
     }
 
     const eyes = {
-        closed: ["      ", " #### ", "  ##  ", "      "],
-        left: [" ##   ", "# #   ", " ##   ", "      "],
-        right: ["   ## ", "   # #", "   ## ", "      "],
-        D: ["  ##  ", " #  # ", "  ##  ", "      "],
-        P: ["  ##  ", " #  # ", "  ##  ", "      "],
-
-        default: ["  ##  ", " #  # ", "  ##  ", "      "],
+        default: ["  ##  ", " #  # ", "  ##  "],
+        closed: ["      ", " #### ", "  ##  "],
+        left: [" ##   ", "# #   ", " ##   "],
+        right: ["   ## ", "   # #", "   ## "],
     };
     const mouth = {
         default: ["   #    #   ", "    ####    ", "            "],
@@ -39,35 +49,26 @@
         return mouth.default[row];
     }
 
-    function getEye(row: number, side: "left" | "right"): string {
-        if (eyeEffect === 0) {
-            return eyes.default[row];
-        }
-        if (eyeEffect === 1) {
-            if (Math.abs((index % 20) - 2) < 2) {
-                return eyes.closed[row];
-            }
-            return eyes.default[row];
-        }
-        if (eyeEffect === 2) {
-            if (index <= 15) {
-                return eyes.left[row];
-            }
-            if (index <= 25) {
-                return eyes.default[row];
-            }
-            if (index <= 35) {
-                return eyes.right[row];
-            }
-            return eyes.default[row];
+    function getEye(row: number): string {
+        let current: keyof typeof eyes = "default";
+        if (eyeEffect === 1 && Math.abs((index % 20) - 2) < 2) {
+            current = "closed";
+        } else if (deltaX > 75) {
+            current = "right";
+        } else if (deltaX < -75) {
+            current = "left";
         }
 
-        return eyes.default[row];
+        const eye = [...eyes[current]];
+        if (deltaY > 75) eye.unshift("      ");
+        else eye.push("      ");
+
+        return eye[row];
     }
 
     function getMiddle(row: number): string {
         if (4 <= row && row <= 7) {
-            return getEye(row - 4, "left") + getEye(row - 4, "right");
+            return getEye(row - 4) + getEye(row - 4);
         }
 
         if (9 <= row && row <= 11) {

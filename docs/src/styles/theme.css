@@ -11,8 +11,8 @@
     /* Dark mode colors */
 
     --sl-color-accent-low: #3c0017;
-    --sl-color-accent:rgb(2, 120, 189);
-    --sl-color-accent-high:rgb(96, 210, 255);
+    --sl-color-accent: rgb(2, 120, 189);
+    --sl-color-accent-high: rgb(96, 210, 255);
     --sl-color-white: #ffffff;
     --sl-color-gray-1: #c2c2c2;
     --sl-color-gray-2: #a3a3a3;
@@ -44,8 +44,8 @@
 :root[data-theme="light"] {
     /* Light mode colors */
 
-    --sl-color-accent-low:rgb(120, 179, 255);
-    --sl-color-accent:rgb(87, 255, 241);
+    --sl-color-accent-low: rgb(120, 179, 255);
+    --sl-color-accent: rgb(87, 255, 241);
     --sl-color-accent-high: #3c0017;
 
     --sl-color-red-low: #ff78ac;

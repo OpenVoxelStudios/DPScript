@@ -25,15 +25,15 @@ export default defineConfig({
             sidebar: [
                 {
                     label: "[tabler:home] Home",
-                    slug: "index"
+                    slug: "index",
                 },
                 {
                     label: "[tabler:globe] Resources",
-                    slug: "resources"
+                    slug: "resources",
                 },
                 {
                     label: "[tabler:road] Roadmap",
-                    slug: "roadmap"
+                    slug: "roadmap",
                 },
                 {
                     label: "[tabler:book] Guides",
@@ -76,11 +76,13 @@ export default defineConfig({
                     },
                 },
             },
-            plugins: [ion({
-                icons: {
-                    include: { tabler: ["*"] },
-                },
-            }) as any],
+            plugins: [
+                ion({
+                    icons: {
+                        include: { tabler: ["*"] },
+                    },
+                }) as any,
+            ],
             customCss: ["@fontsource/jetbrains-mono", "/src/styles/theme.css"],
         }),
     ],
