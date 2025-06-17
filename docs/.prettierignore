@@ -4,3 +4,4 @@ dist
 *.md
 public
 bun.lock
+*.mdx
