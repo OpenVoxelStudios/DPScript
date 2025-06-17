@@ -27,9 +27,11 @@ init {
     
     const hint = [hint_base, disable, cmd, click];
 
-    if config[enable_message] != 0 && config[enable_message] != 1 {
+    if !config[enable_message] { // matches -2147483648..2147483647
         config[enable_message] = 1;
-    } else if config[enable_message] != 0 {
+    }
+    
+    if config[enable_message] != 0 {
         tellraw(all_players, welcome);
         tellraw(all_players, hint);
     }
