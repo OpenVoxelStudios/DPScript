@@ -14,7 +14,7 @@ pub fn sqrt(x: float) -> float {
         var4: [0f, 0f, 0f, x, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 0f],
     };
 
-    return sqrt_handling(x, 1, &temp);
+    return sqrt_handling(x, 1, temp);
 }
 
 fn sqrt_handling(var1: float, var2: float, ref temp: NBT) {
@@ -30,10 +30,10 @@ fn sqrt_handling(var1: float, var2: float, ref temp: NBT) {
     temp.var2 = math_entity.transformation.translation[0];
 
     gm_std[looper] += 1;
-    positive_subtract(&temp);
+    positive_subtract(temp);
 
     if gm_std[looper] != 20.. && temp.v1m2p != "-" {
-        sqrt_handling(temp.var1, temp.var2, &temp);
+        sqrt_handling(temp.var1, temp.var2, temp);
     }
 
     math_entity.tp(pos: [29999999, 0, 91665]);

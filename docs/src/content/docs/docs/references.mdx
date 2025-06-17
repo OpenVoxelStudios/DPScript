@@ -1,0 +1,16 @@
+---
+title: References
+sidebar:
+    order: 11
+---
+
+DPScript's `ref` keyword allows you to circumvent the way DPScript transfers variables. By default, DPScript will clone the contents of the variable
+before passing it to a function, to ensure that it doesn't get mutated accidentally. By using the `ref` keyword, DPScript will instead give the
+function full access to the original variable, allowing it to be mutated.
+
+```dps ins="ref "
+// This example is from the standard library
+fn sqrt_handling(var1: float, var2: float, ref temp: NBT) {
+    ...
+}
+```

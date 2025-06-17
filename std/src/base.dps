@@ -1,23 +1,23 @@
-#[cmd("tellraw %% %%")]
-pub facade fn tellraw(who: Selector, message: Component[]);
+#[cmd("tellraw {target} {message:nbt}")]
+pub facade fn tellraw(target: Selector, message: Any);
 
-#[cmd("summon %%")]
-pub facade fn summon(ent: Entity);
+#[cmd("summon {id}")]
+pub facade fn summon(#[id(entity_type)] id: Identifier);
 
-#[cmd("summon %% %%")]
-pub facade fn summon_at(ent: Entity, position: Pos3);
+#[cmd("summon {id} {position}")]
+pub facade fn summon_at(#[id(entity_type)] id: Identifier, position: Pos3);
 
-#[cmd("summon %% %% %%")]
-pub facade fn summon_with(#[id(entity_type)] ent: Identifier, position: Pos3, data: NBT);
+#[cmd("summon {id} {position} {data}")]
+pub facade fn summon_with(#[id(entity_type)] id: Identifier, position: Pos3, data: NBT);
 
-#[cmd("give %% %%")]
-pub facade fn give(ent: Entity, #[id(item)] item: Identifier);
+#[cmd("give {target} {item}")]
+pub facade fn give(target: Selector, #[id(item)] item: Identifier);
 
-#[cmd("give %% %% %%")]
-pub facade fn give_nbt(ent: Entity, #[id(item)] item: Identifier, data: NBT);
+#[cmd("give {target} {item} {data}")]
+pub facade fn give_nbt(target: Selector, #[id(item)] item: Identifier, data: NBT);
 
-#[cmd("forceload add %% %%")]
+#[cmd("forceload add {position}")]
 pub facade fn forceload_add(position: Pos2);
 
-#[cmd("tp %% %%")]
-pub facade fn tp_pos(ent: Entity, position: Pos3);
+#[cmd("tp {target} {position}")]
+pub facade fn tp_pos(target: Selector, position: Pos3);

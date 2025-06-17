@@ -1,7 +1,0 @@
-/// Gets the key in data of the provided variable or argument.
-/// This is pre-determined at compile time.
-pub compiler fn keyof(obj: Any) -> NBTPath;
-
-/// Gets the store which the provided variable or argument is in.
-/// This is pre-determined at compile time.
-pub compiler fn storeof(obj: Any) -> Store;
