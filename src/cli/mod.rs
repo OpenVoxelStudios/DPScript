@@ -1,4 +1,4 @@
-use crate::{Compiler, Result};
+use crate::{compiler::Compiler, Result};
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 

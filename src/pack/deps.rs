@@ -1,10 +1,7 @@
 use std::{fs, path::PathBuf};
-
 use miette::{NamedSource, SourceOffset, SourceSpan};
 use walkdir::WalkDir;
-
-use crate::{DependencyError, Result};
-
+use crate::{error::DependencyError, Result};
 use super::PackToml;
 
 pub fn get_source_files(dir: &PathBuf, pack: &PackToml, ir: bool) -> Result<Vec<String>> {

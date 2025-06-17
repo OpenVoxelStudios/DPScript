@@ -1,5 +1,5 @@
 use super::{HasSpan, bits::HasBits};
-use crate::{FromBits, Result, Spanned, TokenizerError, UnnamedTokenizerError};
+use crate::{Result, util::{Spanned, FromBits}, error::{TokenizerError, UnnamedTokenizerError}};
 use miette::{NamedSource, SourceOffset, SourceSpan};
 
 #[derive(Debug, Clone)]

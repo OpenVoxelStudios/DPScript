@@ -5,7 +5,7 @@ mod misc;
 pub use token::*;
 pub use misc::*;
 
-use crate::{Result, Spanned, util::Cursor};
+use crate::{Result, util::{Cursor, Spanned}};
 use miette::NamedSource;
 
 pub type StringCursor = Cursor<String, NamedSource<String>>;

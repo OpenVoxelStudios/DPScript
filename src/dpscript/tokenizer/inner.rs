@@ -1,5 +1,5 @@
-use super::{Token, Tokenizer};
-use crate::{Designator, Result, Spanned, TokenizerError, util::IsNotIdent};
+use super::{Designator, Token, Tokenizer};
+use crate::{Result, error::TokenizerError, util::{IsNotIdent, Spanned}};
 
 impl Tokenizer {
     pub(super) fn tokenize_inner(&mut self) -> Result<()> {
