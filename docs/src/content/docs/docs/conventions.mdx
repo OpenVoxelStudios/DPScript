@@ -1,0 +1,26 @@
+---
+title: Conventions
+sidebar:
+    order: 999
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+DPScript's standard library and examples follow a specific set of conventions, however don't feel the need to stick to them exactly!
+Use whatever makes you the most comfortable when writing code.
+
+Here's how we generally do things:
+
+<Steps>
+    1. Name your variables, functions, files, and similar things using **snake_case**. This means names like `thing_one`, or `other_thing`.
+    2. Name enums using PascalCase.
+    3. File names should be short. This means no `super_long_file_that_i_put_a_ton_of_stuff_in.dps`.
+    4. Don't put too much in a single file. If it goes over 500 lines of code, you can probably modularize it, or find places where things can
+       be reused. Remember that re-exports exist.
+    5. Don't nest too much. If you're over 5 levels of nesting, make a new function. Obviously there are exceptions, but this is the general rule.
+    6. Use 4-space indents, no tab characters, and use trailing commas. I know this is HIGHLY contested with programmers, but this is our style.
+    7. Try to name things clearly. Don't just use `thing` or `value` as names, describe what it does. Use something like `result` for a result of
+       something, `door_tag` for a tag for something involving doors, and things like that.
+    8. If your code is messy or unclear, comment it!
+    9. Try to put documentation comments on all public things. It helps make it clear for users.
+</Steps>

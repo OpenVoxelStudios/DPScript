@@ -1,6 +1,9 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import { ion } from "starlight-ion-theme";
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
 
 export default defineConfig({
     site: "https://dpscript.openvoxel.studio",
@@ -21,23 +24,64 @@ export default defineConfig({
             ],
             sidebar: [
                 {
-                    label: "Guides",
-                    items: [
-                        {
-                            slug: "guides/getting_started",
-                        },
-                    ],
+                    label: "[tabler:home] Home",
+                    slug: "index"
                 },
                 {
-                    label: "Documentation",
-                    items: [
-                        {
-                            slug: "docs/file_structure",
-                        },
-                    ],
+                    label: "[tabler:globe] Resources",
+                    slug: "resources"
+                },
+                {
+                    label: "[tabler:road] Roadmap",
+                    slug: "roadmap"
+                },
+                {
+                    label: "[tabler:book] Guides",
+                    autogenerate: {
+                        directory: "guides",
+                    },
+                },
+                {
+                    label: "[tabler:code] Documentation",
+                    autogenerate: {
+                        directory: "docs",
+                    },
+                },
+                {
+                    label: "[tabler:sparkles] Design",
+                    autogenerate: {
+                        directory: "design",
+                    },
                 },
             ],
-            plugins: [ion()],
+            expressiveCode: {
+                shiki: {
+                    langs: [
+                        JSON.parse(
+                            fs.readFileSync(
+                                path.join(
+                                    path.dirname(
+                                        fileURLToPath(import.meta.url),
+                                    ),
+                                    "../vscode/syntaxes/dpscript.tmLanguage.json",
+                                ),
+                                "utf-8",
+                            ),
+                        ),
+                    ],
+
+                    langAlias: {
+                        dps: "DPScript",
+                        dpscript: "DPScript",
+                    },
+                },
+            },
+            plugins: [ion({
+                icons: {
+                    include: { tabler: ["*"] },
+                },
+            }) as any],
+            customCss: ["@fontsource/jetbrains-mono", "/src/styles/theme.css"],
         }),
     ],
 });

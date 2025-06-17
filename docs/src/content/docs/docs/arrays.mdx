@@ -1,0 +1,84 @@
+---
+title: Arrays
+sidebar:
+    order: 8
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+DPScript natively supports arrays. You can add, remove, push, pop, and even loop through them.
+
+## Constructing an Array
+
+It's easy to construct an array, just declare it:
+
+```dps
+let my_array = [];
+```
+
+However, the compiler will complain. This array is empty, so the compiler can't infer the type of its contents. To solve this,
+explicitly tell the compiler its type, with `[]` added at the end, to signify that it's an array.
+
+```dps ins=": Text[]"
+// Your arrays don't have to be full of text, it can be anything!
+let my_array: Text[] = [];
+```
+
+## Adding and Removing
+
+You can quickly add elements to an array using the `push()` function, built-in to the type.
+
+```dps ".push"
+my_array.push(c: "I've been pushed!");
+```
+
+You can also remove elements from the beginning and end of arrays:
+
+```dps ".pop" ".shift"
+// pop() removes the last element from the array and returns it
+let last_element = my_array.pop();
+
+// shift() removes the first element from the array and returns it
+let first_element = my_array.shift();
+```
+
+<Aside type="caution">
+    `pop()` and `shift()` will end up reconstructing the entire array, since Minecraft doesn't support those natively. It has to loop through
+    all the elements until/after an index and add them to a new array, and replace the value. It's weird, but that's how it has to work.
+</Aside>
+
+## Getting the Length
+
+You can get the length of an array using the `len()` function on the object.
+
+```dps
+let length = my_array.len()
+```
+
+## Looping
+
+DPScript has some nice syntax sugar for looping through arrays! Here's how you do it:
+
+```dps
+for element in my_array {
+    // do whatever with the element
+}
+```
+
+Essentially, this just loops from 0 until the length of the array, and runs the content inside the block for each element.
+You can control this flow like using `break`, `continue`, or `return`.
+
+```dps
+for element in my_array {
+    if element == c: "Ignored" {
+        // Ignore elements that are just the text "Ignored"
+        continue;
+    } else if element == c: "Break" {
+        // Break if we find an element that is the text "Break"
+        break;
+    } else if element == c: "What you want" {
+        // Return if we find the text "What you want" - we found it!
+        return element;
+    }
+}
+```

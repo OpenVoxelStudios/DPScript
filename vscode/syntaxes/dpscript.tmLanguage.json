@@ -73,7 +73,7 @@
             "patterns": [
                 {
                     "name": "keyword.control.dpscript",
-                    "match": "\\b(if|else|for|return|export|import|goto|init|tick|at)\\b"
+                    "match": "\\b(if|else|for|in|return|break|continue|export|import|goto|init|tick|at)\\b"
                 },
                 {
                     "name": "entity.name.type.dpscript",
@@ -120,7 +120,7 @@
                 },
                 {
                     "name": "storage.type.variable.dpscript",
-                    "match": "\\b(?:let|objective|const)\\s+([A-Za-z0-9_]+)\\b",
+                    "match": "\\b(?:let|objective|const|enum)\\s+([A-Za-z0-9_]+)\\b",
                     "captures": {
                         "1": {
                             "name": "variable.name.dpscript"

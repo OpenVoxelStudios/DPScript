@@ -1,0 +1,56 @@
+:root {
+    /* Global stuff */
+
+    --sl-font: "JetBrains Mono";
+    --sl-font-system: "JetBrains Mono";
+    --sl-font-system-mono: "JetBrains Mono";
+
+    /* Changing the text color looks kinda weird. */
+    /* --sl-color-text: rgb(200, 200, 200); */
+
+    /* Dark mode colors */
+
+    --sl-color-accent-low: #3c0017;
+    --sl-color-accent:rgb(2, 120, 189);
+    --sl-color-accent-high:rgb(96, 210, 255);
+    --sl-color-white: #ffffff;
+    --sl-color-gray-1: #c2c2c2;
+    --sl-color-gray-2: #a3a3a3;
+    --sl-color-gray-3: #838383;
+    --sl-color-gray-4: #3f3f3f;
+    --sl-color-gray-5: #262626;
+    --sl-color-gray-6: #121212;
+    --sl-color-black: #070707;
+
+    --sl-color-red-low: #3c0017;
+    --sl-color-red: #bd0249;
+    --sl-color-red-high: #ff78ac;
+
+    --sl-color-purple-low: #33225b;
+    --sl-color-purple: #8a5cf5;
+    --sl-color-purple: #9975ee;
+
+    --sl-border: #262626;
+    --pagefind-ui-border: #262626;
+    --pagefind-ui-primary: var(--sl-color-accent);
+
+    --sl-icon-size: 1.25rem;
+
+    --sl-text-4xl: 2rem;
+    --sl-text-3xl: 1.75rem;
+    --sl-text-2xl: 1.5rem;
+}
+
+:root[data-theme="light"] {
+    /* Light mode colors */
+
+    --sl-color-accent-low:rgb(120, 179, 255);
+    --sl-color-accent:rgb(87, 255, 241);
+    --sl-color-accent-high: #3c0017;
+
+    --sl-color-red-low: #ff78ac;
+    --sl-color-red: #bd0249;
+    --sl-color-red-high: #3c0017;
+
+    --pagefind-ui-primary: var(--sl-color-accent);
+}

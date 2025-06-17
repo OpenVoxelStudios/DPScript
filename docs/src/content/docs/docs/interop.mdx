@@ -1,0 +1,40 @@
+---
+title: Using Commands
+sidebar:
+    order: 9
+---
+
+DPScript's standard library contains many of the default commands in Vanilla Minecraft, but if we missed some, create an issue, or send us a pull request!
+
+To use them, simply import them, and then use them!
+
+```dps
+import std::base::tellraw;
+
+fn my_function() {
+    // Roughly translates to: /tellraw @s {"text": "Hello, world!"}
+    tellraw(selector: "@s", c: "Hello, world!");
+
+    // It's flexable, too! It works with an array of components, just like usual!
+    // Roughly translates to: /tellraw @s [{"text": "Hello, world!"}]
+    // In the future, optimization will be added, and the array will be removed automatically.
+    tellraw(selector: "@s", [c: "Hello, world! (Again!)"]);
+}
+```
+
+## Facade Functions
+
+If you're going to use modded commands, want to make your own wrappers, or anything like that, you have to use a `facade` function.
+
+It's called a `facade` function because it's a facade, a simple fake wall that makes the compiler believe the command exists.
+
+It's pretty easy to do, you just need to tell the compiler how to output the command:
+
+```dps ins="{target}" ins="{message:nbt}"
+// This example comes from the DPScript standard library.
+#[cmd("tellraw {target} {message:nbt}")]
+pub facade fn tellraw(target: Selector, message: Any);
+```
+
+- `{target}` tells the compiler to fill in the `target` argument's value.
+- `{message:nbt}` tells the compiler to fill the message in using SNBT syntax (like text components).

@@ -1,0 +1,60 @@
+---
+title: NBT Data
+sidebar:
+    order: 7
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+You can create arbitrary NBT values using the `nbt:` syntax.
+
+```dps
+let my_value = nbt: {
+    some: "thing",
+    cool: true,
+    nice: "amazing",
+    also_a_bool: 1b,
+    numbers: 0.5f,
+    number_two: 1.5d,
+    integer: 8, // <- Trailing commas work!
+};
+```
+
+## Combining data
+
+You can also combine data using the combination operator: `&`
+
+Internally, this does a `/data merge`, and then passes the result wherever needed.
+
+**Example #1:**
+
+```dps
+let value = nbt: {
+    some: "thing",
+};
+
+let other_value = nbt: {
+    other: "thing",
+};
+
+// { some: "thing", other: "thing" }
+let combined = value & other_value;
+```
+
+<Aside type="tip">
+    When both values are constants, the operation will be executed at compile-time!
+
+    ```dps
+    const value = nbt: {
+        some: "thing",
+    };
+
+    const other_value = nbt: {
+        other: "thing",
+    };
+    
+    // { some: "thing", other: "thing" }
+    // This can also just be a regular variable, the operation will still execute at compile-time.
+    const combined = value & other_value;
+    ```
+</Aside>

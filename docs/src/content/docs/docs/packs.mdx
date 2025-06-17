@@ -1,0 +1,32 @@
+---
+title: Packs
+sidebar:
+    order: 1
+---
+
+In your datapack, your `pack.toml` defines everything. Here's how it works:
+
+```toml
+[pack]
+name = "example" # This is your namespace. Your functions will be `example:...`
+version = "0.1.0" # The version of the pack. It's really only used for dependency-related things.
+authors = ["RedstoneWizard08"] # The authors of the pack. Who made it?
+description = "Example Project" # A quick description of the pack, used in pack.mcmeta.
+
+[version]
+minecraft = "1.21.4" # The Minecraft version(s) the pack targets.
+
+[dependencies]
+# Adding `std` isn't actually necessary, since the compiler does that automatically, but it's good as an example.
+std = "*" # Tells the compiler to find `std` at any version and add it as a dependency.
+
+[build]
+output = "./out" # Tells the compiler where to put your pack once it's compiled.
+```
+
+## Dependencies
+
+DPScript also has a dependency system that lets you split things into multiple modules, and use functions from others' code easily.
+You just find it, and put it in!
+
+NOTE: Dependency resolution is not complete, a package registry is needed. More details to come.

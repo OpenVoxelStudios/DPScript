@@ -1,12 +1,53 @@
 ---
 title: File Structure
 description: Documentation for the .dps file structure
+sidebar:
+    order: 2
 ---
 
-import { Code } from "@astrojs/starlight/components";
+import { FileTree, Icon } from "@astrojs/starlight/components";
 
-DPScript files have the `.dps` extension and follow a specific structure. The main file of each folder should be called `mod.dps`.
+DPScript files have the `.dps` extension and follow a specific structure.
 
-import importedCode from "../../examples/mod.dps?raw";
+<FileTree>
+    - pack.toml Definitions for the datapack, like its name, id, version, authors, dependencies, etc.
+    - src All your code lives here. The compiler will only search for code in this folder.
+        - my_pack.dps An example file where you put your code! The name only matters for importing from modules.
+        - some_module.dps Another place you can put your code!
+</FileTree>
 
-<Code code={importedCode} lang="rs" title="mod.dps" />
+## Importing
+
+Let's say you want to import a function, say, `say_hello`, from `src/some_module.dps`, and your pack ID (in `pack.toml`) is `my_pack`.
+Here's how you would do it:
+
+```dps
+//     <Pack>   <Module>     <Imports>
+import my_pack::some_module::say_hello;
+
+fn some_function() {
+    say_hello();
+}
+```
+
+The module path is dependent on the file name, so if you had `src/some/cool/thing/my_module.dps`, the import would be:
+
+```dps
+import my_path::some::cool::thing::my_module::{...};
+```
+
+## Module Names
+
+Module names can only use letters, numbers, and underscores, and cannot begin with a number.
+For instance, the file names `my funny module.dps` and `0module.dps` would be invalid. Module
+names can also not be a keyword, so `fn.dps` is invalid, while `my_fn.dps` is valid.
+
+<FileTree>
+    - src
+        - <span>my funny module.dps</span> <span style="color: red;">Invalid.</span> The file name contains spaces.
+        - <span>my_funny_module.dps</span> <span style="color: lightgreen;">Valid.</span> The file name contains only letters and underscores, and is not a keyword.
+        - <span>0module.dps</span> <span style="color: red;">Invalid.</span> The file name begins with a number.
+        - <span>module_0.dps</span> <span style="color: lightgreen;">Invalid.</span> The file name contains only letters, numbers, underscores, and is not a keyword.
+        - <span>fn.dps</span> <span style="color: red;">Invalid.</span> The file name is a keyword.
+        - <span>my_fn.dps</span> <span style="color: lightgreen;">Invalid.</span> The file name contains only letters and underscores, is not a keyword.
+</FileTree>

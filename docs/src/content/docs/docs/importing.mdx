@@ -1,0 +1,58 @@
+---
+title: Imports
+sidebar:
+    order: 4
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+DPScript features a nice system for importing whatever you want from anywhere, as long as it's marked as public.
+
+```dps
+// From the example code in the repository:
+import std::{
+    base::tellraw,
+    math::sqrt,
+    selectors::all_players,
+};
+```
+
+You can import functions, enums, constants, and more!
+
+## Syntax
+
+The import syntax is pretty easy to get the hang of. Just remember a couple things:
+
+<Steps>
+
+1. You can import many things with a single statement, just wrap them in curly braces (`{}`):
+
+    ```dps
+    import some::{
+        thing,
+        other_thing,
+        cool_function,
+        ...
+    };
+    ```
+
+2. You can also import just a single thing:
+
+    ```dps
+    import some::thing;
+    ```
+
+3. You can import from multiple different sub-modules in the same statement:
+
+    ```dps
+    import some::{
+        thing,
+        other::thing,
+        cool::function,
+        ...
+    };
+    ```
+
+</Steps>
+
+That's about it!

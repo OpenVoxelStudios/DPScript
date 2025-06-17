@@ -1,0 +1,26 @@
+---
+title: Functions
+sidebar:
+    order: 3
+---
+
+DPScript lets you define functions with exactly two lines of code, and strongly typed arguments. Here's how:
+
+```dps
+// Just name it, and go!
+fn say_hello(player: Selector) {
+    // /tellraw $(player) [{ "text": "Hello, " }, { "selector": $(player) }, { "text": "!" }]
+    tellraw(player, [c: "Hello, ", player, c: "!"]);
+}
+```
+
+It's as easy as that! You can make your functions public in your modules by just adding the `pub` keyword:
+
+```dps ins="pub "
+pub fn say_hello(player: Selector) {
+    // /tellraw $(player) [{ "text": "Hello, " }, { "selector": $(player) }, { "text": "!" }]
+    tellraw(player, [c: "Hello, ", player, c: "!"]);
+}
+```
+
+If this file was `src/code.dps`, the function's ID would be `my_pack:code/say_hello`. It's directly based on what you name it in your DPScript code!

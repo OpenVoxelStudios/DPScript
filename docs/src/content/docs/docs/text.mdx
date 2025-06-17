@@ -1,0 +1,27 @@
+---
+title: Text
+sidebar:
+    order: 6
+---
+
+Text components are created using the `component:` syntax. It can be shortened to `c:`
+
+```dps
+// { "text": "Hello there!" }
+let text = component: "Hello there!";
+
+// { "text": "I'm also some text!" }
+let other_text = c: "I'm also some text!";
+```
+
+## Formatting
+
+You can apply formatting to components, too. You just have to use the combination operator (`&`) with some [NBT data](/docs/nbt).
+
+```dps
+let text = c: "Hello there!" & nbt: {
+    bold: true,
+    italic: true,
+    color: "aqua",
+};
+```

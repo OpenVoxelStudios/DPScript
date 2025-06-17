@@ -1,0 +1,58 @@
+---
+title: Exports
+sidebar:
+    order: 5
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+DPScript also lets you export things from other modules, allowing you to have quick access to important things.
+
+```dps
+// From the standard library:
+export std::gm::sqrt::*;
+```
+
+## Syntax
+
+The export syntax is also pretty easy to get the hang of. Just remember a couple things:
+
+<Steps>
+
+1. You can export many things with a single statement, just wrap them in curly braces (`{}`):
+
+    ```dps
+    export some::{
+        thing,
+        other_thing,
+        cool_function,
+        ...
+    };
+    ```
+
+2. You can also export just a single thing:
+
+    ```dps
+    export some::thing;
+    ```
+
+3. You can export from multiple different sub-modules in the same statement:
+
+    ```dps
+    export some::{
+        thing,
+        other::thing,
+        cool::function,
+        ...
+    };
+    ```
+
+4. You can export everything from a module, too:
+
+    ```dps
+    export my_module::*;
+    ```
+
+</Steps>
+
+That's about it!
