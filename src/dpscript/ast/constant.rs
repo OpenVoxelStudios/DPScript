@@ -2,8 +2,8 @@ use miette::SourceSpan;
 
 use crate::{
     common::traits::Validated,
-    dpscript::{ast::node::Node, ty::TypeRef},
-    util::{DataLocation, Spanned},
+    dpscript::{ast::node::Node, check::CheckConst, ty::TypeRef},
+    util::Spanned,
 };
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
@@ -11,7 +11,6 @@ pub struct ConstantNode {
     pub span: SourceSpan,
     pub name: String,
     pub ty: Option<TypeRef>,
-    pub location: DataLocation,
     pub value: Vec<Node>,
 }
 
@@ -31,5 +30,12 @@ impl Validated for ConstantNode {
         } else {
             Ok(())
         }
+    }
+}
+
+impl CheckConst for ConstantNode {
+    // It's a variable declaration and therefore has no value!
+    fn is_const(&self) -> bool {
+        false
     }
 }
