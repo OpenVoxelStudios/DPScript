@@ -1,0 +1,27 @@
+use miette::SourceSpan;
+
+use crate::dpscript::{ast::ast::Scope, data::NodeInfo, ty::TypeRef};
+
+/// A node referencing the name of another node in the AST.
+/// This is typically used to reference variables.
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub struct IdentNode {
+    pub span: SourceSpan,
+    pub ident: String,
+}
+
+impl NodeInfo for IdentNode {
+    fn is_const(&self, scope: &Scope) -> bool {
+        scope
+            .lookup(&self.ident)
+            .map(|it| it.is_const_var())
+            .unwrap_or(false)
+    }
+
+    fn returns(&self, scope: &Scope) -> Option<TypeRef> {
+        scope
+            .lookup(&self.ident)
+            .map(|it| it.compute_ty(scope))
+            .flatten()
+    }
+}

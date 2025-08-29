@@ -2,6 +2,8 @@ mod inner;
 mod misc;
 mod token;
 
+pub mod stream;
+
 pub use misc::*;
 pub use token::*;
 

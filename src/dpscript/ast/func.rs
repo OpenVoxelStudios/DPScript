@@ -1,8 +1,22 @@
 use crate::{
-    dpscript::{ast::node::Node, check::CheckConst, ty::TypeRef},
+    dpscript::{
+        ast::{ast::Scope, node::Node},
+        data::NodeInfo,
+        ty::TypeRef,
+    },
     util::{DataLocation, Identifier},
 };
+use bitflags::bitflags;
 use miette::SourceSpan;
+
+bitflags! {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+    pub struct FuncFlags: u8 {
+        const Inline = 1;
+        const Facade = 2;
+        const Compiler = 3;
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct FunctionNode {
@@ -12,6 +26,7 @@ pub struct FunctionNode {
     pub return_type: Option<TypeRef>,
     pub ident: Identifier,
     pub body: Vec<Node>,
+    pub flags: FuncFlags,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
@@ -20,11 +35,12 @@ pub struct FunctionArg {
     pub name: String,
     pub ty: TypeRef,
     pub location: DataLocation,
+    pub is_this: bool,
 }
 
-impl CheckConst for FunctionNode {
+impl NodeInfo for FunctionNode {
     // It's a function declaration and therefore has no value!
-    fn is_const(&self) -> bool {
+    fn is_const(&self, _scope: &Scope) -> bool {
         false
     }
 }

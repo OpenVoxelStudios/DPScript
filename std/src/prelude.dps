@@ -1,0 +1,3 @@
+// std::prelude's members is automatically imported in every DPScript module.
+
+export std::entity::*;

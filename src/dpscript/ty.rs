@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum TypeRef {
     /// A local (user-defined) type.
     Local(String),
@@ -14,7 +14,7 @@ pub enum TypeRef {
     TypedNBT(NBTSchema),
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum BuiltInType {
     /// An integer type.
     Int,
@@ -46,7 +46,7 @@ pub enum BuiltInType {
     NBT,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum NBTSchema {
     /// A simple struct that validates based on the elements contained.
     Struct {
@@ -64,7 +64,7 @@ pub enum NBTSchema {
     Union { name: String, types: Vec<NBTSchema> },
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct NBTSchemaElement {
     pub name: String,
     pub value_type: TypeRef,

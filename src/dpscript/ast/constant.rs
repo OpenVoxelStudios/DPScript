@@ -1,11 +1,7 @@
-use crate::{
-    common::traits::Validated,
-    dpscript::{
-        ast::{ast::Module, node::Node},
-        check::CheckConst,
-        ty::TypeRef,
-    },
-    util::Spanned,
+use crate::dpscript::{
+    ast::{ast::Scope, node::Node, var::VarInfo},
+    data::NodeInfo,
+    ty::TypeRef,
 };
 use miette::SourceSpan;
 
@@ -13,32 +9,23 @@ use miette::SourceSpan;
 pub struct ConstantNode {
     pub span: SourceSpan,
     pub name: String,
-    pub ty: Option<TypeRef>,
-    pub value: Vec<Node>,
+    pub ty: TypeRef,
+    pub value: Box<Node>,
 }
 
-impl ConstantNode {}
+impl VarInfo for ConstantNode {
+    fn compute_ty(&self, _scope: &Scope) -> Option<TypeRef> {
+        Some(self.ty.clone())
+    }
 
-impl Validated for ConstantNode {
-    fn validate(
-        &self,
-        module: &Module,
-        warnings: &mut Vec<Spanned<String>>,
-        errors: &mut Vec<Spanned<String>>,
-    ) -> Result<(), ()> {
-        if self.ty.is_none() {
-            errors.push(("Constant must have a declared type!".into(), self.span));
-
-            Err(())
-        } else {
-            Ok(())
-        }
+    fn is_const_var(&self) -> bool {
+        true
     }
 }
 
-impl CheckConst for ConstantNode {
+impl NodeInfo for ConstantNode {
     // It's a variable declaration and therefore has no value!
-    fn is_const(&self) -> bool {
+    fn is_const(&self, _scope: &Scope) -> bool {
         false
     }
 }

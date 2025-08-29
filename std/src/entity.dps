@@ -1,0 +1,3 @@
+#[since = "0.4.0"]
+#[cmd("data get entity {sel} UUID")]
+pub facade fn uuid(#[this] sel: Selector) -> [int; 4];

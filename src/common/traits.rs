@@ -1,10 +1,10 @@
-use crate::{dpscript::ast::ast::Module, util::Spanned};
+use crate::{dpscript::ast::ast::Scope, util::Spanned};
 
 pub trait Validated {
     /// Validate this node.
     fn validate(
         &self,
-        module: &Module,
+        scope: &Scope,
         warnings: &mut Vec<Spanned<String>>,
         errors: &mut Vec<Spanned<String>>,
     ) -> Result<(), ()>;

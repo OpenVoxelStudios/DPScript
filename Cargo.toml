@@ -15,6 +15,7 @@ name = "dscls"
 path = "src/bin/lsp.rs"
 
 [dependencies]
+bitflags = { version = "2.9.3", features = ["serde", "std"] }
 clap = { version = "4.5.39", features = ["derive"] }
 indicatif = "0.17.11"
 json5 = "0.4.1"

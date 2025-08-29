@@ -2,14 +2,14 @@
 
 use miette::SourceSpan;
 
-use crate::dpscript::{ast::node::Node, check::CheckConst};
+use crate::dpscript::{ast::{ast::Scope, node::Node}, data::NodeInfo};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct BinaryOpNode {
     pub span: SourceSpan,
     pub operation: BinaryOperation,
-    pub lhs: Vec<Node>,
-    pub rhs: Vec<Node>,
+    pub lhs: Box<Node>,
+    pub rhs: Box<Node>,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
@@ -63,8 +63,8 @@ pub enum BinaryOperation {
     CondLe,
 }
 
-impl CheckConst for BinaryOpNode {
-    fn is_const(&self) -> bool {
-        self.lhs.is_const() && self.rhs.is_const()
+impl NodeInfo for BinaryOpNode {
+    fn is_const(&self, scope: &Scope) -> bool {
+        self.lhs.is_const(scope) && self.rhs.is_const(scope)
     }
 }

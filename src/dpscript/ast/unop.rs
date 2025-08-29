@@ -2,13 +2,13 @@
 
 use miette::SourceSpan;
 
-use crate::dpscript::{ast::node::Node, check::CheckConst};
+use crate::dpscript::{ast::{ast::Scope, node::Node}, data::NodeInfo, ty::TypeRef};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct UnaryOpNode {
     pub span: SourceSpan,
     pub operation: UnaryOperation,
-    pub value: Vec<Node>,
+    pub value: Box<Node>,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
@@ -23,8 +23,12 @@ pub enum UnaryOperation {
     BitNot,
 }
 
-impl CheckConst for UnaryOpNode {
-    fn is_const(&self) -> bool {
-        self.value.is_const()
+impl NodeInfo for UnaryOpNode {
+    fn is_const(&self, scope: &Scope) -> bool {
+        self.value.is_const(scope)
+    }
+
+    fn returns(&self, scope: &Scope) -> Option<TypeRef> {
+        self.value.returns(scope)
     }
 }
