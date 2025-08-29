@@ -1,4 +1,8 @@
-use crate::dpscript::{ast::{ast::Scope, node::Node}, data::NodeInfo, ty::TypeRef};
+use crate::dpscript::{
+    ast::{ast::Scope, node::Node},
+    data::NodeInfo,
+    ty::TypeRef,
+};
 use miette::SourceSpan;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]

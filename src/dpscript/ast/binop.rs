@@ -2,7 +2,10 @@
 
 use miette::SourceSpan;
 
-use crate::dpscript::{ast::{ast::Scope, node::Node}, data::NodeInfo};
+use crate::dpscript::{
+    ast::{ast::Scope, node::Node},
+    data::NodeInfo,
+};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct BinaryOpNode {

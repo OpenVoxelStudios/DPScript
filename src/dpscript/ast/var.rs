@@ -17,7 +17,7 @@ pub struct VarNode {
     pub location: DataLocation,
 }
 
-pub trait VarInfo : NodeInfo {
+pub trait VarInfo: NodeInfo {
     fn compute_ty(&self, scope: &Scope) -> Option<TypeRef>;
     fn is_const_var(&self) -> bool;
 }

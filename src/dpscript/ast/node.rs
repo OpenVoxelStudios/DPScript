@@ -2,7 +2,8 @@ use miette::SourceSpan;
 
 use crate::dpscript::{
     ast::{
-        ast::Scope, binop::BinaryOpNode, block::BlockNode, constant::ConstantNode, func::FunctionNode, literal::LiteralNode, unop::UnaryOpNode, var::VarNode
+        ast::Scope, binop::BinaryOpNode, block::BlockNode, constant::ConstantNode,
+        func::FunctionNode, literal::LiteralNode, unop::UnaryOpNode, var::VarNode,
     },
     data::NodeInfo,
     ty::TypeRef,

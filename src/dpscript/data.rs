@@ -5,7 +5,9 @@ pub trait NodeInfo {
 
     /// Get the type of data the node will return.
     /// This wil be [`None`] if it has no value.
-    fn returns(&self, _scope: &Scope) -> Option<TypeRef> { None }
+    fn returns(&self, _scope: &Scope) -> Option<TypeRef> {
+        None
+    }
 }
 
 impl<T: NodeInfo> NodeInfo for Vec<T> {

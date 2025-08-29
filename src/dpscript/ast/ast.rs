@@ -1,6 +1,11 @@
-use crate::dpscript::{ast::{
-    constant::ConstantNode, func::FunctionNode, var::{VarInfo, VarNode}
-}, ty::TypeRef};
+use crate::dpscript::{
+    ast::{
+        constant::ConstantNode,
+        func::FunctionNode,
+        var::{VarInfo, VarNode},
+    },
+    ty::TypeRef,
+};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
