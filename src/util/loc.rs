@@ -9,4 +9,3 @@ pub struct DataLocation {
     pub storage: String,
     pub path: String,
 }
-

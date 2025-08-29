@@ -25,7 +25,7 @@ pub enum BinaryOperation {
 
     /// lhs / rhs
     Divide,
-    
+
     /// lhs % rhs
     Modulo,
 

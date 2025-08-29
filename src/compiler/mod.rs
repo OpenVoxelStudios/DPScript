@@ -1,4 +1,8 @@
-use crate::{pack::PackToml, Result, dpscript::tokenizer::Tokenizer, pack::get_source_files};
+use crate::{
+    Result,
+    dpscript::{ast::ast::AST, tokenizer::Tokenizer},
+    pack::{PackToml, get_source_files},
+};
 use indicatif::{ProgressIterator, ProgressStyle};
 use ron::ser::PrettyConfig;
 use serde::{Deserialize, Serialize};
@@ -71,11 +75,11 @@ impl Compiler {
 
         let mut ast = asts.remove(0);
 
-        for item in asts {
-            ast.merge(item);
-        }
+        // for item in asts {
+        //     ast.merge(item);
+        // }
 
-        ast.index()?;
+        // ast.index()?;
 
         if self.dump_ast {
             let dump_file = dump_dir.join("ast_merged.ron");
@@ -131,29 +135,46 @@ impl Compiler {
             let dump_file =
                 tokens_dir.join(file.with_extension("dps.tokens.ron").file_name().unwrap());
 
+            let dump_str_file = tokens_dir.join(
+                file.with_extension("dps.str_tokens.dps")
+                    .file_name()
+                    .unwrap(),
+            );
+
             fs::write(
                 dump_file,
                 ron::ser::to_string_pretty(&tokens, PrettyConfig::new())?,
             )?;
-        }
-
-        let ast = Lexer::new(&file_name, data, tokens).run()?.ast();
-
-        if self.dump_ast {
-            let ast_dir = dump_dir.join("ast");
-
-            if !ast_dir.exists() {
-                fs::create_dir_all(&ast_dir)?;
-            }
-
-            let dump_file = ast_dir.join(file.with_extension("dps.ast.ron").file_name().unwrap());
 
             fs::write(
-                dump_file,
-                ron::ser::to_string_pretty(&ast, PrettyConfig::new())?,
+                dump_str_file,
+                tokens
+                    .iter()
+                    .map(|it| format!("{}", it.0))
+                    .collect::<Vec<_>>()
+                    .join(" "),
             )?;
         }
 
-        Ok(ast)
+        // let ast = Lexer::new(&file_name, data, tokens).run()?.ast();
+
+        // if self.dump_ast {
+        //     let ast_dir = dump_dir.join("ast");
+
+        //     if !ast_dir.exists() {
+        //         fs::create_dir_all(&ast_dir)?;
+        //     }
+
+        //     let dump_file = ast_dir.join(file.with_extension("dps.ast.ron").file_name().unwrap());
+
+        //     fs::write(
+        //         dump_file,
+        //         ron::ser::to_string_pretty(&ast, PrettyConfig::new())?,
+        //     )?;
+        // }
+
+        // Ok(ast)
+
+        todo!()
     }
 }

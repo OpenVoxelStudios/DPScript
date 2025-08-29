@@ -1,0 +1,2 @@
+#[since = "0.4.0"]
+pub compiler fn nameof(object: Any);

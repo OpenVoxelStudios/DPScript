@@ -1,0 +1,59 @@
+// ===================================================================================================
+// DPScript Assembly
+// ===================================================================================================
+
+// This is the lowest level of any DPScript code, basically gets directly compiled to datapack code.
+// The only real exception is the condition builder, but even then it's not much of a difference.
+
+@section scoreboard:
+
+INDEX = #[score("testing", "loops.index")] // a constant named 'TEMP' references a scoreboard entry
+                                          // references the objective "testing" and the player "loops.index".
+
+COMPARISON = #[score("testing", "loops.end")]
+
+@section code:
+
+func [testing:loops]:
+    $temp = #[store("testing:loops", "len")]    // a compile-time constant.
+    
+    putdi 5, $temp                              // puts the value of 5 into $temp.
+    j [testing:loops/inner]                     // call the inner loop.
+
+func [testing:loops/inner]:
+    $temp = #[store("testing:loops", "len")]
+    
+    getd2sci INDEX, $temp                        // stores the value of $temp into INDEX, automatically converting it to an int.
+    subsi 1, INDEX                               // subtract 1 from INDEX
+    putsi 0, COMPARISON                          // set the score referenced by COMPARISON to 0.
+    cmpss INDEX, COMPARISON                      // compare a score with another score.
+    j.gt [testing:loops/inner]                   // jump to [testing:loops/inner] if the comparison results in "greater than"
+
+// putdi = Put Int into Data
+// getd2sci = Get Data to Scoreboard Int
+// subsi = Subtract Scoreboard with Int
+// putsi = Set Scoreboard to Int
+// cmpss = Compare Scoreboard with Scoreboard
+
+// putdi = data modify storage $storage $path set value $arg
+// getd2sci = execute store result score $player $objective run data get storage $storage $path 1
+// subsi = scoreboard players remove $player $objective $arg
+// putsi = scoreboard players set $player $objective $arg
+// cmpss = execute $truthy score $first $op $second run function $target
+//                    ^                  ^ determined by the jump type.
+
+// ===================================================================================================
+// Datapack version, see how close it is.
+// ===================================================================================================
+
+// @file data/testing/function/loops.mcfunction
+
+data modify storage testing:loops len set value 5
+function testing:loops/inner
+
+// @file data/testing/function/loops/inner.mcfunction
+
+execute store result score loops.index testing run data get storage testing:loops len 1
+scoreboard players remove loops.index testing 1
+scoreboard players set loops.end testing 0
+execute if score loops.index testing > loops.end testing run function testing:loops/inner

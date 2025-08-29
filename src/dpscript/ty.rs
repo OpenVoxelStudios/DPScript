@@ -61,10 +61,7 @@ pub enum NBTSchema {
     },
 
     /// A union struct, which merges all the properties of the given schemas.
-    Union {
-        name: String,
-        types: Vec<NBTSchema>,
-    },
+    Union { name: String, types: Vec<NBTSchema> },
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
@@ -107,7 +104,6 @@ pub mod schema {
                         name: "TextContents".into(),
                         elements: vec![nbt_schema_element!([req] builtin; "text" => String)],
                     },
-
                     NBTSchema::Struct {
                         name: "DataContents".into(),
                         elements: vec![
@@ -116,12 +112,9 @@ pub mod schema {
                             nbt_schema_element!(builtin; "interpret" => Boolean),
                         ],
                     },
-                    
                     NBTSchema::Struct {
                         name: "SelectorContents".into(),
-                        elements: vec![
-                            nbt_schema_element!([req] builtin; "selector" => String),
-                        ],
+                        elements: vec![nbt_schema_element!([req] builtin; "selector" => String)],
                     },
                 ],
             },
@@ -133,7 +126,6 @@ pub mod schema {
                     nbt_schema_element!(builtin; "italic" => Boolean),
                     nbt_schema_element!(builtin; "strikethrough" => Boolean),
                     nbt_schema_element!(builtin; "underline" => Boolean),
-
                     // TODO: hover & click events
                 ],
             },

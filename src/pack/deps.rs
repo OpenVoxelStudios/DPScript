@@ -1,8 +1,8 @@
-use std::{fs, path::PathBuf};
-use miette::{NamedSource, SourceOffset, SourceSpan};
-use walkdir::WalkDir;
-use crate::{error::DependencyError, Result};
 use super::PackToml;
+use crate::{Result, error::DependencyError};
+use miette::{NamedSource, SourceOffset, SourceSpan};
+use std::{fs, path::PathBuf};
+use walkdir::WalkDir;
 
 pub fn get_source_files(dir: &PathBuf, pack: &PackToml, ir: bool) -> Result<Vec<String>> {
     let mut files = Vec::new();

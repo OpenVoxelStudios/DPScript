@@ -1,10 +1,13 @@
-use miette::SourceSpan;
-
 use crate::{
     common::traits::Validated,
-    dpscript::{ast::node::Node, check::CheckConst, ty::TypeRef},
+    dpscript::{
+        ast::{ast::Module, node::Node},
+        check::CheckConst,
+        ty::TypeRef,
+    },
     util::Spanned,
 };
+use miette::SourceSpan;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct ConstantNode {

@@ -1,11 +1,14 @@
 mod inner;
-mod token;
 mod misc;
+mod token;
 
-pub use token::*;
 pub use misc::*;
+pub use token::*;
 
-use crate::{Result, util::{Cursor, Spanned}};
+use crate::{
+    Result,
+    util::{Cursor, Spanned},
+};
 use miette::NamedSource;
 
 pub type StringCursor = Cursor<String, NamedSource<String>>;

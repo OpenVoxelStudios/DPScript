@@ -1,5 +1,8 @@
+use crate::{
+    dpscript::{ast::node::Node, check::CheckConst, ty::TypeRef},
+    util::{DataLocation, Identifier},
+};
 use miette::SourceSpan;
-use crate::{dpscript::{ast::node::Node, check::CheckConst, ty::TypeRef}, util::{DataLocation, Identifier}};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct FunctionNode {

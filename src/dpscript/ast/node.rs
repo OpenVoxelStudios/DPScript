@@ -1,4 +1,7 @@
-use crate::dpscript::{ast::{binop::BinaryOpNode, constant::ConstantNode, func::FunctionNode, unop::UnaryOpNode}, check::CheckConst};
+use crate::dpscript::{
+    ast::{binop::BinaryOpNode, constant::ConstantNode, func::FunctionNode, unop::UnaryOpNode},
+    check::CheckConst,
+};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub enum Node {

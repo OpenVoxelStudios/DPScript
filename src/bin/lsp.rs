@@ -1,4 +1,4 @@
-use dpscript::Backend;
+use dpscript::lsp::Backend;
 use tower_lsp::Server;
 
 #[tokio::main]

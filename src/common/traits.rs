@@ -1,4 +1,4 @@
-use crate::util::Spanned;
+use crate::{dpscript::ast::ast::Module, util::Spanned};
 
 pub trait Validated {
     /// Validate this node.

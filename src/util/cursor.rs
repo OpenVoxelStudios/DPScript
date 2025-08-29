@@ -1,5 +1,9 @@
 use super::{HasSpan, bits::HasBits};
-use crate::{Result, util::{Spanned, FromBits}, error::{TokenizerError, UnnamedTokenizerError}};
+use crate::{
+    Result,
+    error::{TokenizerError, UnnamedTokenizerError},
+    util::{FromBits, Spanned},
+};
 use miette::{NamedSource, SourceOffset, SourceSpan};
 
 #[derive(Debug, Clone)]
@@ -315,14 +319,22 @@ impl Cursor<String, NamedSource<String>> {
 
     pub fn span(&self, length: usize) -> SourceSpan {
         SourceSpan::new(
-            SourceOffset::from_location(&self.src, self.find_line(self.pos) + 1, self.find_char(self.pos)),
+            SourceOffset::from_location(
+                &self.src,
+                self.find_line(self.pos) + 1,
+                self.find_char(self.pos),
+            ),
             length,
         )
     }
 
     pub fn span_prev(&self, length: usize, back: usize) -> SourceSpan {
         SourceSpan::new(
-            SourceOffset::from_location(&self.src, self.find_line(self.pos - back) + 1, self.find_char(self.pos - back)),
+            SourceOffset::from_location(
+                &self.src,
+                self.find_line(self.pos - back) + 1,
+                self.find_char(self.pos - back),
+            ),
             length,
         )
     }
