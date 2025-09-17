@@ -1,3 +1,5 @@
+pub mod import;
+
 use crate::{dpscript::{ast::ast::AST, tokenizer::Token}, util::Spanned, Result};
 
 pub struct Lexer {
