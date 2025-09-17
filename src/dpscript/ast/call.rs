@@ -1,3 +1,4 @@
+use dpscript_macros::HasSpan;
 use miette::SourceSpan;
 
 use crate::dpscript::{
@@ -6,13 +7,13 @@ use crate::dpscript::{
     ty::TypeRef,
 };
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct CallNode {
     pub span: SourceSpan,
 
     /// A reference to a node that is the receiver,
     /// like when calling an object instance function.
-    pub receiver: Option<Node>,
+    pub receiver: Option<Box<Node>>,
 
     /// The name of the function to call.
     pub func: String,

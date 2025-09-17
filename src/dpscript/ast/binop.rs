@@ -1,5 +1,6 @@
 //! Binary operations
 
+use dpscript_macros::HasSpan;
 use miette::SourceSpan;
 
 use crate::dpscript::{
@@ -7,7 +8,7 @@ use crate::dpscript::{
     data::NodeInfo,
 };
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct BinaryOpNode {
     pub span: SourceSpan,
     pub operation: BinaryOperation,

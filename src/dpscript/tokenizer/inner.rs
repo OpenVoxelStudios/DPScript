@@ -50,13 +50,13 @@ impl Tokenizer {
             '~' => self.skip_1(Token::Tilde),
 
             '.' => {
-                if self.cursor.peek().is_some_and(|v| v == '.')
-                    && self.cursor.peek_ahead(1).is_some_and(|v| v == '.')
+                if self.cursor.peek_ahead(1).is_some_and(|v| v == '.')
+                    && self.cursor.peek_ahead(2).is_some_and(|v| v == '.')
                 {
                     let span = self.cursor.span(3);
                     self.cursor.skip(3);
                     Some((Token::Ellipsis, span))
-                } else if self.cursor.peek().is_some_and(|v| v == '.') {
+                } else if self.cursor.peek_ahead(1).is_some_and(|v| v == '.') {
                     let span = self.cursor.span(2);
                     self.cursor.skip(2);
                     Some((Token::Range, span))

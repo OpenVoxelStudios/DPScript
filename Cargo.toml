@@ -17,6 +17,7 @@ path = "src/bin/lsp.rs"
 [dependencies]
 bitflags = { version = "2.9.3", features = ["serde", "std"] }
 clap = { version = "4.5.39", features = ["derive"] }
+dpscript-macros = { version = "0.1.0", path = "crates/macros" }
 indicatif = "0.17.11"
 json5 = "0.4.1"
 miette = { version = "7.6.0", features = ["fancy", "serde"] }
@@ -37,3 +38,7 @@ walkdir = "2.5.0"
 [package.metadata.binstall]
 pkg-url = "{ repo }/releases/download/v{ version }/dsc-{ target }"
 pkg-fmt = "bin"
+
+[workspace]
+resolver = "2"
+members = [".", "crates/*"]

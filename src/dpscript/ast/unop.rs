@@ -8,7 +8,7 @@ use crate::dpscript::{
     ty::TypeRef,
 };
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct UnaryOpNode {
     pub span: SourceSpan,
     pub operation: UnaryOperation,

@@ -1,3 +1,4 @@
+use dpscript_macros::HasSpan;
 use miette::SourceSpan;
 
 use crate::dpscript::{
@@ -6,7 +7,7 @@ use crate::dpscript::{
     ty::{BuiltInType, TypeRef},
 };
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct LiteralNode {
     pub span: SourceSpan,
     pub data: LiteralData,

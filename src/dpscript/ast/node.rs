@@ -2,8 +2,7 @@ use miette::SourceSpan;
 
 use crate::dpscript::{
     ast::{
-        ast::Scope, binop::BinaryOpNode, block::BlockNode, constant::ConstantNode,
-        func::FunctionNode, literal::LiteralNode, unop::UnaryOpNode, var::VarNode,
+        ast::Scope, binop::BinaryOpNode, block::BlockNode, call::CallNode, cond::ConditionalNode, constant::ConstantNode, enums::EnumNode, func::FunctionNode, ident::{FieldNode, IdentNode}, literal::LiteralNode, loops::LoopNode, objective::ObjectiveNode, unop::UnaryOpNode, var::VarNode
     },
     data::NodeInfo,
     ty::TypeRef,
@@ -21,7 +20,7 @@ pub struct Node {
 
 macro_rules! node_data {
     { $($variant: ident: $data: ty,)* } => {
-        #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+        #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpanGroup)]
         pub enum NodeData {
             $($variant($data),)*
         }
@@ -50,4 +49,11 @@ node_data! {
     Variable: VarNode,
     Block: BlockNode,
     Literal: LiteralNode,
+    Call: CallNode,
+    Conditional: ConditionalNode,
+    Enum: EnumNode,
+    Ident: IdentNode,
+    Loop: LoopNode,
+    Objective: ObjectiveNode,
+    Field: FieldNode,
 }

@@ -7,6 +7,7 @@ use crate::{
     util::{DataLocation, Identifier},
 };
 use bitflags::bitflags;
+use dpscript_macros::HasSpan;
 use miette::SourceSpan;
 
 bitflags! {
@@ -18,7 +19,7 @@ bitflags! {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct FunctionNode {
     pub span: SourceSpan,
     pub name: String,
@@ -29,7 +30,7 @@ pub struct FunctionNode {
     pub flags: FuncFlags,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct FunctionArg {
     pub span: SourceSpan,
     pub name: String,

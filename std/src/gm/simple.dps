@@ -16,15 +16,16 @@ pub fn subtract(x: float, y: float) -> float {
     let var2 = y;
     let tv2p = y.slice(0, 1);
     let v2p = "-";
+    let v2s = "";
 
     if (tv2p == "-") {
         // var2 is float but has to be a string for slicing and converted back to float.....
-        var2 = var2.slice(1);
+        v2s = var2.slice(1);
         v2p = "";
     }
 
     at pos: [~, x, ~] {
-        math_entity.tp(pos: [29999999, v2p + var2, 91665]); // "v2p + var2" is string concatenation
+        math_entity.tp(pos: [29999999, v2p + v2s, 91665]); // "v2p + var2" is string concatenation
     }
 
     let result = math_entity.Pos[1];
@@ -59,54 +60,56 @@ pub fn divide(x: float, y: float) -> float {
     return result;
 }
 
-pub fn modulo(x: float, y: float) -> float {
-    // i hate this already.
-    if (y == 0) {
-        panic!
-    }
-
-    math_entity.transformation = [0f,0f,0f,x,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,y];
-
-    let var2 = math_entity.transformation.translation[0];
-
-    let tv2p = var2.slice(0, 1);
-    let v2p = "";
-
-    if (tv2p == "-") {
-        var2 = var2.slice(1);
-        v2p = "-";
-    }
-
-    // gotta convert that to string and then back to float
-    var2 = var2.slice(0, -1);
-
-    math_entity.transformation = [0f,0f,0f,1f,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,y];
-    let var3 = math_entity.transformation.translation[0];
-
-    // eww
-    var2 = $execute store result storage gm._temp_:std var2 float $(v2p)1 run data get storage gm._temp_:std var2
-
-    math_entity.transformation = [0f,0f,0f,var2,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,var3];
-
-    var2 = math_entity.transformation.translation[0];
-    tv2p = var2.slice(0, 1);
-
-    v2p = "-";
-
-    if (tv2p == "-") {
-        var2 = var2.slice(1);
-        v2p = "";
-    }
-
-    // Again.... STRING TO DOUBLE LETS GOOOOO 🗣️
-    var2 = var2.slice(0, -1);
-
-    at pos: [~, x, ~] {
-        math_entity.tp(pos: [29999999, v2p + var2, 91665]);
-    }
-
-    let result = math_entity.Pos[1];
-    math_entity.tp(pos: [29999999, 0, 91665]);
-    
-    return result;
-}
+// This... does not work. We gotta redo this.
+// pub fn modulo(x: float, y: float) -> float {
+//     // i hate this already.
+//     if (y == 0) {
+//         panic!
+//     }
+// 
+//     math_entity.transformation = [0f,0f,0f,x,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,y];
+// 
+//     let var2 = math_entity.transformation.translation[0];
+//     let tv2p = var2.slice(0, 1);
+//     let v2p = "";
+//     let v2s = "";
+// 
+//     if (tv2p == "-") {
+//         v2s = var2.slice(1);
+//         v2p = "-";
+//     }
+// 
+//     // gotta convert that to string and then back to float
+//     v2s = v2s.slice(0, -1);
+// 
+//     math_entity.transformation = [0f,0f,0f,1f,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,y];
+// 
+//     let var3 = math_entity.transformation.translation[0];
+// 
+//     // eww
+//     var2 = $execute store result storage gm._temp_:std var2 float $(v2p)1 run data get storage gm._temp_:std var2
+// 
+//     math_entity.transformation = [0f,0f,0f,var2,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,var3];
+// 
+//     var2 = math_entity.transformation.translation[0];
+//     tv2p = var2.slice(0, 1);
+// 
+//     v2p = "-";
+// 
+//     if (tv2p == "-") {
+//         var2 = var2.slice(1);
+//         v2p = "";
+//     }
+// 
+//     // Again.... STRING TO DOUBLE LETS GOOOOO 🗣️
+//     var2 = var2.slice(0, -1);
+// 
+//     at pos: [~, x, ~] {
+//         math_entity.tp(pos: [29999999, v2p + var2, 91665]);
+//     }
+// 
+//     let result = math_entity.Pos[1];
+//     math_entity.tp(pos: [29999999, 0, 91665]);
+//     
+//     return result;
+// }

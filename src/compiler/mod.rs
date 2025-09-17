@@ -1,7 +1,5 @@
 use crate::{
-    Result,
-    dpscript::{ast::ast::AST, tokenizer::Tokenizer},
-    pack::{PackToml, get_source_files},
+    dpscript::{ast::ast::AST, lexer::Lexer, tokenizer::Tokenizer}, pack::{get_source_files, PackToml}, Result
 };
 use indicatif::{ProgressIterator, ProgressStyle};
 use ron::ser::PrettyConfig;
@@ -156,25 +154,23 @@ impl Compiler {
             )?;
         }
 
-        // let ast = Lexer::new(&file_name, data, tokens).run()?.ast();
+        let ast = Lexer::new(file_name.into(), data, tokens).run()?;
 
-        // if self.dump_ast {
-        //     let ast_dir = dump_dir.join("ast");
+        if self.dump_ast {
+            let ast_dir = dump_dir.join("ast");
 
-        //     if !ast_dir.exists() {
-        //         fs::create_dir_all(&ast_dir)?;
-        //     }
+            if !ast_dir.exists() {
+                fs::create_dir_all(&ast_dir)?;
+            }
 
-        //     let dump_file = ast_dir.join(file.with_extension("dps.ast.ron").file_name().unwrap());
+            let dump_file = ast_dir.join(file.with_extension("dps.ast.ron").file_name().unwrap());
 
-        //     fs::write(
-        //         dump_file,
-        //         ron::ser::to_string_pretty(&ast, PrettyConfig::new())?,
-        //     )?;
-        // }
+            fs::write(
+                dump_file,
+                ron::ser::to_string_pretty(&ast, PrettyConfig::new())?,
+            )?;
+        }
 
-        // Ok(ast)
-
-        todo!()
+        Ok(ast)
     }
 }

@@ -32,6 +32,12 @@ pub struct Scope {
     pub locals: HashMap<String, VarNode>,
 }
 
+impl AST {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
+
 impl Scope {
     pub fn lookup(&self, var: impl AsRef<str>) -> Option<&dyn VarInfo> {
         match self.locals.get(&var.as_ref().to_string()) {

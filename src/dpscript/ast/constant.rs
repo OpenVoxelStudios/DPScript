@@ -3,9 +3,10 @@ use crate::dpscript::{
     data::NodeInfo,
     ty::TypeRef,
 };
+use dpscript_macros::HasSpan;
 use miette::SourceSpan;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct ConstantNode {
     pub span: SourceSpan,
     pub name: String,

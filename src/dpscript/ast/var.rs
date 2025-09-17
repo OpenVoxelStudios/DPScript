@@ -8,7 +8,7 @@ use crate::{
 };
 use miette::SourceSpan;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct VarNode {
     pub span: SourceSpan,
     pub name: String,
