@@ -1,6 +1,6 @@
 use crate::{Result, compiler::Compiler};
 use clap::{Parser, Subcommand};
-use std::path::PathBuf;
+use std::{fs, path::PathBuf};
 
 #[derive(Debug, Clone, Parser)]
 #[command(version, about, long_about = None)]
@@ -81,7 +81,7 @@ impl Commands {
                     *dump_ast,
                     *dump_ir,
                 )?
-                .compile_project()?;
+                .compile_project(&toml::de::from_str(&fs::read_to_string(config_path)?)?)?;
             }
 
             Self::Compile {

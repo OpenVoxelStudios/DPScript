@@ -15,7 +15,7 @@ pub use validator::*;
 use miette::Diagnostic;
 use thiserror::Error;
 
-use crate::dpscript::lexer::err::LexerErr;
+use crate::dpscript::lexer::err::{LexerErr, LexerFullErr};
 
 #[derive(Debug, Error, Diagnostic)]
 pub enum Error {
@@ -34,6 +34,10 @@ pub enum Error {
     #[error(transparent)]
     #[diagnostic(transparent)]
     Lexer(#[from] LexerErr),
+
+    #[error(transparent)]
+    #[diagnostic(transparent)]
+    LexerFull(#[from] LexerFullErr),
 
     #[error(transparent)]
     #[diagnostic(transparent)]

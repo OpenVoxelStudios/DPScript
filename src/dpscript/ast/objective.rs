@@ -16,6 +16,8 @@ pub struct ObjectiveNode {
 
     /// The objective trigger (/scoreboard objectives add [id] [trigger]).
     pub kind: String,
+
+    pub is_public: bool,
 }
 
 impl NodeInfo for ObjectiveNode {

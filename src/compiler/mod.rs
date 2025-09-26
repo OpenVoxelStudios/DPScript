@@ -1,5 +1,5 @@
 use crate::{
-    dpscript::{ast::ast::AST, lexer::Lexer, tokenizer::Tokenizer}, pack::{get_source_files, PackToml}, Result
+    dpscript::{ast::node::Node, lexer::Lexer, tokenizer::Tokenizer}, pack::{get_source_files, PackToml}, Result
 };
 use indicatif::{ProgressIterator, ProgressStyle};
 use ron::ser::PrettyConfig;
@@ -47,7 +47,7 @@ impl Compiler {
         })
     }
 
-    pub fn compile_project(&self) -> Result<()> {
+    pub fn compile_project(&self, pack: &PackToml) -> Result<()> {
         let dump_dir = self.out_dir.join(".dpscript");
         let source_files = get_source_files(&self.base, &self.config, self.build_ir)?;
 
@@ -62,7 +62,7 @@ impl Compiler {
         let mut asts = Vec::new();
 
         for path in source_files.iter().progress_with_style(style) {
-            asts.push(self.create_ast(&PathBuf::from(path))?);
+            asts.push(self.create_ast(pack, &PathBuf::from(path))?);
         }
 
         if asts.is_empty() {
@@ -71,7 +71,7 @@ impl Compiler {
             return Ok(());
         }
 
-        let mut ast = asts.remove(0);
+        let nodes = asts.remove(0);
 
         // for item in asts {
         //     ast.merge(item);
@@ -80,11 +80,11 @@ impl Compiler {
         // ast.index()?;
 
         if self.dump_ast {
-            let dump_file = dump_dir.join("ast_merged.ron");
+            let dump_file = dump_dir.join("nodes_merged.ron");
 
             fs::write(
                 dump_file,
-                ron::ser::to_string_pretty(&ast, PrettyConfig::new())?,
+                ron::ser::to_string_pretty(&nodes, PrettyConfig::new())?,
             )?;
 
             // let merged_dir = dump_dir.join("merged");
@@ -113,7 +113,7 @@ impl Compiler {
         Ok(())
     }
 
-    fn create_ast(&self, file: &PathBuf) -> Result<AST> {
+    fn create_ast(&self, pack: &PackToml, file: &PathBuf) -> Result<Vec<Node>> {
         let file_name = file.to_str().unwrap();
         let data = fs::read_to_string(&file)?;
         let tokens = Tokenizer::new(&file_name, data.clone()).run()?.tokens();
@@ -154,16 +154,16 @@ impl Compiler {
             )?;
         }
 
-        let ast = Lexer::new(file_name.into(), data, tokens).run()?;
+        let ast = Lexer::new(pack.pack.name.clone(), file_name.into(), data, tokens).run()?;
 
         if self.dump_ast {
-            let ast_dir = dump_dir.join("ast");
+            let ast_dir = dump_dir.join("nodes");
 
             if !ast_dir.exists() {
                 fs::create_dir_all(&ast_dir)?;
             }
 
-            let dump_file = ast_dir.join(file.with_extension("dps.ast.ron").file_name().unwrap());
+            let dump_file = ast_dir.join(file.with_extension("dps.nodes.ron").file_name().unwrap());
 
             fs::write(
                 dump_file,

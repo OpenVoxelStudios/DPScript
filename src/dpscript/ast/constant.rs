@@ -8,15 +8,16 @@ use miette::SourceSpan;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct ConstantNode {
+    pub is_public: bool,
     pub span: SourceSpan,
     pub name: String,
-    pub ty: TypeRef,
+    pub ty: Option<TypeRef>,
     pub value: Box<Node>,
 }
 
 impl VarInfo for ConstantNode {
     fn compute_ty(&self, _scope: &Scope) -> Option<TypeRef> {
-        Some(self.ty.clone())
+        self.ty.clone()
     }
 
     fn is_const_var(&self) -> bool {

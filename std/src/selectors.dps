@@ -1,6 +1,7 @@
-pub const self = selector: "@s";
-pub const nearest_entity = selector: "@n";
-pub const nearest_player = selector: "@p";
-pub const random_player = selector: "@r";
-pub const all_players = selector: "@a";
-pub const all_entities = selector: "@e";
+// TODO: Selectors
+// pub const self = selector: "@s";
+// pub const nearest_entity = selector: "@n";
+// pub const nearest_player = selector: "@p";
+// pub const random_player = selector: "@r";
+// pub const all_players = selector: "@a";
+// pub const all_entities = selector: "@e";

@@ -6,13 +6,17 @@ use crate::{
             block::{BlockKind, BlockNode},
             node::Node,
         },
-        lexer::{Lexer, Result},
+        lexer::{
+            Result,
+            parser::{BodyLexer, TopLevelLexer},
+            util::LexerMethods,
+        },
         tokenizer::Token,
     },
     util::AddSpan,
 };
 
-impl Lexer {
+impl TopLevelLexer {
     pub fn read_init_block(&mut self) -> Result<Node> {
         debug!("Attempting to read init block...");
 
@@ -36,7 +40,8 @@ impl Lexer {
     fn read_block_inner(&mut self, span: SourceSpan, kind: BlockKind) -> Result<Node> {
         self.expect(Token::LeftBrace)?;
 
-        let (_body, last) = self.eat_block(Token::LeftBrace, Token::RightBrace);
+        let (body, last) = self.eat_block(Token::LeftBrace, Token::RightBrace);
+        let body = BodyLexer::new(self.namespace.clone(), body).parse()?;
 
         self.pop_in_place()?;
 
@@ -45,7 +50,7 @@ impl Lexer {
         Ok(Node::Block(BlockNode {
             kind,
             span: span.add(last),
-            body: vec![], // TODO
+            body,
         }))
     }
 }

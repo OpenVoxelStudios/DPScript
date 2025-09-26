@@ -1,3 +1,7 @@
+use strum::EnumString;
+
+use crate::util::Spanned;
+
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum TypeRef {
     /// A local (user-defined) type.
@@ -7,42 +11,54 @@ pub enum TypeRef {
     BuiltIn(BuiltInType),
 
     /// A type for an NBT array.
-    Array(Box<TypeRef>),
+    Array(Vec<Option<TypeRef>>),
+
+    /// A type for an NBT array with a set length.
+    SizedArray(Box<TypeRef>, Spanned<usize>),
 
     /// A type for NBT data with a specific schema.
     /// If this should instead be unvalidated, use [`BuiltInType::NBT`].
     TypedNBT(NBTSchema),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+// For strum variants - primitives should be lowercase, others shuold be PascalCase.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, EnumString)]
 pub enum BuiltInType {
     /// An integer type.
+    #[strum(serialize = "int")]
     Int,
 
     /// A float type.
+    #[strum(serialize = "float")]
     Float,
 
     /// A double type.
+    #[strum(serialize = "double")]
     Double,
 
     /// A true/false boolean type.
+    #[strum(serialize = "bool")]
     Boolean,
+
+    /// A type for any arbitrary string.
+    #[strum(serialize = "str")]
+    String,
 
     /// A time type.
     /// Examples:
     ///  - 5s
     ///  - 12m38s
     ///  - 14d
+    #[strum(serialize = "Time")]
     Time,
-
-    /// A type for any arbitrary string.
-    String,
 
     /// A type for an identifier (or ResourceLocation).
     /// Should be a string in the form "namespace:path".
+    #[strum(serialize = "Ident")]
     Identifier,
 
     /// A type for arbitrary NBT (named binary tag) data.
+    #[strum(serialize = "NBT")]
     NBT,
 }
 

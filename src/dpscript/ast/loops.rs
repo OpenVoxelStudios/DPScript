@@ -1,6 +1,6 @@
 use miette::SourceSpan;
 
-use crate::dpscript::{ast::node::Node, data::NodeInfo};
+use crate::dpscript::{ast::{ident::IdentNode, node::Node}, data::NodeInfo};
 
 use super::ast::Scope;
 
@@ -15,9 +15,21 @@ pub struct LoopNode {
 pub enum LoopCondition {
     Range {
         span: SourceSpan,
+        /// The variable to put the current value in.
+        var: IdentNode,
         // Use i32 here because Minecraft scoreboards have the same min/max integer limits
         min: i32,
         max: i32,
+    },
+
+    Iter {
+        span: SourceSpan,
+
+        /// The variable to store the element.
+        var: IdentNode,
+
+        /// The variable to loop through.
+        array: IdentNode,
     },
 
     While {

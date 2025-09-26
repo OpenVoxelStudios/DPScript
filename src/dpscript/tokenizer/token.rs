@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, PartialEq, PartialOrd)]
 pub enum Token {
     // =============== LITERALS ===============
-    /// n
+    /// n (int)
     Int(i64),
 
     /// n.n (float)
@@ -89,6 +89,9 @@ pub enum Token {
 
     /// "~"
     Tilde,
+
+    /// "^"
+    BitNot,
 
     // =============== GROUPS ===============
     /// "..."
@@ -193,6 +196,15 @@ pub enum Token {
 
     /// "goto"
     Goto,
+
+    // =============== SPECIAL ===============
+    /// "<none>"
+    /// This should never be parsed, it should only be used for error messages.
+    None,
+
+    /// "EOF"
+    /// This should never be parsed, it should only be used for error messages.
+    EOF,
 }
 
 impl fmt::Debug for Token {
@@ -258,6 +270,9 @@ impl fmt::Debug for Token {
             Self::Tilde => write!(f, "~"),
             Self::Ref => write!(f, "ref"),
             Self::DoubleColon => write!(f, "::"),
+            Self::None => write!(f, "<none>"),
+            Self::BitNot => write!(f, "^"),
+            Self::EOF => write!(f, "EOF"),
         }
     }
 }
@@ -324,7 +339,10 @@ impl fmt::Display for Token {
             Self::Pos => write!(f, "pos"),
             Self::Tilde => write!(f, "~"),
             Self::Ref => write!(f, "ref"),
+            Self::BitNot => write!(f, "^"),
             Self::DoubleColon => write!(f, "::"),
+            Self::None => write!(f, "<none>"),
+            Self::EOF => write!(f, "EOF"),
         }
     }
 }

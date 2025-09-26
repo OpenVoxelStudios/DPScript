@@ -4,35 +4,42 @@ import std::{
 };
 
 pub objective config: dummy = "dpscript_config";
-pub const enable_message = selector: "enable_std_hello";
+
+// TODO: Selectors
+// pub const enable_message = selector: "enable_std_hello";
 
 init {
-    const welcome = [c: "Thank you for using DPScript!" & nbt: { bold: true }];
-    const hint_base = c: "Hint: " & nbt: { bold: true, color: "gold" };
-    const disable = c: "You can disable this message by running:\n" & nbt: { color: "dark_aqua" };
-    const cmd = c: "/scoreboard players set enable_std_hello dpscript_config 0\n" & nbt: { bold: true, color: "gray" };
+    // TODO: NBT
+    // const welcome = [c: "Thank you for using DPScript!" & nbt: { bold: true }];
+    // const hint_base = c: "Hint: " & nbt: { bold: true, color: "gold" };
+    // const disable = c: "You can disable this message by running:\n" & nbt: { color: "dark_aqua" };
+    // const cmd = c: "/scoreboard players set enable_std_hello dpscript_config 0\n" & nbt: { bold: true, color: "gray" };
     
-    const click = c: "[Click to copy!]" & nbt: {
-        bold: true,
-        color: "dark_aqua",
-        clickEvent: {
-            action: "copy_to_clipboard",
-            value: "/scoreboard players set enable_std_hello dpscript_config 0"
-        },
-        hoverEvent: {
-            action: "show_text",
-            contents: ["Copy: /scoreboard players set enable_std_hello dpscript_config 0"],
-        },
-    };
+    // TODO: NBT
+    // const click = c: "[Click to copy!]" & nbt: {
+    //     bold: true,
+    //     color: "dark_aqua",
+    //     clickEvent: {
+    //         action: "copy_to_clipboard",
+    //         value: "/scoreboard players set enable_std_hello dpscript_config 0"
+    //     },
+    //     hoverEvent: {
+    //         action: "show_text",
+    //         contents: ["Copy: /scoreboard players set enable_std_hello dpscript_config 0"],
+    //     },
+    // };
     
     const hint = [hint_base, disable, cmd, click];
 
-    if !config[enable_message] { // matches -2147483648..2147483647
-        config[enable_message] = 1;
-    }
+    // TODO: array indexing
+    // if !config[enable_message] { // matches -2147483648..2147483647
+        // TODO: array indexing
+        // config[enable_message] = 1;
+    // }
     
-    if config[enable_message] != 0 {
+    // TODO: array indexing, binary operations
+    // if config[enable_message] != 0 {
         tellraw(all_players, welcome);
         tellraw(all_players, hint);
-    }
+    // }
 }

@@ -1,6 +1,7 @@
 // import std::data::{set_data, get_data, clone};
 
-export std::gm::sqrt::*;
+// Are exports necessary?
+// export std::gm::sqrt::*;
 
 // pub fn sin(num: float) -> float {
 //     const stor = store: "dpscript:temp/ops/sin";

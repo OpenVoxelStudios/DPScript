@@ -7,8 +7,6 @@ pub enum LexerErr {
     #[error("Expected '{tkn:?}'")]
     #[diagnostic(code(lexer::expected))]
     Expected {
-        #[source_code]
-        src: NamedSource<String>,
         #[label("here")]
         span: SourceSpan,
         tkn: Token,
@@ -17,8 +15,6 @@ pub enum LexerErr {
     #[error("Unexpected token: '{tkn:?}'")]
     #[diagnostic(code(lexer::unexpected))]
     Unexpected {
-        #[source_code]
-        src: NamedSource<String>,
         #[label("here")]
         span: SourceSpan,
         tkn: Token,
@@ -27,12 +23,32 @@ pub enum LexerErr {
     #[error("Expected '{expect:?}', got: '{got:?}'")]
     #[diagnostic(code(lexer::expected_but_got))]
     ExpectedButGot {
-        #[source_code]
-        src: NamedSource<String>,
         #[label("here")]
         span: SourceSpan,
         expect: Token,
         got: Token,
+    },
+
+    #[error("Expected a non-negative integer!")]
+    #[diagnostic(code(lexer::int_was_negative))]
+    IntWasNegative {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("Integer was out of bounds (exceeded max value or was below minimum value)!")]
+    #[diagnostic(code(lexer::int_max_value))]
+    IntMaxVal {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("Undefined type: '{ty}'")]
+    #[diagnostic(code(lexer::int_was_negative))]
+    UnknownType {
+        #[label("here")]
+        span: SourceSpan,
+        ty: String,
     },
 
     // Exists so we can differentiate between this and the regular one.
@@ -40,8 +56,6 @@ pub enum LexerErr {
     #[error("Expected '{expect:?}', got: '{got:?}'")]
     #[diagnostic(code(lexer::expected_but_got_s))]
     StartParse {
-        #[source_code]
-        src: NamedSource<String>,
         #[label("here")]
         span: SourceSpan,
         expect: Token,
@@ -51,8 +65,6 @@ pub enum LexerErr {
     #[error("Unexpected end-of-file")]
     #[diagnostic(code(lexer::eof))]
     EOF {
-        #[source_code]
-        src: NamedSource<String>,
         #[label("here")]
         span: SourceSpan,
     },
@@ -60,19 +72,43 @@ pub enum LexerErr {
     #[error("Attempted to pop an empty stack!")]
     #[diagnostic(code(lexer::stack_pop))]
     StackPop {
-        #[source_code]
-        src: NamedSource<String>,
         #[label("here")]
         span: SourceSpan,
     },
 
-    #[error("Expected any of {expected}")]
+    #[error("Expected any of {expected}, got {got:?}")]
     #[diagnostic(code(lexer::expected_any_of))]
     ExpectedAny {
-        #[source_code]
-        src: NamedSource<String>,
         #[label("here")]
         span: SourceSpan,
         expected: String,
+        got: Token,
     },
+
+    #[error("Expected any of {expected:?}, got {got:?}")]
+    #[diagnostic(code(lexer::expected_any_token))]
+    ExpectedAnyToken {
+        #[label("here")]
+        span: SourceSpan,
+        expected: Vec<Token>,
+        got: Token,
+    },
+
+    #[error("Expression should have only one value!")]
+    #[diagnostic(code(lexer::multiple_values))]
+    MultipleValues {
+        #[label("here")]
+        span: SourceSpan,
+    },
+}
+
+#[derive(Debug, Error, Diagnostic)]
+#[error("Parsing error!")]
+#[diagnostic(code(dpscript::lexer))]
+pub struct LexerFullErr {
+    #[source_code]
+    pub source_code: NamedSource<String>,
+
+    #[related]
+    pub err: Vec<LexerErr>,
 }

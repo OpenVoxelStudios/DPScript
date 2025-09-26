@@ -1,36 +1,47 @@
 import std::gm::{gm_std, math_entity};
 
 pub fn add(x: float, y: float) -> float {
-    at pos: [~, x, ~] {
-        math_entity.tp(pos: [29999999, ~y, 91665]);
-    }
+    // TODO: this needs a better syntax
+    // at pos: [~, x, ~] {
+    //     math_entity.tp(pos: [29999999, ~y, 91665]);
+    // }
 
-    let result = math_entity.Pos[1];
+    // TODO: fields
+    // let result = math_entity.Pos[1];
 
-    math_entity.tp(pos: [29999999, 0, 91665]);
+    // TODO: calls with receivers
+    // math_entity.tp(pos: [29999999, 0, 91665]);
 
     return result;
 }
 
 pub fn subtract(x: float, y: float) -> float {
     let var2 = y;
-    let tv2p = y.slice(0, 1);
+    // TODO: calls with receivers
+    // let tv2p = y.slice(0, 1);
     let v2p = "-";
     let v2s = "";
 
-    if (tv2p == "-") {
+    // TODO: Binary operations
+    // if tv2p == "-" {
         // var2 is float but has to be a string for slicing and converted back to float.....
-        v2s = var2.slice(1);
-        v2p = "";
-    }
+        // TODO: calls with receivers
+        // v2s = var2.slice(1);
 
-    at pos: [~, x, ~] {
-        math_entity.tp(pos: [29999999, v2p + v2s, 91665]); // "v2p + var2" is string concatenation
-    }
+        // TODO: Assignment
+        // v2p = "";
+    // }
 
-    let result = math_entity.Pos[1];
+    // TODO: this needs a better syntax
+    // at pos: [~, x, ~] {
+    //     math_entity.tp(pos: [29999999, v2p + v2s, 91665]); // "v2p + var2" is string concatenation
+    // }
 
-    math_entity.tp(pos: [29999999, 0, 91665]);
+    // TODO: fields
+    // let result = math_entity.Pos[1];
+
+    // TODO: calls with receivers
+    // math_entity.tp(pos: [29999999, 0, 91665]);
 
     return result;
 }
@@ -40,22 +51,28 @@ pub fn multiply(x: float, y: float) -> float {
     let var1 = [0f,0f,0f,x,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,1f];
 
     // same lol
-    math_entity.transformation = [0f,0f,0f,1f,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,y];
+    // TODO: fields
+    // math_entity.transformation = [0f,0f,0f,1f,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,y];
 
-    var1[-1] = math_entity.transformation.translation[0];
+    // TODO: fields
+    // var1[-1] = math_entity.transformation.translation[0];
 
-    math_entity.transformation = var1;
+    // TODO: fields
+    // math_entity.transformation = var1;
 
-    let result = math_entity.transformation.translation[0];
+    // TODO: fields
+    // let result = math_entity.transformation.translation[0];
 
     return result;
 }
 
 pub fn divide(x: float, y: float) -> float {
     // don't you love when 0f
-    math_entity.transformation = [0f,0f,0f,x,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,y];
+    // TODO: fields
+    // math_entity.transformation = [0f,0f,0f,x,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,y];
     
-    let result = transformation.translation[0];
+    // TODO: fields
+    // let result = transformation.translation[0];
 
     return result;
 }

@@ -1,60 +1,62 @@
 use crate::{
     dpscript::{
-        ast::{ident::IdentNode, import::ImportNode, node::Node},
-        lexer::{Lexer, Result, err::LexerErr},
+        ast::{import::ImportNode, node::Node},
+        lexer::{util::LexerMethods, parser::TopLevelLexer, Result},
         tokenizer::Token,
     },
     util::AddSpan,
 };
 
-impl Lexer {
+impl TopLevelLexer {
     pub fn read_import(&mut self) -> Result<Node> {
         debug!("Attempting to read import...");
 
         self.push();
 
         let span = self.start_parse(Token::Import)?;
-        let (tokens, last) = self.eat_until(Token::Semi);
-        let mut path = Vec::new();
-        let mut idx = 0;
+        let (_tokens, last) = self.eat_until(Token::Semi);
 
-        loop {
-            if idx >= tokens.len() {
-                break;
-            }
+        // TODO: Validate the tokens!
+        // let mut path = Vec::new();
+        // let mut idx = 0;
 
-            let cur = tokens.get(idx).unwrap();
+        // loop {
+        //     if idx >= tokens.len() {
+        //         break;
+        //     }
 
-            if idx != tokens.len() - 1 {
-                let div = tokens.get(idx + 1).unwrap();
+        //     let cur = tokens.get(idx).unwrap();
 
-                if div.0 != Token::DoubleColon {
-                    return Err(LexerErr::ExpectedButGot {
-                        src: self.src(),
-                        span: div.1.clone(),
-                        expect: Token::DoubleColon,
-                        got: div.0.clone(),
-                    });
-                }
-            }
+        //     if idx != tokens.len() - 1 {
+        //         let div = tokens.get(idx + 1).unwrap();
 
-            match cur.0.clone() {
-                Token::Ident(id) => path.push(IdentNode {
-                    span: cur.1,
-                    ident: id,
-                }),
+        //         if div.0 != Token::DoubleColon {
+        //             return Err(LexerErr::ExpectedButGot {
+        //                 src: self.src(),
+        //                 span: div.1.clone(),
+        //                 expect: Token::DoubleColon,
+        //                 got: div.0.clone(),
+        //             });
+        //         }
+        //     }
 
-                other => {
-                    return Err(LexerErr::Unexpected {
-                        src: self.src(),
-                        span: cur.1,
-                        tkn: other,
-                    });
-                }
-            };
+        //     match cur.0.clone() {
+        //         Token::Ident(id) => path.push(IdentNode {
+        //             span: cur.1,
+        //             ident: id,
+        //         }),
 
-            idx += 1;
-        }
+        //         other => {
+        //             return Err(LexerErr::Unexpected {
+        //                 src: self.src(),
+        //                 span: cur.1,
+        //                 tkn: other,
+        //             });
+        //         }
+        //     };
+
+        //     idx += 1;
+        // }
 
         self.pop_in_place()?;
 
@@ -62,7 +64,7 @@ impl Lexer {
 
         Ok(Node::Import(ImportNode {
             span: span.add(last),
-            imports: vec![path],
+            imports: vec![],
         }))
     }
 }
