@@ -17,7 +17,7 @@ impl Tokenizer {
             return Ok(());
         }
 
-        if ch == '/' && self.cursor.peek().is_some_and(|v| v == '/') {
+        if ch == '/' && self.cursor.peek_ahead(1).is_some_and(|v| v == '/') {
             while let Some(ch) = self.cursor.next() {
                 if ch == '\n' {
                     break;
@@ -28,7 +28,6 @@ impl Tokenizer {
         }
 
         let basic = match ch {
-            ':' => self.skip_1(Token::Colon),
             ',' => self.skip_1(Token::Comma),
             '[' => self.skip_1(Token::LeftBracket),
             ']' => self.skip_1(Token::RightBracket),
@@ -43,11 +42,21 @@ impl Tokenizer {
             '-' => self.skip_1(Token::Minus),
             '+' => self.skip_1(Token::Plus),
             '*' => self.skip_1(Token::Star),
-            '/' => self.skip_1(Token::Slash),
             '&' => self.skip_1(Token::And),
             '#' => self.skip_1(Token::Hash),
             '!' => self.skip_1(Token::Exclamation),
             '~' => self.skip_1(Token::Tilde),
+            '/' => self.skip_1(Token::Slash),
+
+            ':' => {
+                if self.cursor.peek_ahead(1).is_some_and(|v| v == ':') {
+                    let span = self.cursor.span(2);
+                    self.cursor.skip(2);
+                    Some((Token::DoubleColon, span))
+                } else {
+                    self.skip_1(Token::Colon)
+                }
+            }
 
             '.' => {
                 if self.cursor.peek_ahead(1).is_some_and(|v| v == '.')

@@ -1,11 +1,13 @@
-import std::{
-    base::tellraw,
-    math::sqrt,
-    selectors::all_players,
-};
+// commented out because i'm gonna leave the import parsing sorta unimplemented for now
+// (definitely not procrastination no way nuh uh)
+//import std::{
+//    base::tellraw,
+//    math::sqrt,
+//    selectors::all_players,
+//};
 
 // This is a basic function:
-fn say_hi() {
+pub fn say_hi() {
     // `const` means this is just something that gets substituted for the real value during compilation.
     // The `&` just adds those properties to the component.
     // The `component: ""` syntax can be shortened to `c: ""`.

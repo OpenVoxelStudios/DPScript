@@ -16,6 +16,7 @@ bitflags! {
         const Inline = 1;
         const Facade = 2;
         const Compiler = 3;
+        const Public = 4;
     }
 }
 

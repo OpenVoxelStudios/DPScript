@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::dpscript::{
     ast::{ast::Scope, node::Node},
     data::NodeInfo,
@@ -25,13 +27,17 @@ impl NodeInfo for BlockNode {
         false
     }
 
-    fn returns(&self, scope: &Scope) -> Option<TypeRef> {
-        if let Some(last) = self.body.last() {
-            if last.is_end {
-                return last.returns(scope);
-            }
-        }
-
+    fn returns(&self, _scope: &Scope) -> Option<TypeRef> {
         None
+    }
+}
+
+impl Display for BlockKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            BlockKind::None => write!(f, "none"),
+            BlockKind::Init => write!(f, "init"),
+            BlockKind::Tick => write!(f, "tick"),
+        }
     }
 }

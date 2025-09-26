@@ -1,40 +1,42 @@
-use miette::SourceSpan;
-
 use crate::dpscript::{
     ast::{
-        ast::Scope, binop::BinaryOpNode, block::BlockNode, call::CallNode, cond::ConditionalNode, constant::ConstantNode, enums::EnumNode, func::FunctionNode, ident::{FieldNode, IdentNode}, literal::LiteralNode, loops::LoopNode, objective::ObjectiveNode, unop::UnaryOpNode, var::VarNode
+        ast::Scope,
+        binop::BinaryOpNode,
+        block::BlockNode,
+        call::CallNode,
+        cond::ConditionalNode,
+        constant::ConstantNode,
+        enums::EnumNode,
+        func::FunctionNode,
+        ident::{FieldNode, IdentNode},
+        import::ImportNode,
+        literal::LiteralNode,
+        loops::LoopNode,
+        objective::ObjectiveNode,
+        unop::UnaryOpNode,
+        var::VarNode,
     },
     data::NodeInfo,
     ty::TypeRef,
 };
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
-pub struct Node {
-    pub span: SourceSpan,
-    pub data: NodeData,
-
-    /// Whether the node is an "ending" node, which means it didn't have a semicolon.
-    /// If the node returns a value, then it will be returned from whatever block it is in (if any).
-    pub is_end: bool,
-}
-
 macro_rules! node_data {
     { $($variant: ident: $data: ty,)* } => {
         #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpanGroup)]
-        pub enum NodeData {
+        pub enum Node {
             $($variant($data),)*
         }
 
         impl NodeInfo for Node {
             fn is_const(&self, scope: &Scope) -> bool {
-                match &self.data {
-                    $(NodeData::$variant(me) => me.is_const(scope),)*
+                match self {
+                    $(Node::$variant(me) => me.is_const(scope),)*
                 }
             }
 
             fn returns(&self, scope: &Scope) -> Option<TypeRef> {
-                match &self.data {
-                    $(NodeData::$variant(me) => me.returns(scope),)*
+                match self {
+                    $(Node::$variant(me) => me.returns(scope),)*
                 }
             }
         }
@@ -56,4 +58,5 @@ node_data! {
     Loop: LoopNode,
     Objective: ObjectiveNode,
     Field: FieldNode,
+    Import: ImportNode,
 }

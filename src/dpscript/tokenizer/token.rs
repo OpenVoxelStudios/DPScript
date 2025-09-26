@@ -33,6 +33,9 @@ pub enum Token {
     /// ":"
     Colon,
 
+    /// "::"
+    DoubleColon,
+
     /// ","
     Comma,
 
@@ -195,12 +198,12 @@ pub enum Token {
 impl fmt::Debug for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.clone() {
-            Self::Int(i) => write!(f, "{}", i),
-            Self::Float(v) => write!(f, "{}f", v),
-            Self::Double(v) => write!(f, "{}d", v),
-            Self::String(s) => write!(f, "\"{}\"", s),
-            Self::Bool(b) => write!(f, "{}", b),
-            Self::Ident(i) => write!(f, "{}", i),
+            Self::Int(_) => write!(f, "int"),
+            Self::Float(_) => write!(f, "float"),
+            Self::Double(_) => write!(f, "double"),
+            Self::String(_) => write!(f, "string"),
+            Self::Bool(_) => write!(f, "bool"),
+            Self::Ident(_) => write!(f, "ident"),
             Self::Exclamation => write!(f, "!"),
             Self::And => write!(f, "&"),
             Self::Colon => write!(f, ":"),
@@ -254,6 +257,7 @@ impl fmt::Debug for Token {
             Self::Pos => write!(f, "pos"),
             Self::Tilde => write!(f, "~"),
             Self::Ref => write!(f, "ref"),
+            Self::DoubleColon => write!(f, "::"),
         }
     }
 }
@@ -320,6 +324,7 @@ impl fmt::Display for Token {
             Self::Pos => write!(f, "pos"),
             Self::Tilde => write!(f, "~"),
             Self::Ref => write!(f, "ref"),
+            Self::DoubleColon => write!(f, "::"),
         }
     }
 }
