@@ -1,7 +1,13 @@
+use std::fmt;
+
 use dpscript_macros::HasSpan;
 use miette::SourceSpan;
 
-use crate::dpscript::{ast::node::Node, data::NodeInfo, ty::TypeRef};
+use crate::dpscript::{
+    ast::{node::Node, util::{Body, Indent}},
+    data::NodeInfo,
+    ty::TypeRef,
+};
 
 use super::ast::Scope;
 
@@ -64,5 +70,51 @@ impl NodeInfo for ElseIfNode {
     // TODO
     fn returns(&self, _scope: &Scope) -> Option<TypeRef> {
         None
+    }
+}
+
+impl fmt::Display for ConditionalNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "@if [{}]: {{\n{}\n}};\n",
+            self.condition,
+            self.body
+                .iter()
+                .map(|it| format!("{it}"))
+                .collect::<Vec<_>>()
+                .join("\n")
+                .indent(4)
+                .body()
+        )?;
+
+        for node in &self.else_ifs {
+            write!(
+                f,
+                "@elif [{}]: {{\n{}\n}};\n",
+                node.condition,
+                node.body
+                    .iter()
+                    .map(|it| format!("{it}"))
+                    .collect::<Vec<_>>()
+                    .join("\n")
+                    .indent(4)
+                    .body()
+            )?;
+        }
+
+        write!(
+            f,
+            "@else: {{\n{}\n}};\n",
+            self.else_body
+                .iter()
+                .map(|it| format!("{it}"))
+                .collect::<Vec<_>>()
+                .join("\n")
+                .indent(4)
+                .body()
+        )?;
+
+        Ok(())
     }
 }

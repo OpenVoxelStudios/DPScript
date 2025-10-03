@@ -1,13 +1,18 @@
-use crate::dpscript::{
-    ast::{
-        literal::{LiteralData, LiteralNode},
-        node::Node,
+use crate::{
+    common::traits::HasSpan,
+    dpscript::{
+        ast::{
+            literal::{LiteralData, LiteralNode},
+            node::Node,
+            special::{SpecialData, SpecialNode},
+        },
+        lexer::{Result, err::LexerErr, parser::Lexer, util::LexerMethods},
+        tokenizer::Token,
     },
-    lexer::{Result, err::LexerErr, parser::ValueLexer, util::LexerMethods},
-    tokenizer::Token,
+    util::AddSpan,
 };
 
-impl ValueLexer {
+impl Lexer {
     pub fn read_literal(&mut self) -> Result<Node> {
         self.push();
 
@@ -76,6 +81,68 @@ impl ValueLexer {
             }
 
             None => Err(self.eof()),
+        }
+    }
+
+    pub fn read_special(&mut self) -> Result<Node> {
+        self.push();
+
+        debug!("Attempting to read special...");
+
+        let Some(cur) = self.eat() else {
+            return Err(self.eof());
+        };
+
+        self.start_parse(Token::Colon)?;
+
+        match cur {
+            (Token::Selector, span) => {
+                let id = self.eat_str()?;
+
+                self.pop_in_place()?;
+
+                debug!("Successfully read special!");
+
+                Ok(Node::Special(SpecialNode {
+                    data: SpecialData::Selector(id.0),
+                    span: span.add(id.1),
+                }))
+            }
+
+            (Token::Pos, span) => {
+                self.expect(Token::LeftBracket)?;
+
+                let x = self.read_value()?;
+
+                self.expect(Token::Comma)?;
+
+                let y = self.read_value()?;
+
+                self.expect(Token::Comma)?;
+
+                let z = self.read_value()?;
+
+                self.expect(Token::RightBracket)?;
+
+                self.pop_in_place()?;
+
+                debug!("Successfully read special!");
+
+                Ok(Node::Special(SpecialNode {
+                    span: span.add(z.span()),
+                    data: SpecialData::Pos(Box::new(x), Box::new(y), Box::new(z)),
+                }))
+            }
+
+            (other, span) => {
+                self.pop()?;
+
+                Err(LexerErr::ExpectedAnyToken {
+                    span,
+                    expected: vec![Token::Selector, Token::Pos],
+                    got: other,
+                })
+            }
         }
     }
 }

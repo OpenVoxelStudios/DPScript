@@ -1,3 +1,5 @@
+use std::fmt;
+
 use dpscript_macros::HasSpan;
 use miette::SourceSpan;
 
@@ -41,5 +43,32 @@ impl NodeInfo for LiteralNode {
                 TypeRef::Array(data.iter().map(|it| it.returns(scope)).collect())
             }
         })
+    }
+}
+
+impl fmt::Display for LiteralNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.data)
+    }
+}
+
+impl fmt::Display for LiteralData {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::String(v) => write!(f, "\"{v}\""),
+            Self::Int(v) => write!(f, "{v}"),
+            Self::Float(v) => write!(f, "{v}f"),
+            Self::Double(v) => write!(f, "{v}d"),
+            Self::Bool(v) => write!(f, "{v}"),
+
+            Self::Array(v) => write!(
+                f,
+                "[{}]",
+                v.iter()
+                    .map(|it| format!("{it}"))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
+        }
     }
 }

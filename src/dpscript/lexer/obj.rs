@@ -1,13 +1,13 @@
 use crate::{
     dpscript::{
         ast::{node::Node, objective::ObjectiveNode},
-        lexer::{parser::TopLevelLexer, util::LexerMethods, Result},
+        lexer::{Result, parser::Lexer, util::LexerMethods},
         tokenizer::Token,
     },
     util::AddSpan,
 };
 
-impl TopLevelLexer {
+impl Lexer {
     pub fn read_objective(&mut self) -> Result<Node> {
         self.push();
 

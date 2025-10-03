@@ -1,6 +1,9 @@
-use crate::dpscript::{lexer::{util::LexerMethods, parser::TopLevelLexer}, tokenizer::Token};
+use crate::dpscript::{
+    lexer::{parser::Lexer, util::LexerMethods},
+    tokenizer::Token,
+};
 
-impl TopLevelLexer {
+impl Lexer {
     /// Read an attribute.
     /// THIS WILL NOT PUSH/POP THE STACK!
     // TODO: Return type, parsing contents

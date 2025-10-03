@@ -1,6 +1,11 @@
+use std::fmt;
+
 use miette::SourceSpan;
 
-use crate::dpscript::{ast::{ident::IdentNode, node::Node}, data::NodeInfo};
+use crate::dpscript::{
+    ast::{ident::IdentNode, node::Node, util::{Body, Indent}},
+    data::NodeInfo,
+};
 
 use super::ast::Scope;
 
@@ -38,12 +43,50 @@ pub enum LoopCondition {
         /// because the [`LoopCondition::Range`] variant has it.
         span: SourceSpan,
         condition: Box<Node>,
-    }
+    },
 }
 
 impl NodeInfo for LoopNode {
     fn is_const(&self, _scope: &Scope) -> bool {
         // Loops cannot return values and therefore have no reason to be constant.
         false
+    }
+}
+
+impl fmt::Display for LoopNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "@loop [{}]: {{\n{}\n}};",
+            self.condition,
+            self.body
+                .iter()
+                .map(|it| format!("{it}"))
+                .collect::<Vec<_>>()
+                .join("\n")
+                .indent(4)
+                .body()
+        )
+    }
+}
+
+impl fmt::Display for LoopCondition {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Range {
+                span: _,
+                var,
+                min,
+                max,
+            } => write!(f, "{var} in [{min} to {max}]"),
+
+            Self::Iter {
+                span: _,
+                var,
+                array,
+            } => write!(f, "{var} in {array}"),
+
+            Self::While { span: _, condition } => write!(f, "{condition}"),
+        }
     }
 }

@@ -1,17 +1,14 @@
 use crate::{
+    common::traits::HasSpan,
     dpscript::{
         ast::{node::Node, ret::ReturnNode},
-        lexer::{
-            Result,
-            parser::{BodyLexer, ValueLexer},
-            util::{LexerMethods, check_one},
-        },
+        lexer::{Result, parser::Lexer, util::LexerMethods},
         tokenizer::Token,
     },
     util::AddSpan,
 };
 
-impl BodyLexer {
+impl Lexer {
     pub fn read_return(&mut self) -> Result<Node> {
         self.push();
 
@@ -21,12 +18,11 @@ impl BodyLexer {
         let mut value = None;
 
         if !self.if_next_and_eat(Token::Semi) {
-            let (rest, end) = self.eat_until(Token::Semi);
+            let val = self.read_value()?;
 
-            span = span.add(end);
-            value = Some(Box::new(check_one(
-                ValueLexer::new(self.namespace.clone(), rest).parse()?,
-            )?))
+            span = span.add(val.span());
+            value = Some(Box::new(val));
+            self.expect(Token::Semi)?;
         }
 
         debug!("Successfully read return!");

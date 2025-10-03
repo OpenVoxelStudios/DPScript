@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::{quote, quote_spanned};
-use syn::{parse_macro_input, spanned::Spanned, Data, DeriveInput};
+use syn::{Data, DeriveInput, parse_macro_input, spanned::Spanned};
 
 #[proc_macro_derive(HasSpan)]
 pub fn derive_has_span(stream: TokenStream) -> TokenStream {
@@ -48,7 +48,7 @@ pub fn derive_has_span(stream: TokenStream) -> TokenStream {
                     }
                 }
             }
-        },
+        }
 
         Data::Struct(ref data) => {
             let mut found = false;
@@ -82,7 +82,8 @@ pub fn derive_has_span(stream: TokenStream) -> TokenStream {
                 }
             }
         }
-    }.into()
+    }
+    .into()
 }
 
 #[proc_macro_derive(HasSpanGroup)]
@@ -132,5 +133,6 @@ pub fn derive_has_span_group(stream: TokenStream) -> TokenStream {
                 }
             }
         }
-    }.into()
+    }
+    .into()
 }

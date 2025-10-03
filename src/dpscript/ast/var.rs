@@ -1,3 +1,5 @@
+use std::fmt;
+
 use crate::{
     dpscript::{
         ast::{ast::Scope, node::Node},
@@ -38,5 +40,23 @@ impl VarInfo for VarNode {
 impl NodeInfo for VarNode {
     fn is_const(&self, _scope: &Scope) -> bool {
         false
+    }
+}
+
+impl fmt::Display for VarNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let ty = if let Some(ty) = &self.ty {
+            format!(" [type: {ty}]")
+        } else {
+            "".into()
+        };
+
+        let val = if let Some(val) = &self.value {
+            format!(" = {val}")
+        } else {
+            "".into()
+        };
+
+        write!(f, "@var {} @ [{}]{ty}{val};", self.name, self.location)
     }
 }

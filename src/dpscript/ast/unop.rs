@@ -1,5 +1,7 @@
 //! Unary operations
 
+use std::fmt;
+
 use miette::SourceSpan;
 
 use crate::dpscript::{
@@ -11,7 +13,7 @@ use crate::dpscript::{
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct UnaryOpNode {
     pub span: SourceSpan,
-    pub operation: UnaryOperation,
+    pub op: UnaryOperation,
     pub value: Box<Node>,
 }
 
@@ -21,10 +23,13 @@ pub enum UnaryOperation {
     None,
 
     /// !value
-    Negate,
+    Invert,
 
     /// ~value
     BitNot,
+
+    /// -value
+    Negate,
 }
 
 impl NodeInfo for UnaryOpNode {
@@ -34,5 +39,16 @@ impl NodeInfo for UnaryOpNode {
 
     fn returns(&self, scope: &Scope) -> Option<TypeRef> {
         self.value.returns(scope)
+    }
+}
+
+impl fmt::Display for UnaryOpNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.op {
+            UnaryOperation::None => write!(f, "unary<None, {}>", self.value),
+            UnaryOperation::Invert => write!(f, "unary<Invert, {}>", self.value),
+            UnaryOperation::BitNot => write!(f, "unary<BitwiseNot, {}>", self.value),
+            UnaryOperation::Negate => write!(f, "unary<Negate, {}>", self.value),
+        }
     }
 }

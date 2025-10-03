@@ -256,6 +256,34 @@ pub trait LexerMethods {
         }
     }
 
+    fn start_parse_id(&mut self) -> Result<(String, SourceSpan)> {
+        match self.peek(0).cloned() {
+            Some((tok, span)) => {
+                if let Token::Ident(val) = tok {
+                    Ok((val, self.eat().unwrap().1))
+                } else {
+                    self.pop()?;
+
+                    Err(LexerErr::StartParse {
+                        span: span.clone(),
+                        expect: Token::Ident("".into()),
+                        got: tok,
+                    })
+                }
+            }
+
+            None => {
+                self.pop()?;
+
+                Err(LexerErr::StartParse {
+                    span: self.loc(),
+                    expect: Token::Ident("".into()),
+                    got: Token::EOF,
+                })
+            }
+        }
+    }
+
     fn start_parse_any(&mut self, tokens: Vec<Token>) -> Result<(Token, SourceSpan)> {
         match self.peek(0).cloned() {
             Some((tok, span)) => {

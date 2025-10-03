@@ -2,14 +2,13 @@ import std::base::{forceload_add, summon_with};
 
 pub objective gm_std: dummy = "gm.std";
 
-// TODO: Selectors
-// pub const math_entity = selector: "91bb5-0-0-0-ffff";
+pub const math_entity = selector: "91bb5-0-0-0-ffff";
 
 init {
     forceload_add(29999999, 91665);
 
     if !math_entity {
-        // TODO: Positions
+        // TODO: NBT literals
         // summon_with("item_display", pos: [29999999, 0, 91665], nbt: {
         //     UUID: [I; 596917, 0, 0, 65535],
         //     CustomName: "gm.math_entity",

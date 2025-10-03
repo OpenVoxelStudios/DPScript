@@ -1,6 +1,8 @@
-use miette::SourceSpan;
-use crate::dpscript::data::NodeInfo;
+use std::fmt;
+
 use super::ast::Scope;
+use crate::dpscript::data::NodeInfo;
+use miette::SourceSpan;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct EnumNode {
@@ -21,5 +23,16 @@ impl NodeInfo for EnumNode {
         // even if it gets removed during compilation and replaced with regular numbers.
 
         false
+    }
+}
+
+impl fmt::Display for EnumNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "@enum[{}]: [\n{}\n];",
+            self.name,
+            self.values.join(",\n")
+        )
     }
 }

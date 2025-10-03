@@ -1,3 +1,5 @@
+use std::fmt;
+
 use dpscript_macros::HasSpan;
 use miette::SourceSpan;
 
@@ -13,6 +15,8 @@ pub struct CallNode {
 
     /// A reference to a node that is the receiver,
     /// like when calling an object instance function.
+    ///
+    /// This will likely be stored in a [`super::binop::BinaryOpNode`], so this will have to be populated later.
     pub receiver: Option<Box<Node>>,
 
     /// The name of the function to call.
@@ -52,5 +56,27 @@ impl NodeInfo for CallNode {
                 .map(|it| it.return_type.clone())
                 .flatten(),
         }
+    }
+}
+
+impl fmt::Display for CallNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let recv = if let Some(it) = &self.receiver {
+            format!("[recv: {it}] ")
+        } else {
+            "".into()
+        };
+
+        write!(
+            f,
+            "call {}{}: [{}]",
+            recv,
+            self.func,
+            self.args
+                .iter()
+                .map(|it| format!("{it}"))
+                .collect::<Vec<_>>()
+                .join(", ")
+        )
     }
 }

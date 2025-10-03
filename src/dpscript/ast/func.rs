@@ -1,6 +1,8 @@
+use std::fmt;
+
 use crate::{
     dpscript::{
-        ast::{ast::Scope, node::Node},
+        ast::{ast::Scope, node::Node, util::{Body, Indent}},
         data::NodeInfo,
         ty::TypeRef,
     },
@@ -17,6 +19,28 @@ bitflags! {
         const Facade = 2;
         const Compiler = 3;
         const Public = 4;
+    }
+}
+
+impl fmt::Display for FuncFlags {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.contains(FuncFlags::Inline) {
+            write!(f, "    $flag: Inline;\n")?;
+        }
+
+        if self.contains(FuncFlags::Facade) {
+            write!(f, "    $flag: Facade;\n")?;
+        }
+
+        if self.contains(FuncFlags::Compiler) {
+            write!(f, "    $flag: Compiler;\n")?;
+        }
+
+        if self.contains(FuncFlags::Public) {
+            write!(f, "    $flag: Public;\n")?;
+        }
+
+        Ok(())
     }
 }
 
@@ -44,5 +68,58 @@ impl NodeInfo for FunctionNode {
     // It's a function declaration and therefore has no value!
     fn is_const(&self, _scope: &Scope) -> bool {
         false
+    }
+}
+
+impl fmt::Display for FunctionNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "@fn[{}] @ [{}] -> {}:\n",
+            self.name,
+            self.ident,
+            match &self.return_type {
+                Some(it) => format!("{it}"),
+                None => "void".into(),
+            }
+        )?;
+
+        self.flags.fmt(f)?;
+
+        for arg in &self.args {
+            arg.fmt(f)?;
+        }
+
+        write!(
+            f,
+            "    $body: {{\n{}\n    }};",
+            self.body
+                .iter()
+                .map(|it| format!("{it}"))
+                .collect::<Vec<_>>()
+                .join("\n")
+                .indent(8)
+                .body()
+        )?;
+
+        Ok(())
+    }
+}
+
+impl fmt::Display for FunctionArg {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.is_this {
+            write!(
+                f,
+                "$arg: (this) [{}] @ [{}]: [{}];",
+                self.name, self.location, self.ty
+            )
+        } else {
+            write!(
+                f,
+                "$arg: [{}] @ [{}]: [{}];",
+                self.name, self.location, self.ty
+            )
+        }
     }
 }

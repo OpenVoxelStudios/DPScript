@@ -4,13 +4,13 @@ use crate::{
             func::{FuncFlags, FunctionNode},
             node::Node,
         },
-        lexer::{parser::{BodyLexer, TopLevelLexer}, ty::TypeLexer, util::LexerMethods, Result},
+        lexer::{Result, parser::Lexer, ty::TypeLexer, util::LexerMethods},
         tokenizer::Token,
     },
     util::Identifier,
 };
 
-impl TopLevelLexer {
+impl Lexer {
     pub fn read_func(&mut self) -> Result<Node> {
         debug!("Attempting to read function...");
 
@@ -50,9 +50,9 @@ impl TopLevelLexer {
             self.expect(Token::LeftBrace)?;
 
             let (tokens, _) = self.eat_block(Token::LeftBrace, Token::RightBrace);
-            let parser = BodyLexer::new(self.namespace.clone(), tokens);
+            let parser = Lexer::new(self.namespace.clone(), tokens);
 
-            body = parser.parse()?;
+            body = parser.parse_body()?;
         }
 
         let mut flags = FuncFlags::empty();

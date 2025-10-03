@@ -2,7 +2,7 @@ use crate::{
     chain_parsers,
     dpscript::{
         ast::node::Node,
-        lexer::{call::CallLexer, constant::ConstLexer, err::LexerErr, id::IdentLexer, util::LexerMethods, Result},
+        lexer::{Result, err::LexerErr, id::IdentLexer, util::LexerMethods},
         tokenizer::Token,
     },
     impl_lexer,
@@ -12,70 +12,90 @@ use miette::{SourceOffset, SourceSpan};
 
 macro_rules! lexer {
     (($value: expr): $name: ident => [$($func: ident),*]) => {
-        pub struct $name {
-            pub tokens: Vec<Spanned<Token>>,
-            pub pos: usize,
-            pub namespace: String,
-            pub last_pos: SourceSpan,
-            pub stack: Vec<usize>,
-        }
-
-        impl_lexer!($name);
-
-        impl $name {
-            pub fn new(namespace: String, tokens: Vec<Spanned<Token>>) -> Self {
-                let last = tokens
-                    .first()
-                    .map(|it| it.1.clone())
-                    .unwrap_or(SourceSpan::new(SourceOffset::from_location("", 0, 0), 0));
-
-                Self {
-                    namespace,
-                    tokens,
-                    pos: 0,
-                    last_pos: last,
-                    stack: Vec::new(),
+        concat_idents::concat_idents!(name = read_, $name {
+            impl Lexer {
+                pub fn name(&mut self) -> Result<Node> {
+                    chain_parsers!(($value): self; [
+                        $($func),*
+                    ]);
                 }
             }
+        });
 
-            pub fn read_node(&mut self) -> Result<Node> {
-                chain_parsers!(($value): self; [
-                    $($func),*
-                ]);
-            }
-
-            pub fn read_node_sep(&mut self, sep: &Token) -> Result<Option<Node>> {
-                chain_parsers!(sep, ($value): self; [
-                    $($func),*
-                ]);
-            }
-
-            pub fn parse(mut self) -> Result<Vec<Node>> {
-                let mut nodes = Vec::new();
-
-                while self.has_next() {
-                    nodes.push(self.read_node()?);
+        concat_idents::concat_idents!(name = read_, $name, _sep {
+            impl Lexer {
+                pub fn name(&mut self, sep: &Token) -> Result<Option<Node>> {
+                    chain_parsers!(sep, ($value): self; [
+                        $($func),*
+                    ]);
                 }
-
-                Ok(nodes)
             }
+        });
 
-            pub fn parse_sep(mut self, sep: Token) -> Result<Vec<Node>> {
-                let mut nodes = Vec::new();
+        concat_idents::concat_idents!(name = parse_, $name {
+            impl Lexer {
+                pub fn name(mut self) -> Result<Vec<Node>> {
+                    let mut nodes = Vec::new();
 
-                while self.has_next() {
-                    if let Some(node) = self.read_node_sep(&sep)? {
-                        nodes.push(node);
+                    while self.has_next() {
+                        concat_idents::concat_idents!(func = read_, $name {
+                            nodes.push(self.func()?);
+                        });
                     }
-                }
 
-                Ok(nodes)
+                    Ok(nodes)
+                }
             }
-        }
+        });
+
+        concat_idents::concat_idents!(name = parse_, $name, _sep {
+            impl Lexer {
+                pub fn name(mut self, sep: Token) -> Result<Vec<Node>> {
+                    let mut nodes = Vec::new();
+
+                    while self.has_next() {
+                        concat_idents::concat_idents!(func = read_, $name, _sep {
+                            if let Some(node) = self.func(&sep)? {
+                                nodes.push(node);
+                            }
+                        });
+                    }
+
+                    Ok(nodes)
+                }
+            }
+        });
     };
 }
 
-lexer!((false): TopLevelLexer => [
+pub struct Lexer {
+    pub tokens: Vec<Spanned<Token>>,
+    pub pos: usize,
+    pub namespace: String,
+    pub last_pos: SourceSpan,
+    pub stack: Vec<usize>,
+}
+
+impl_lexer!(Lexer);
+
+impl Lexer {
+    pub fn new(namespace: String, tokens: Vec<Spanned<Token>>) -> Self {
+        let last = tokens
+            .first()
+            .map(|it| it.1.clone())
+            .unwrap_or(SourceSpan::new(SourceOffset::from_location("", 0, 0), 0));
+
+        Self {
+            namespace,
+            tokens,
+            pos: 0,
+            last_pos: last,
+            stack: Vec::new(),
+        }
+    }
+}
+
+lexer!((false): top_level => [
     read_import,
     read_func,
     read_init_block,
@@ -84,19 +104,32 @@ lexer!((false): TopLevelLexer => [
     read_const
 ]);
 
-lexer!((false): BodyLexer => [
+lexer!((false): body => [
     read_const,
     read_var,
     read_call,
     read_for_loop,
     read_cond,
-    read_return
+    read_return,
+    read_assign,
+    read_binop_val
 ]);
 
-lexer!((true): ValueLexer => [
+lexer!((true): value => [
+    read_binop,
+    read_value_nb
+]);
+
+lexer!((true): value_nb => [
+    read_binop_val,
+    read_value_nbv
+]);
+
+lexer!((true): value_nbv => [
     read_literal,
     read_array,
     read_call,
     read_unop,
+    read_special,
     read_ident_full
 ]);

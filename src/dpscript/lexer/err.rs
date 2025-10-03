@@ -1,6 +1,6 @@
+use crate::dpscript::tokenizer::Token;
 use miette::{Diagnostic, NamedSource, SourceSpan};
 use thiserror::Error;
-use crate::dpscript::tokenizer::Token;
 
 #[derive(Debug, Error, Diagnostic)]
 pub enum LexerErr {

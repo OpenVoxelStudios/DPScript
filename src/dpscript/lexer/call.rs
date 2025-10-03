@@ -1,19 +1,14 @@
 use crate::{
     dpscript::{
         ast::{call::CallNode, node::Node},
-        lexer::{
-            Result,
-            err::LexerErr,
-            parser::{BodyLexer, ValueLexer},
-            util::LexerMethods,
-        },
+        lexer::{Result, err::LexerErr, parser::Lexer, util::LexerMethods},
         tokenizer::Token,
     },
     util::AddSpan,
 };
 
-pub trait CallLexer: LexerMethods {
-    fn read_call(&mut self) -> Result<Node> {
+impl Lexer {
+    pub fn read_call(&mut self) -> Result<Node> {
         self.push();
 
         debug!("Attempting to parse call...");
@@ -36,10 +31,22 @@ pub trait CallLexer: LexerMethods {
 
         self.start_parse(Token::LeftParen)?;
 
-        let (args, args_span) = self.eat_block(Token::LeftParen, Token::RightParen);
-        let args = ValueLexer::new(self.ns(), args).parse_sep(Token::Comma)?;
+        let mut args = Vec::new();
+        let mut first = true;
 
-        span = span.add(args_span);
+        while self.peek(0).is_some_and(|it| it.0 != Token::RightParen) {
+            if first {
+                first = false;
+            } else {
+                self.expect(Token::Comma)?;
+            }
+
+            args.push(self.read_value()?);
+        }
+
+        let last = self.expect_span(Token::RightParen)?;
+
+        span = span.add(last);
 
         debug!("Successfully read call!");
 
@@ -53,6 +60,3 @@ pub trait CallLexer: LexerMethods {
         }))
     }
 }
-
-impl CallLexer for BodyLexer {}
-impl CallLexer for ValueLexer {}

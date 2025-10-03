@@ -1,4 +1,6 @@
-use strum::EnumString;
+use std::fmt;
+
+use strum::{Display, EnumString};
 
 use crate::util::Spanned;
 
@@ -22,7 +24,20 @@ pub enum TypeRef {
 }
 
 // For strum variants - primitives should be lowercase, others shuold be PascalCase.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, EnumString)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    Serialize,
+    Deserialize,
+    EnumString,
+    Display,
+)]
 pub enum BuiltInType {
     /// An integer type.
     #[strum(serialize = "int")]
@@ -60,6 +75,36 @@ pub enum BuiltInType {
     /// A type for arbitrary NBT (named binary tag) data.
     #[strum(serialize = "NBT")]
     NBT,
+
+    /// An entity selector.
+    #[strum(serialize = "Selector")]
+    Selector,
+
+    /// A 3D world position.
+    #[strum(serialize = "Pos")]
+    Pos,
+}
+
+impl fmt::Display for TypeRef {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            TypeRef::Local(it) => write!(f, "Local<{it}>"),
+            TypeRef::BuiltIn(it) => write!(f, "BuiltIn<{it}>"),
+            TypeRef::Array(it) => write!(
+                f,
+                "Array<[{}]>",
+                it.iter()
+                    .map(|it| match it {
+                        None => "None".into(),
+                        Some(it) => format!("{it}"),
+                    })
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
+            TypeRef::SizedArray(it, size) => write!(f, "SizedArray<[{it}; {}]>", size.0),
+            TypeRef::TypedNBT(_) => write!(f, "TypedNBT"),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]

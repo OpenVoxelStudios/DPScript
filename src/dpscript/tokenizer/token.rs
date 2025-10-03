@@ -84,14 +84,20 @@ pub enum Token {
     /// "/"
     Slash,
 
+    /// "%"
+    Modulo,
+
+    /// "|"
+    Or,
+
+    /// "^"
+    Xor,
+
     /// "#"
     Hash,
 
     /// "~"
     Tilde,
-
-    /// "^"
-    BitNot,
 
     // =============== GROUPS ===============
     /// "..."
@@ -271,8 +277,10 @@ impl fmt::Debug for Token {
             Self::Ref => write!(f, "ref"),
             Self::DoubleColon => write!(f, "::"),
             Self::None => write!(f, "<none>"),
-            Self::BitNot => write!(f, "^"),
             Self::EOF => write!(f, "EOF"),
+            Self::Modulo => write!(f, "%"),
+            Self::Or => write!(f, "|"),
+            Self::Xor => write!(f, "^"),
         }
     }
 }
@@ -339,10 +347,12 @@ impl fmt::Display for Token {
             Self::Pos => write!(f, "pos"),
             Self::Tilde => write!(f, "~"),
             Self::Ref => write!(f, "ref"),
-            Self::BitNot => write!(f, "^"),
             Self::DoubleColon => write!(f, "::"),
             Self::None => write!(f, "<none>"),
             Self::EOF => write!(f, "EOF"),
+            Self::Modulo => write!(f, "%"),
+            Self::Or => write!(f, "|"),
+            Self::Xor => write!(f, "^"),
         }
     }
 }

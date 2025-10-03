@@ -31,15 +31,12 @@ init {
     
     const hint = [hint_base, disable, cmd, click];
 
-    // TODO: array indexing
-    // if !config[enable_message] { // matches -2147483648..2147483647
-        // TODO: array indexing
-        // config[enable_message] = 1;
-    // }
+    if !config[enable_message] { // matches -2147483648..2147483647
+        config[enable_message] = 1;
+    }
     
-    // TODO: array indexing, binary operations
-    // if config[enable_message] != 0 {
+    if config[enable_message] != 0 {
         tellraw(all_players, welcome);
         tellraw(all_players, hint);
-    // }
+    }
 }

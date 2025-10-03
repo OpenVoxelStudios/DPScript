@@ -1,19 +1,13 @@
 use crate::{
     dpscript::{
         ast::{node::Node, var::VarNode},
-        lexer::{
-            Result,
-            err::LexerErr,
-            parser::{BodyLexer, ValueLexer},
-            ty::TypeLexer,
-            util::LexerMethods,
-        },
+        lexer::{Result, parser::Lexer, ty::TypeLexer, util::LexerMethods},
         tokenizer::Token,
     },
     util::{AddSpan, DataLocation},
 };
 
-impl BodyLexer {
+impl Lexer {
     pub fn read_var(&mut self) -> Result<Node> {
         self.push();
 
@@ -27,15 +21,7 @@ impl BodyLexer {
         let mut value = None;
 
         if has_val {
-            let (tokens, body_span) = self.eat_until(Token::Semi);
-            let mut read = ValueLexer::new(self.namespace.clone(), tokens).parse()?;
-
-            if read.len() > 1 {
-                return Err(LexerErr::MultipleValues { span: body_span });
-            }
-            
-            self.backtrack(1);
-            value = Some(Box::new(read.remove(0)));
+            value = Some(Box::new(self.read_value()?));
         }
 
         let semi = self.expect_span(Token::Semi)?;

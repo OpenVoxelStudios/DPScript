@@ -2,12 +2,10 @@ import std::base::{tp_pos};
 import std::data::{set_string_entity};
 import std::gm::{gm_std, math_entity};
 
-// TODO: Selectors
-// const looper = selector: "__sqrt_loop";
+const looper = selector: "__sqrt_loop";
 
 pub fn sqrt(x: float) -> float {
-    // TODO: Array indexing, assignment
-    // gm_std[looper] = 0;
+    gm_std[looper] = 0;
 
     // TODO: NBT literals
     // let temp = nbt: {
@@ -23,40 +21,38 @@ pub fn sqrt(x: float) -> float {
 fn sqrt_handling(var1: float, var2: float, ref temp: NBT) {
     // TODO: Better syntax
     // at pos: [~, var1, ~] {
-    //     math_entity.tp(pos: [29999999, ~var2, 91665]);
+        math_entity.tp(pos: [29999999, ~var2, 91665]);
     // }
 
-    // TODO: Array indexing, assignment
-    // temp.var3[3] = math_entity.Pos[1];
-    // math_entity.transformation = temp.var3;
-    // temp.var1 = math_entity.transformation.translation[0];
-    // temp.var4[-1] = temp.var1;
-    // math_entity.transformation = temp.var4;
-    // temp.var2 = math_entity.transformation.translation[0];
+    temp.var3[3] = math_entity.Pos[1];
+    math_entity.transformation = temp.var3;
+    temp.var1 = math_entity.transformation.translation[0];
+    temp.var4[-1] = temp.var1;
+    math_entity.transformation = temp.var4;
+    temp.var2 = math_entity.transformation.translation[0];
 
-    // gm_std[looper] += 1;
+    gm_std[looper] += 1;
     positive_subtract(temp);
 
-    // TODO: Binary operations
+    // TODO: Range syntax
     // if gm_std[looper] != 20.. && temp.v1m2p != "-" {
-    //     sqrt_handling(temp.var1, temp.var2, temp);
+        sqrt_handling(temp.var1, temp.var2, temp);
     // }
 
     // TODO: calls with receivers
-    // math_entity.tp(pos: [29999999, 0, 91665]);
+    math_entity.tp(pos: [29999999, 0, 91665]);
 
-    // TODO: fields
-    // return temp.var1;
+    return temp.var1;
 }
 
 fn positive_subtract(ref temp: NBT) {
     // TODO: Better syntax
     // at pos: [~, temp.var1, ~] {
     //     at pos: [~, ~-0.000000001, ~] {
-    //         math_entity.tp(pos: [29999999, ~-var2, 91665]);
+            math_entity.tp(pos: [29999999, ~-var2, 91665]);
     //     }
     // }
 
-    // TODO: array indexing, assignment
+    // TODO: range syntax, should we even have range indexing for strings?
     // temp.v1m2p = math_entity.Pos[1][0..1];
 }

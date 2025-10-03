@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use crate::dpscript::{
-    ast::{ast::Scope, node::Node},
+    ast::{ast::Scope, node::Node, util::{Body, Indent}},
     data::NodeInfo,
     ty::TypeRef,
 };
@@ -39,5 +39,22 @@ impl Display for BlockKind {
             BlockKind::Init => write!(f, "init"),
             BlockKind::Tick => write!(f, "tick"),
         }
+    }
+}
+
+impl Display for BlockNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "@block[{}] {{\n{}\n}}",
+            self.kind,
+            self.body
+                .iter()
+                .map(|it| format!("{it}"))
+                .collect::<Vec<_>>()
+                .join("\n")
+                .indent(4)
+                .body()
+        )
     }
 }

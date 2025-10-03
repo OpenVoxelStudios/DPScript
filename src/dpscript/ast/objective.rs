@@ -1,3 +1,5 @@
+use std::fmt;
+
 use miette::SourceSpan;
 
 use crate::dpscript::data::NodeInfo;
@@ -24,5 +26,23 @@ impl NodeInfo for ObjectiveNode {
     fn is_const(&self, _scope: &Scope) -> bool {
         // This is the declaration of a variable that gets removed during compilation, so therefore it is not constant.
         false
+    }
+}
+
+impl fmt::Display for ObjectiveNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.is_public {
+            write!(
+                f,
+                "@objective [public] {} @ [{}] [kind: {}];",
+                self.name, self.id, self.kind
+            )
+        } else {
+            write!(
+                f,
+                "@objective {} @ [{}] [kind: {}];",
+                self.name, self.id, self.kind
+            )
+        }
     }
 }

@@ -1,19 +1,15 @@
 use crate::{
+    common::traits::HasSpan,
     dpscript::{
         ast::{constant::ConstantNode, node::Node},
-        lexer::{
-            Result,
-            parser::ValueLexer,
-            ty::TypeLexer,
-            util::{LexerMethods, check_one},
-        },
+        lexer::{Result, parser::Lexer, ty::TypeLexer, util::LexerMethods},
         tokenizer::Token,
     },
     util::AddSpan,
 };
 
-pub trait ConstLexer: LexerMethods + TypeLexer {
-    fn read_const(&mut self) -> Result<Node> {
+impl Lexer {
+    pub fn read_const(&mut self) -> Result<Node> {
         self.push();
 
         debug!("Attempting to read constant...");
@@ -30,9 +26,8 @@ pub trait ConstLexer: LexerMethods + TypeLexer {
 
         self.expect(Token::Equal)?;
 
-        let (value, last) = self.eat_until(Token::Semi);
-        let span = span.add(last);
-        let value = Box::new(check_one(ValueLexer::new(self.ns(), value).parse()?)?);
+        let value = Box::new(self.read_value()?);
+        let span = span.add(value.span());
 
         self.pop_in_place()?;
 
@@ -47,5 +42,3 @@ pub trait ConstLexer: LexerMethods + TypeLexer {
         }))
     }
 }
-
-impl<T: LexerMethods + TypeLexer> ConstLexer for T {}

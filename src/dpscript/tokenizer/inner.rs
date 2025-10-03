@@ -47,7 +47,9 @@ impl Tokenizer {
             '!' => self.skip_1(Token::Exclamation),
             '~' => self.skip_1(Token::Tilde),
             '/' => self.skip_1(Token::Slash),
-            '^' => self.skip_1(Token::BitNot),
+            '%' => self.skip_1(Token::Modulo),
+            '|' => self.skip_1(Token::Or),
+            '^' => self.skip_1(Token::Xor),
 
             ':' => {
                 if self.cursor.peek_ahead(1).is_some_and(|v| v == ':') {

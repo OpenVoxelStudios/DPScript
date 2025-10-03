@@ -1,5 +1,7 @@
 use crate::{
-    dpscript::{ast::node::Node, lexer::Lexer, tokenizer::Tokenizer}, pack::{get_source_files, PackToml}, Result
+    Result,
+    dpscript::{ast::node::Node, lexer::FullLexer, tokenizer::Tokenizer},
+    pack::{PackToml, get_source_files},
 };
 use indicatif::{ProgressIterator, ProgressStyle};
 use ron::ser::PrettyConfig;
@@ -154,7 +156,7 @@ impl Compiler {
             )?;
         }
 
-        let ast = Lexer::new(pack.pack.name.clone(), file_name.into(), data, tokens).run()?;
+        let ast = FullLexer::new(pack.pack.name.clone(), file_name.into(), data, tokens).run()?;
 
         if self.dump_ast {
             let ast_dir = dump_dir.join("nodes");
@@ -168,6 +170,17 @@ impl Compiler {
             fs::write(
                 dump_file,
                 ron::ser::to_string_pretty(&ast, PrettyConfig::new())?,
+            )?;
+
+            let dump_file_2 =
+                ast_dir.join(file.with_extension("dps.nodes.dpir").file_name().unwrap());
+
+            fs::write(
+                dump_file_2,
+                ast.iter()
+                    .map(|it| format!("{it}"))
+                    .collect::<Vec<_>>()
+                    .join("\n\n"),
             )?;
         }
 

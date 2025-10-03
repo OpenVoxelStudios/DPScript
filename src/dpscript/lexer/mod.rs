@@ -1,5 +1,6 @@
 pub mod array;
 pub mod attr;
+pub mod binop;
 pub mod block;
 pub mod call;
 pub mod cond;
@@ -23,7 +24,7 @@ use crate::{
         ast::node::Node,
         lexer::{
             err::{LexerErr, LexerFullErr},
-            parser::TopLevelLexer,
+            parser::Lexer,
         },
         tokenizer::Token,
     },
@@ -33,16 +34,16 @@ use miette::NamedSource;
 
 pub type Result<T, E = LexerErr> = core::result::Result<T, E>;
 
-pub struct Lexer {
+pub struct FullLexer {
     pub file_name: String,
     pub source: Vec<char>,
     pub source_str: String,
     pub named_src: NamedSource<String>,
     pub namespace: String,
-    pub inner: TopLevelLexer,
+    pub inner: Lexer,
 }
 
-impl Lexer {
+impl FullLexer {
     pub fn new(
         namespace: String,
         file_name: String,
@@ -55,7 +56,7 @@ impl Lexer {
             file_name,
             source: source.chars().collect(),
             source_str: source,
-            inner: TopLevelLexer::new(namespace, tokens),
+            inner: Lexer::new(namespace, tokens),
         }
     }
 
@@ -69,7 +70,7 @@ impl Lexer {
     }
 
     fn run_inner(self) -> Result<Vec<Node>> {
-        let nodes = self.inner.parse()?;
+        let nodes = self.inner.parse_top_level()?;
 
         Ok(nodes)
     }

@@ -1,13 +1,13 @@
 use crate::{
     dpscript::{
         ast::{import::ImportNode, node::Node},
-        lexer::{util::LexerMethods, parser::TopLevelLexer, Result},
+        lexer::{Result, parser::Lexer, util::LexerMethods},
         tokenizer::Token,
     },
     util::AddSpan,
 };
 
-impl TopLevelLexer {
+impl Lexer {
     pub fn read_import(&mut self) -> Result<Node> {
         debug!("Attempting to read import...");
 
