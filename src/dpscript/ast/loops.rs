@@ -81,7 +81,7 @@ impl fmt::Display for LoopNode {
 
         write!(
             f,
-            "loop<{ty}> [{}]: {{\n{}\n}};",
+            "@loop<{ty}> [{}]: {{\n{}\n}};",
             self.condition,
             self.body
                 .iter()

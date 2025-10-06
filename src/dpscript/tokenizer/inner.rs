@@ -254,6 +254,7 @@ impl Tokenizer {
                 "goto" => Some((Token::Goto, span)),
                 "tick" => Some((Token::Tick, span)),
                 "true" => Some((Token::Bool(true), span)),
+                "at" => Some((Token::At, span)),
 
                 other => {
                     if other.is_empty() {

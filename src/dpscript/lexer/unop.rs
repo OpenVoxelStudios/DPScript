@@ -26,7 +26,7 @@ impl Lexer {
 
         let op = match tkn {
             Token::Exclamation => UnaryOperation::Invert,
-            Token::Tilde => UnaryOperation::BitNot,
+            Token::Tilde => UnaryOperation::LocalOffset,
             Token::Minus => UnaryOperation::Negate,
             Token::Range => UnaryOperation::RangeEnd,
 

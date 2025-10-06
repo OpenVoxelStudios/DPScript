@@ -134,6 +134,7 @@ lexer!((false, true): body => [
     read_const,
     read_var,
     read_for_loop,
+    read_at,
     read_cond,
     read_return,
     read_assign

@@ -25,8 +25,11 @@ pub enum UnaryOperation {
     /// !value
     Invert,
 
+    // FIXME: I don't really like that you have to do `~0` in order to just
+    // get `~` in Minecraft, but it's necessary for the way we parse things
+    // right now. Fix this!
     /// ~value
-    BitNot,
+    LocalOffset,
 
     /// -value
     Negate,
@@ -54,7 +57,7 @@ impl fmt::Display for UnaryOpNode {
         match self.op {
             UnaryOperation::None => write!(f, "{}", self.value),
             UnaryOperation::Invert => write!(f, "-{}", self.value),
-            UnaryOperation::BitNot => write!(f, "~{}", self.value),
+            UnaryOperation::LocalOffset => write!(f, "~{}", self.value),
             UnaryOperation::Negate => write!(f, "!{}", self.value),
             UnaryOperation::RangeStart => write!(f, "{}..", self.value),
             UnaryOperation::RangeEnd => write!(f, "..{}", self.value),
@@ -64,7 +67,7 @@ impl fmt::Display for UnaryOpNode {
         match self.op {
             UnaryOperation::None => write!(f, "unary<None, {}>", self.value),
             UnaryOperation::Invert => write!(f, "unary<Invert, {}>", self.value),
-            UnaryOperation::BitNot => write!(f, "unary<BitwiseNot, {}>", self.value),
+            UnaryOperation::LocalOffset => write!(f, "unary<LocalOffset, {}>", self.value),
             UnaryOperation::Negate => write!(f, "unary<Negate, {}>", self.value),
             UnaryOperation::RangeStart => write!(f, "unary<RangeStart, {}>", self.value),
             UnaryOperation::RangeEnd => write!(f, "unary<RangeEnd, {}>", self.value),

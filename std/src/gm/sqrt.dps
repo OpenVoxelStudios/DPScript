@@ -18,10 +18,9 @@ pub fn sqrt(x: float) -> float {
 }
 
 fn sqrt_handling(var1: float, var2: float, ref temp: NBT) {
-    // TODO: Better syntax
-    // at pos: [~, var1, ~] {
+    at pos: [~0, var1, ~0] {
         math_entity.tp(pos: [29999999, ~var2, 91665]);
-    // }
+    }
 
     temp.var3[3] = math_entity.Pos[1];
     math_entity.transformation = temp.var3;
@@ -43,12 +42,11 @@ fn sqrt_handling(var1: float, var2: float, ref temp: NBT) {
 }
 
 fn positive_subtract(ref temp: NBT) {
-    // TODO: Better syntax
-    // at pos: [~, temp.var1, ~] {
-    //     at pos: [~, ~-0.000000001, ~] {
+    at pos: [~0, temp.var1, ~0] {
+        at pos: [~0, ~-0.000000001, ~0] {
             math_entity.tp(pos: [29999999, ~-var2, 91665]);
-    //     }
-    // }
+        }
+    }
 
     temp.v1m2p = math_entity.Pos[1][0..1];
 }

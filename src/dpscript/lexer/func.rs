@@ -32,6 +32,7 @@ impl Lexer {
         self.expect(Token::LeftParen)?;
 
         let mut args = Vec::new();
+        let storage = format!("{}:__dps/gen/funcs/{}/args", self.namespace, name);
 
         loop {
             if self.if_next_and_eat(Token::RightParen) {
@@ -60,7 +61,7 @@ impl Lexer {
                 is_this: false,
                 location: DataLocation {
                     path: name.0.clone(),
-                    storage: "TODO".into(),
+                    storage: storage.clone(),
                 },
                 name: name.0,
                 span: name.1,

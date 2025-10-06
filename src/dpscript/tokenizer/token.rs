@@ -123,6 +123,10 @@ pub enum Token {
     Inline,
 
     // ========================================
+    /// "at"
+    At,
+
+    // ========================================
     /// "sub"
     Sub,
 
@@ -281,6 +285,7 @@ impl fmt::Debug for Token {
             Self::Modulo => write!(f, "%"),
             Self::Or => write!(f, "|"),
             Self::Xor => write!(f, "^"),
+            Self::At => write!(f, "at"),
         }
     }
 }
@@ -353,6 +358,7 @@ impl fmt::Display for Token {
             Self::Modulo => write!(f, "%"),
             Self::Or => write!(f, "|"),
             Self::Xor => write!(f, "^"),
+            Self::At => write!(f, "at"),
         }
     }
 }

@@ -19,10 +19,10 @@ use miette::SourceSpan;
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
     pub struct FuncFlags: u8 {
-        const Inline = 1;
-        const Facade = 2;
-        const Compiler = 3;
-        const Public = 4;
+        const Inline   = 0b00000001;
+        const Facade   = 0b00000010;
+        const Compiler = 0b00000100;
+        const Public   = 0b00001000;
     }
 }
 

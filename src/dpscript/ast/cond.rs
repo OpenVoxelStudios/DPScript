@@ -108,7 +108,7 @@ impl fmt::Display for ConditionalNode {
 
         write!(
             f,
-            "@else: {{\n{}\n}};\n",
+            "@else: {{\n{}\n}};",
             self.else_body
                 .iter()
                 .map(|it| format!("{it}"))

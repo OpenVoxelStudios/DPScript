@@ -1,9 +1,10 @@
 use crate::dpscript::{
     ast::{
-        ast::Scope, binop::BinaryOpNode, block::BlockNode, call::CallNode, cond::ConditionalNode,
-        constant::ConstantNode, enums::EnumNode, func::FunctionNode, ident::IdentNode,
-        import::ImportNode, literal::LiteralNode, loops::LoopNode, objective::ObjectiveNode,
-        ret::ReturnNode, special::SpecialNode, unop::UnaryOpNode, var::VarNode,
+        ast::Scope, at::AtNode, binop::BinaryOpNode, block::BlockNode, call::CallNode,
+        cond::ConditionalNode, constant::ConstantNode, enums::EnumNode, func::FunctionNode,
+        ident::IdentNode, import::ImportNode, literal::LiteralNode, loops::LoopNode,
+        objective::ObjectiveNode, ret::ReturnNode, special::SpecialNode, unop::UnaryOpNode,
+        var::VarNode,
     },
     data::NodeInfo,
     ty::TypeRef,
@@ -57,6 +58,7 @@ node_data! {
     Import: ImportNode,
     Return: ReturnNode,
     Special: SpecialNode,
+    At: AtNode,
 }
 
 impl Node {
@@ -71,7 +73,8 @@ impl Node {
             | Node::Loop(_)
             | Node::Objective(_)
             | Node::Import(_)
-            | Node::Return(_) => false,
+            | Node::Return(_)
+            | Node::At(_) => false,
 
             Node::UnaryOp(_)
             | Node::BinaryOp(_)
