@@ -108,8 +108,6 @@ impl Lexer {
 
         let lhs = Box::new(last.clone());
 
-        dbg!(&lhs);
-
         let (op_tkn, _) = self.start_parse_any(vec![
             Token::Or,  // |, ||
             Token::And, // &, &&
