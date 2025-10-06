@@ -7,12 +7,12 @@ pub objective config: dummy = "dpscript_config";
 pub const enable_message = selector: "enable_std_hello";
 
 init {
-    const welcome = [c: "Thank you for using DPScript!" & nbt: { bold: true }];
-    const hint_base = c: "Hint: " & nbt: { bold: true, color: "gold" };
-    const disable = c: "You can disable this message by running:\n" & nbt: { color: "dark_aqua" };
-    const cmd = c: "/scoreboard players set enable_std_hello dpscript_config 0\n" & nbt: { bold: true, color: "gray" };
+    const welcome = [c: "Thank you for using DPScript!" + nbt: { bold: true }];
+    const hint_base = c: "Hint: " + nbt: { bold: true, color: "gold" };
+    const disable = c: "You can disable this message by running:\n" + nbt: { color: "dark_aqua" };
+    const cmd = c: "/scoreboard players set enable_std_hello dpscript_config 0\n" + nbt: { bold: true, color: "gray" };
     
-    const click = c: "[Click to copy!]" & nbt: {
+    const click = c: "[Click to copy!]" + nbt: {
         bold: true,
         color: "dark_aqua",
         clickEvent: {
