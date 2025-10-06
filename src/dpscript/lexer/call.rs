@@ -1,7 +1,7 @@
 use crate::{
     dpscript::{
         ast::{call::CallNode, node::Node},
-        lexer::{parser::Lexer, util::LexerMethods, Result},
+        lexer::{Result, parser::Lexer, util::LexerMethods},
         tokenizer::Token,
     },
     util::AddSpan,

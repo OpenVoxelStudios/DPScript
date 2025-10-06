@@ -23,8 +23,6 @@ impl Lexer {
 
         let lhs = Box::new(last.clone());
 
-        dbg!(&lhs);
-
         let (op_tkn, _) = self.start_parse_any(vec![
             Token::Plus,        // +
             Token::Minus,       // -
@@ -99,7 +97,10 @@ impl Lexer {
     pub fn read_binop_cond(&mut self) -> Result<Node> {
         self.push();
 
-        debug!("[{}] Attempting to parse binary op condition...", self.nesting);
+        debug!(
+            "[{}] Attempting to parse binary op condition...",
+            self.nesting
+        );
 
         let Some(last) = self.last.last() else {
             return Err(LexerErr::NoLastExpr { span: self.loc() });
@@ -110,8 +111,8 @@ impl Lexer {
         dbg!(&lhs);
 
         let (op_tkn, _) = self.start_parse_any(vec![
-            Token::Or,          // |, ||
-            Token::And,         // &, &&
+            Token::Or,  // |, ||
+            Token::And, // &, &&
         ])?;
 
         let op = match op_tkn {
@@ -143,7 +144,10 @@ impl Lexer {
 
         self.nesting -= 1;
 
-        debug!("[{}] Successfully parsed a binary op condition!", self.nesting);
+        debug!(
+            "[{}] Successfully parsed a binary op condition!",
+            self.nesting
+        );
 
         self.pop_in_place()?;
 

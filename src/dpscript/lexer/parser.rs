@@ -15,13 +15,9 @@ macro_rules! lexer {
         concat_idents::concat_idents!(name = read_, $name {
             impl Lexer {
                 pub fn name(&mut self) -> Result<Node> {
-                    dbg!("PRE: ", &self.last);
-
                     let res = chain_parsers!(($value): self; [
                         $($func),*
                     ])?;
-
-                    dbg!("POST: ", &self.last);
 
                     self.last.push(res.clone());
 
@@ -37,13 +33,9 @@ macro_rules! lexer {
         concat_idents::concat_idents!(name = read_, $name, _sep {
             impl Lexer {
                 pub fn name(&mut self, sep: &Token) -> Result<Option<Node>> {
-                    dbg!("PRE: ", &self.last);
-
                     let res = chain_parsers!(sep, ($value): self; [
                         $($func),*
                     ])?;
-
-                    dbg!("POST: ", &self.last);
 
                     if let Some(it) = &res {
                         self.last.push(it.clone());
@@ -70,10 +62,6 @@ macro_rules! lexer {
                         });
                     }
 
-                    // while let Some(node) = self.last.pop() {
-                    //     self.nodes.push(node);
-                    // }
-
                     Ok(self.nodes)
                 }
             }
@@ -91,10 +79,6 @@ macro_rules! lexer {
                             self.last.pop();
                         });
                     }
-
-                    // while let Some(node) = self.last.pop() {
-                    //     self.nodes.push(node);
-                    // }
 
                     Ok(self.nodes)
                 }

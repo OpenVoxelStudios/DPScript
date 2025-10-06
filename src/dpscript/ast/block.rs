@@ -1,7 +1,11 @@
 use std::fmt::Display;
 
 use crate::dpscript::{
-    ast::{ast::Scope, node::Node, util::{Body, Indent}},
+    ast::{
+        ast::Scope,
+        node::Node,
+        util::{Body, Indent},
+    },
     data::NodeInfo,
     ty::TypeRef,
 };

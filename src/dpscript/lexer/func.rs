@@ -4,8 +4,9 @@ use crate::{
             func::{FuncFlags, FunctionArg, FunctionNode},
             node::Node,
         },
-        lexer::{parser::Lexer, ty::TypeLexer, util::LexerMethods, Result},
-        tokenizer::Token, ty::{BuiltInType, TypeRef},
+        lexer::{Result, parser::Lexer, ty::TypeLexer, util::LexerMethods},
+        tokenizer::Token,
+        ty::{BuiltInType, TypeRef},
     },
     util::{DataLocation, Identifier},
 };

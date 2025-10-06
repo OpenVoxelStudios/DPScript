@@ -4,7 +4,10 @@ use dpscript_macros::HasSpan;
 use miette::SourceSpan;
 
 use crate::dpscript::{
-    ast::{node::Node, util::{Body, Indent}},
+    ast::{
+        node::Node,
+        util::{Body, Indent},
+    },
     data::NodeInfo,
     ty::TypeRef,
 };

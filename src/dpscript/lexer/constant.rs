@@ -29,9 +29,9 @@ impl Lexer {
         self.nesting += 1;
 
         let value = Box::new(self.read_value()?);
-        
+
         self.nesting -= 1;
-        
+
         let span = span.add(value.span());
 
         self.pop_in_place()?;

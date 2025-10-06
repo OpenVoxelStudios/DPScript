@@ -28,11 +28,6 @@ impl NodeInfo for EnumNode {
 
 impl fmt::Display for EnumNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "enum[{}]: [\n{}\n];",
-            self.name,
-            self.values.join(",\n")
-        )
+        write!(f, "enum[{}]: [\n{}\n];", self.name, self.values.join(",\n"))
     }
 }

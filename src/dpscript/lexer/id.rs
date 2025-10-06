@@ -1,6 +1,6 @@
 use crate::dpscript::{
     ast::{ident::IdentNode, node::Node},
-    lexer::{parser::Lexer, util::LexerMethods, Result},
+    lexer::{Result, parser::Lexer, util::LexerMethods},
 };
 
 impl Lexer {

@@ -1,6 +1,6 @@
-use std::fmt;
 use dpscript_macros::HasSpan;
 use miette::SourceSpan;
+use std::fmt;
 
 use crate::dpscript::{
     ast::{ast::Scope, nbt::NbtValue, node::Node},
