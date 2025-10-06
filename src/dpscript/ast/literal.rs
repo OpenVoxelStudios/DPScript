@@ -1,10 +1,9 @@
 use std::fmt;
-
 use dpscript_macros::HasSpan;
 use miette::SourceSpan;
 
 use crate::dpscript::{
-    ast::{ast::Scope, node::Node},
+    ast::{ast::Scope, nbt::NbtValue, node::Node},
     data::NodeInfo,
     ty::{BuiltInType, TypeRef},
 };
@@ -23,7 +22,7 @@ pub enum LiteralData {
     Double(f64),
     Bool(bool),
     Array(Vec<Node>),
-    // TODO: Time, ident, NBT
+    Nbt(NbtValue),
 }
 
 impl NodeInfo for LiteralNode {
@@ -38,6 +37,7 @@ impl NodeInfo for LiteralNode {
             LiteralData::Float(_) => TypeRef::BuiltIn(BuiltInType::Float),
             LiteralData::Double(_) => TypeRef::BuiltIn(BuiltInType::Double),
             LiteralData::Bool(_) => TypeRef::BuiltIn(BuiltInType::Boolean),
+            LiteralData::Nbt(_) => TypeRef::BuiltIn(BuiltInType::NBT),
 
             LiteralData::Array(ref data) => {
                 TypeRef::Array(data.iter().map(|it| it.returns(scope)).collect())
@@ -60,6 +60,7 @@ impl fmt::Display for LiteralData {
             Self::Float(v) => write!(f, "{v}f"),
             Self::Double(v) => write!(f, "{v}d"),
             Self::Bool(v) => write!(f, "{v}"),
+            Self::Nbt(v) => write!(f, "nbt<{v}>"),
 
             Self::Array(v) => write!(
                 f,

@@ -4,7 +4,7 @@ use crate::{
             loops::{LoopCondition, LoopNode},
             node::Node,
         },
-        lexer::{Result, err::LexerErr, id::IdentLexer, parser::Lexer, util::LexerMethods},
+        lexer::{Result, err::LexerErr, parser::Lexer, util::LexerMethods},
         tokenizer::Token,
     },
     util::AddSpan,
@@ -14,7 +14,7 @@ impl Lexer {
     pub fn read_for_loop(&mut self) -> Result<Node> {
         self.push();
 
-        debug!("Attempting to read loop...");
+        debug!("[{}] Attempting to read loop...", self.nesting);
 
         let span = self.start_parse(Token::For)?;
         let var = self.read_ident()?;
@@ -67,7 +67,7 @@ impl Lexer {
 
         self.pop_in_place()?;
 
-        debug!("Successfully read for loop!");
+        debug!("[{}] Successfully read for loop!", self.nesting);
 
         Ok(Node::Loop(LoopNode {
             body,

@@ -11,6 +11,7 @@ pub mod id;
 pub mod import;
 pub mod literal;
 pub mod loops;
+pub mod nbt;
 pub mod obj;
 pub mod parser;
 pub mod ret;

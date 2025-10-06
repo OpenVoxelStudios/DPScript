@@ -11,7 +11,7 @@ impl Lexer {
     pub fn read_var(&mut self) -> Result<Node> {
         self.push();
 
-        debug!("Attempting to read var...");
+        debug!("[{}] Attempting to read var...", self.nesting);
 
         let mut span = self.start_parse(Token::Let)?;
         let (name, _) = self.eat_id()?;
@@ -21,7 +21,9 @@ impl Lexer {
         let mut value = None;
 
         if has_val {
+            self.nesting += 1;
             value = Some(Box::new(self.read_value()?));
+            self.nesting -= 1;
         }
 
         let semi = self.expect_span(Token::Semi)?;
@@ -30,7 +32,7 @@ impl Lexer {
 
         self.pop_in_place()?;
 
-        debug!("Successfully read var!");
+        debug!("[{}] Successfully read var!", self.nesting);
 
         Ok(Node::Variable(VarNode {
             name: name.clone(),

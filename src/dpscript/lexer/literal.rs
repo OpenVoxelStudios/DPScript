@@ -1,8 +1,11 @@
+use std::collections::BTreeMap;
+
 use crate::{
     common::traits::HasSpan,
     dpscript::{
         ast::{
             literal::{LiteralData, LiteralNode},
+            nbt::{NbtValue, NbtValueData},
             node::Node,
             special::{SpecialData, SpecialNode},
         },
@@ -16,7 +19,7 @@ impl Lexer {
     pub fn read_literal(&mut self) -> Result<Node> {
         self.push();
 
-        debug!("Attempting to read literal...");
+        debug!("[{}] Attempting to read literal...", self.nesting);
 
         match self.eat() {
             Some((Token::Int(val), span)) => {
@@ -87,7 +90,7 @@ impl Lexer {
     pub fn read_special(&mut self) -> Result<Node> {
         self.push();
 
-        debug!("Attempting to read special...");
+        debug!("[{}] Attempting to read special...", self.nesting);
 
         let Some(cur) = self.eat() else {
             return Err(self.eof());
@@ -101,7 +104,7 @@ impl Lexer {
 
                 self.pop_in_place()?;
 
-                debug!("Successfully read special!");
+                debug!("[{}] Successfully read special!", self.nesting);
 
                 Ok(Node::Special(SpecialNode {
                     data: SpecialData::Selector(id.0),
@@ -111,6 +114,8 @@ impl Lexer {
 
             (Token::Pos, span) => {
                 self.expect(Token::LeftBracket)?;
+
+                self.nesting += 1;
 
                 let x = self.read_value()?;
 
@@ -122,15 +127,47 @@ impl Lexer {
 
                 let z = self.read_value()?;
 
+                self.nesting -= 1;
+
                 self.expect(Token::RightBracket)?;
 
                 self.pop_in_place()?;
 
-                debug!("Successfully read special!");
+                debug!("[{}] Successfully read special!", self.nesting);
 
                 Ok(Node::Special(SpecialNode {
                     span: span.add(z.span()),
                     data: SpecialData::Pos(Box::new(x), Box::new(y), Box::new(z)),
+                }))
+            }
+
+            (Token::Component, span) | (Token::ComponentShort, span) => {
+                // This is actually just syntactic sugar - it just turns it into NBT.
+                // This still uses the special `Component` variant, though, since it can be validated
+                // against the schema when validation of binary operations occurs.
+
+                let (data, end) = self.eat_str()?;
+
+                self.pop_in_place()?;
+
+                debug!("[{}] Successfully read special!", self.nesting);
+
+                let mut map = BTreeMap::new();
+
+                map.insert(
+                    "text".into(),
+                    NbtValue {
+                        span: end,
+                        data: NbtValueData::String(data),
+                    },
+                );
+
+                Ok(Node::Special(SpecialNode {
+                    span: span.add(end),
+                    data: SpecialData::Component(NbtValue {
+                        span: end,
+                        data: NbtValueData::Map(map),
+                    }),
                 }))
             }
 

@@ -2,22 +2,22 @@
 pub facade fn tellraw(target: Selector, message: Any);
 
 #[cmd("summon {id}")]
-pub facade fn summon(#[id(entity_type)] id: Identifier);
+pub facade fn summon(#[id(entity_type)] id: Ident);
 
 #[cmd("summon {id} {position}")]
-pub facade fn summon_at(#[id(entity_type)] id: Identifier, position: Pos3);
+pub facade fn summon_at(#[id(entity_type)] id: Ident, position: Pos);
 
 #[cmd("summon {id} {position} {data}")]
-pub facade fn summon_with(#[id(entity_type)] id: Identifier, position: Pos3, data: NBT);
+pub facade fn summon_with(#[id(entity_type)] id: Ident, position: Pos, data: NBT);
 
 #[cmd("give {target} {item}")]
-pub facade fn give(target: Selector, #[id(item)] item: Identifier);
+pub facade fn give(target: Selector, #[id(item)] item: Ident);
 
 #[cmd("give {target} {item} {data}")]
-pub facade fn give_nbt(target: Selector, #[id(item)] item: Identifier, data: NBT);
+pub facade fn give_nbt(target: Selector, #[id(item)] item: Ident, data: NBT);
 
 #[cmd("forceload add {x} {z}")]
 pub facade fn forceload_add(x: int, z: int);
 
 #[cmd("tp {target} {position}")]
-pub facade fn tp_pos(target: Selector, position: Pos3);
+pub facade fn tp_pos(target: Selector, position: Pos);

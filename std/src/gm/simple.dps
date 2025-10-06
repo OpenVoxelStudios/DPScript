@@ -8,7 +8,6 @@ pub fn add(x: float, y: float) -> float {
 
     let result = math_entity.Pos[1];
 
-    // TODO: calls with receivers
     math_entity.tp(pos: [29999999, 0, 91665]);
 
     return result;
@@ -33,7 +32,6 @@ pub fn subtract(x: float, y: float) -> float {
 
     let result = math_entity.Pos[1];
 
-    // TODO: calls with receivers
     math_entity.tp(pos: [29999999, 0, 91665]);
 
     return result;

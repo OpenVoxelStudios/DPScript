@@ -42,9 +42,9 @@ impl fmt::Display for ConstantNode {
         };
 
         if self.is_public {
-            write!(f, "@const [public] {}{ty} = {};", self.name, self.value)
+            write!(f, "const [public] {}{ty} = {};", self.name, self.value)
         } else {
-            write!(f, "@const {}{ty} = {};", self.name, self.value)
+            write!(f, "const {}{ty} = {};", self.name, self.value)
         }
     }
 }

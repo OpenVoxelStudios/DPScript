@@ -3,7 +3,11 @@ use std::fmt;
 use miette::SourceSpan;
 
 use crate::dpscript::{
-    ast::{ident::IdentNode, node::Node, util::{Body, Indent}},
+    ast::{
+        ident::IdentNode,
+        node::Node,
+        util::{Body, Indent},
+    },
     data::NodeInfo,
 };
 
@@ -55,9 +59,29 @@ impl NodeInfo for LoopNode {
 
 impl fmt::Display for LoopNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let ty = match &self.condition {
+            LoopCondition::Range {
+                span: _,
+                var: _,
+                min: _,
+                max: _,
+            } => "range",
+
+            LoopCondition::Iter {
+                span: _,
+                var: _,
+                array: _,
+            } => "iter",
+
+            LoopCondition::While {
+                span: _,
+                condition: _,
+            } => "while",
+        };
+
         write!(
             f,
-            "@loop [{}]: {{\n{}\n}};",
+            "loop<{ty}> [{}]: {{\n{}\n}};",
             self.condition,
             self.body
                 .iter()
@@ -78,13 +102,13 @@ impl fmt::Display for LoopCondition {
                 var,
                 min,
                 max,
-            } => write!(f, "{var} in [{min} to {max}]"),
+            } => write!(f, "{var} = [{min} to {max}]"),
 
             Self::Iter {
                 span: _,
                 var,
                 array,
-            } => write!(f, "{var} in {array}"),
+            } => write!(f, "{var} = {array}"),
 
             Self::While { span: _, condition } => write!(f, "{condition}"),
         }

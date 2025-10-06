@@ -46,3 +46,7 @@ pkg-fmt = "bin"
 [workspace]
 resolver = "2"
 members = [".", "crates/*"]
+
+[features]
+default = []
+print-clarity = []

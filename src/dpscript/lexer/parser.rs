@@ -2,7 +2,7 @@ use crate::{
     chain_parsers,
     dpscript::{
         ast::node::Node,
-        lexer::{Result, err::LexerErr, id::IdentLexer, util::LexerMethods},
+        lexer::{Result, err::LexerErr, util::LexerMethods},
         tokenizer::Token,
     },
     impl_lexer,
@@ -11,13 +11,25 @@ use crate::{
 use miette::{SourceOffset, SourceSpan};
 
 macro_rules! lexer {
-    (($value: expr): $name: ident => [$($func: ident),*]) => {
+    (($value: expr, $body: expr): $name: ident => [$($func: ident),*]) => {
         concat_idents::concat_idents!(name = read_, $name {
             impl Lexer {
                 pub fn name(&mut self) -> Result<Node> {
-                    chain_parsers!(($value): self; [
+                    dbg!("PRE: ", &self.last);
+
+                    let res = chain_parsers!(($value): self; [
                         $($func),*
-                    ]);
+                    ])?;
+
+                    dbg!("POST: ", &self.last);
+
+                    self.last.push(res.clone());
+
+                    if $body && self.peek(0).is_some_and(|it| it.0 == Token::Semi) {
+                        self.eat();
+                    }
+
+                    return Ok(res);
                 }
             }
         });
@@ -25,9 +37,23 @@ macro_rules! lexer {
         concat_idents::concat_idents!(name = read_, $name, _sep {
             impl Lexer {
                 pub fn name(&mut self, sep: &Token) -> Result<Option<Node>> {
-                    chain_parsers!(sep, ($value): self; [
+                    dbg!("PRE: ", &self.last);
+
+                    let res = chain_parsers!(sep, ($value): self; [
                         $($func),*
-                    ]);
+                    ])?;
+
+                    dbg!("POST: ", &self.last);
+
+                    if let Some(it) = &res {
+                        self.last.push(it.clone());
+                    }
+
+                    if $body && self.peek(0).is_some_and(|it| it.0 == Token::Semi) {
+                        self.eat();
+                    }
+
+                    Ok(res)
                 }
             }
         });
@@ -35,15 +61,20 @@ macro_rules! lexer {
         concat_idents::concat_idents!(name = parse_, $name {
             impl Lexer {
                 pub fn name(mut self) -> Result<Vec<Node>> {
-                    let mut nodes = Vec::new();
-
                     while self.has_next() {
                         concat_idents::concat_idents!(func = read_, $name {
-                            nodes.push(self.func()?);
+                            let node = self.func()?;
+
+                            self.nodes.push(node);
+                            self.last.pop();
                         });
                     }
 
-                    Ok(nodes)
+                    // while let Some(node) = self.last.pop() {
+                    //     self.nodes.push(node);
+                    // }
+
+                    Ok(self.nodes)
                 }
             }
         });
@@ -51,17 +82,21 @@ macro_rules! lexer {
         concat_idents::concat_idents!(name = parse_, $name, _sep {
             impl Lexer {
                 pub fn name(mut self, sep: Token) -> Result<Vec<Node>> {
-                    let mut nodes = Vec::new();
-
                     while self.has_next() {
                         concat_idents::concat_idents!(func = read_, $name, _sep {
                             if let Some(node) = self.func(&sep)? {
-                                nodes.push(node);
+                                self.nodes.push(node);
                             }
+
+                            self.last.pop();
                         });
                     }
 
-                    Ok(nodes)
+                    // while let Some(node) = self.last.pop() {
+                    //     self.nodes.push(node);
+                    // }
+
+                    Ok(self.nodes)
                 }
             }
         });
@@ -74,6 +109,9 @@ pub struct Lexer {
     pub namespace: String,
     pub last_pos: SourceSpan,
     pub stack: Vec<usize>,
+    pub last: Vec<Node>,
+    pub nodes: Vec<Node>,
+    pub nesting: usize,
 }
 
 impl_lexer!(Lexer);
@@ -91,11 +129,14 @@ impl Lexer {
             pos: 0,
             last_pos: last,
             stack: Vec::new(),
+            last: Vec::new(),
+            nodes: Vec::new(),
+            nesting: 0,
         }
     }
 }
 
-lexer!((false): top_level => [
+lexer!((false, false): top_level => [
     read_import,
     read_func,
     read_init_block,
@@ -104,32 +145,118 @@ lexer!((false): top_level => [
     read_const
 ]);
 
-lexer!((false): body => [
+lexer!((false, true): body => [
+    read_call,
     read_const,
     read_var,
-    read_call,
     read_for_loop,
     read_cond,
     read_return,
-    read_assign,
-    read_binop_val
+    read_assign
 ]);
 
-lexer!((true): value => [
-    read_binop,
-    read_value_nb
-]);
+impl Lexer {
+    pub fn read_value(&mut self) -> Result<Node> {
+        let mut res = chain_parsers!((true): self; [
+            read_array,
+            read_binop_val,
+            read_binop,
+            read_binop_cond,
+            read_literal,
+            read_nbt,
+            read_call,
+            read_unop,
+            read_special,
+            read_ident_full
+        ])?;
 
-lexer!((true): value_nb => [
-    read_binop_val,
-    read_value_nbv
-]);
+        while res.maybe_has_value()
+            && self
+                .peek(0)
+                .is_some_and(|it| it.0.is_binop_val(self.peek(1)))
+        {
+            self.last.push(res.clone());
 
-lexer!((true): value_nbv => [
-    read_literal,
-    read_array,
-    read_call,
-    read_unop,
-    read_special,
-    read_ident_full
-]);
+            if let Ok(node) = self.read_binop() {
+                res = node;
+            } else if let Ok(node) = self.read_binop_val() {
+                res = node;
+            } else if let Ok(node) = self.read_binop_cond() {
+                res = node;
+            } else {
+                return Err(LexerErr::Unexpected {
+                    span: self.loc(),
+                    tkn: self.eat().unwrap().0,
+                });
+            }
+        }
+
+        Ok(res)
+    }
+}
+
+impl Lexer {
+    pub fn read_value_sep(&mut self, sep: &Token) -> Result<Option<Node>> {
+        let mut res = chain_parsers!(sep,(true): self; [
+            read_array,
+            read_binop_val,
+            read_binop,
+            read_binop_cond,
+            read_literal,
+            read_nbt,
+            read_call,
+            read_unop,
+            read_special,
+            read_ident_full
+        ])?;
+
+        if let Some(res) = &mut res {
+            while res.maybe_has_value()
+                && self
+                    .peek(0)
+                    .is_some_and(|it| it.0.is_binop_val(self.peek(1)))
+            {
+                self.last.push(res.clone());
+
+                if let Ok(node) = self.read_binop() {
+                    *res = node;
+                } else if let Ok(node) = self.read_binop_val() {
+                    *res = node;
+                } else if let Ok(node) = self.read_binop_cond() {
+                    *res = node;
+                } else {
+                    return Err(LexerErr::Unexpected {
+                        span: self.loc(),
+                        tkn: self.eat().unwrap().0,
+                    });
+                }
+            }
+        }
+
+        Ok(res)
+    }
+}
+
+impl Lexer {
+    pub fn parse_value(mut self) -> Result<Vec<Node>> {
+        while self.has_next() {
+            let node = self.read_value()?;
+
+            self.nodes.push(node);
+        }
+
+        Ok(self.nodes)
+    }
+}
+
+impl Lexer {
+    pub fn parse_value_sep(mut self, sep: Token) -> Result<Vec<Node>> {
+        while self.has_next() {
+            if let Some(node) = self.read_value_sep(&sep)? {
+                self.nodes.push(node);
+            }
+        }
+
+        Ok(self.nodes)
+    }
+}

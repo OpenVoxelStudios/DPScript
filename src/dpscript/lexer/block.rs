@@ -14,7 +14,7 @@ use crate::{
 
 impl Lexer {
     pub fn read_init_block(&mut self) -> Result<Node> {
-        debug!("Attempting to read init block...");
+        debug!("[{}] Attempting to read init block...", self.nesting);
 
         self.push();
 
@@ -24,7 +24,7 @@ impl Lexer {
     }
 
     pub fn read_tick_block(&mut self) -> Result<Node> {
-        debug!("Attempting to read tick block...");
+        debug!("[{}] Attempting to read tick block...", self.nesting);
 
         self.push();
 
@@ -41,7 +41,7 @@ impl Lexer {
 
         self.pop_in_place()?;
 
-        debug!("Successfully read {kind} block!");
+        debug!("[{}] Successfully read {kind} block!", self.nesting);
 
         Ok(Node::Block(BlockNode {
             kind,

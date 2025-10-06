@@ -15,6 +15,9 @@ pub enum TypeRef {
     /// A type for an NBT array.
     Array(Vec<Option<TypeRef>>),
 
+    /// A type for an array with a single type.
+    SingleArray(Box<TypeRef>),
+
     /// A type for an NBT array with a set length.
     SizedArray(Box<TypeRef>, Spanned<usize>),
 
@@ -83,6 +86,14 @@ pub enum BuiltInType {
     /// A 3D world position.
     #[strum(serialize = "Pos")]
     Pos,
+
+    /// The 'Any' type. Allows any value.
+    #[strum(serialize = "Any")]
+    Any,
+
+    /// The void type. Represents nothing.
+    #[strum(serialize = "void")]
+    Void,
 }
 
 impl fmt::Display for TypeRef {
@@ -101,6 +112,7 @@ impl fmt::Display for TypeRef {
                     .collect::<Vec<_>>()
                     .join(", ")
             ),
+            TypeRef::SingleArray(it) => write!(f, "SingleArray<{it}>"),
             TypeRef::SizedArray(it, size) => write!(f, "SizedArray<[{it}; {}]>", size.0),
             TypeRef::TypedNBT(_) => write!(f, "TypedNBT"),
         }

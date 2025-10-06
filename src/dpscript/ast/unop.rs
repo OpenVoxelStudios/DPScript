@@ -30,6 +30,12 @@ pub enum UnaryOperation {
 
     /// -value
     Negate,
+
+    // value..
+    RangeStart,
+
+    /// ..value
+    RangeEnd,
 }
 
 impl NodeInfo for UnaryOpNode {
@@ -44,11 +50,24 @@ impl NodeInfo for UnaryOpNode {
 
 impl fmt::Display for UnaryOpNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        #[cfg(not(feature = "print-clarity"))]
+        match self.op {
+            UnaryOperation::None => write!(f, "{}", self.value),
+            UnaryOperation::Invert => write!(f, "-{}", self.value),
+            UnaryOperation::BitNot => write!(f, "~{}", self.value),
+            UnaryOperation::Negate => write!(f, "!{}", self.value),
+            UnaryOperation::RangeStart => write!(f, "{}..", self.value),
+            UnaryOperation::RangeEnd => write!(f, "..{}", self.value),
+        }
+
+        #[cfg(feature = "print-clarity")]
         match self.op {
             UnaryOperation::None => write!(f, "unary<None, {}>", self.value),
             UnaryOperation::Invert => write!(f, "unary<Invert, {}>", self.value),
             UnaryOperation::BitNot => write!(f, "unary<BitwiseNot, {}>", self.value),
             UnaryOperation::Negate => write!(f, "unary<Negate, {}>", self.value),
+            UnaryOperation::RangeStart => write!(f, "unary<RangeStart, {}>", self.value),
+            UnaryOperation::RangeEnd => write!(f, "unary<RangeEnd, {}>", self.value),
         }
     }
 }

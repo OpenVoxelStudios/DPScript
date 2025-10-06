@@ -9,14 +9,14 @@ use crate::{
 
 impl Lexer {
     pub fn read_import(&mut self) -> Result<Node> {
-        debug!("Attempting to read import...");
+        debug!("[{}] Attempting to read import...", self.nesting);
 
         self.push();
 
         let span = self.start_parse(Token::Import)?;
         let (_tokens, last) = self.eat_until(Token::Semi);
 
-        // TODO: Validate the tokens!
+        // TODO: Collect the items to import!
         // let mut path = Vec::new();
         // let mut idx = 0;
 
@@ -60,7 +60,7 @@ impl Lexer {
 
         self.pop_in_place()?;
 
-        debug!("Successfully read import!");
+        debug!("[{}] Successfully read import!", self.nesting);
 
         Ok(Node::Import(ImportNode {
             span: span.add(last),

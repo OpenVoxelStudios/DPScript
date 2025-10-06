@@ -11,7 +11,7 @@ impl Lexer {
     pub fn read_objective(&mut self) -> Result<Node> {
         self.push();
 
-        debug!("Attempting to read objective...");
+        debug!("[{}] Attempting to read objective...", self.nesting);
 
         let is_public = self.if_next_and_eat(Token::Pub);
         let span = self.start_parse(Token::Objective)?;
@@ -28,7 +28,7 @@ impl Lexer {
 
         self.pop_in_place()?;
 
-        debug!("Successfully read objective...");
+        debug!("[{}] Successfully read objective...", self.nesting);
 
         Ok(Node::Objective(ObjectiveNode {
             id,

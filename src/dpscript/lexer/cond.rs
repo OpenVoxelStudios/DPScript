@@ -11,10 +11,15 @@ impl Lexer {
     pub fn read_cond(&mut self) -> Result<Node> {
         self.push();
 
-        debug!("Attempting to read conditional...");
+        debug!("[{}] Attempting to read conditional...", self.nesting);
 
         let span = self.start_parse(Token::If)?;
+
+        self.nesting += 1;
+
         let cond = self.read_value()?;
+
+        self.nesting -= 1;
 
         self.expect(Token::LeftBrace)?;
 
@@ -22,7 +27,7 @@ impl Lexer {
         let span = span.add(end);
         let body = Lexer::new(self.namespace.clone(), body).parse_body()?;
 
-        debug!("Successfully read conditional!");
+        debug!("[{}] Successfully read conditional!", self.nesting);
 
         self.pop_in_place()?;
 

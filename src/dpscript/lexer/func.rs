@@ -1,18 +1,18 @@
 use crate::{
     dpscript::{
         ast::{
-            func::{FuncFlags, FunctionNode},
+            func::{FuncFlags, FunctionArg, FunctionNode},
             node::Node,
         },
-        lexer::{Result, parser::Lexer, ty::TypeLexer, util::LexerMethods},
-        tokenizer::Token,
+        lexer::{parser::Lexer, ty::TypeLexer, util::LexerMethods, Result},
+        tokenizer::Token, ty::{BuiltInType, TypeRef},
     },
-    util::Identifier,
+    util::{DataLocation, Identifier},
 };
 
 impl Lexer {
     pub fn read_func(&mut self) -> Result<Node> {
-        debug!("Attempting to read function...");
+        debug!("[{}] Attempting to read function...", self.nesting);
 
         self.push();
 
@@ -30,17 +30,50 @@ impl Lexer {
 
         self.expect(Token::LeftParen)?;
 
-        // TODO
-        let (_args_tkns, _) = self.eat_block(Token::LeftParen, Token::RightParen);
+        let mut args = Vec::new();
 
-        let has_ret_ty = self.if_next_and_eat(Token::Minus);
-        let mut ret = None;
+        loop {
+            if self.if_next_and_eat(Token::RightParen) {
+                break;
+            }
 
-        if has_ret_ty {
-            self.expect(Token::RightAngle)?;
+            if self.if_next_and_eat(Token::Comma) {
+                continue;
+            }
 
-            ret = Some(self.read_ty()?);
+            // TODO: Use this
+            let _arg_attr = self.read_attrs();
+
+            let is_ref = self.if_next_and_eat(Token::Ref);
+            let name = self.eat_id()?;
+
+            self.expect(Token::Colon)?;
+
+            let ty = self.read_ty()?;
+
+            if self.peek(0).is_none_or(|it| it.0 != Token::RightParen) {
+                self.expect(Token::Comma)?;
+            }
+
+            args.push(FunctionArg {
+                is_this: false,
+                location: DataLocation {
+                    path: name.0.clone(),
+                    storage: "TODO".into(),
+                },
+                name: name.0,
+                span: name.1,
+                ty,
+                is_ref,
+            });
         }
+
+        let ret = if self.if_next_and_eat(Token::Minus) {
+            self.expect(Token::RightAngle)?;
+            self.read_ty()?
+        } else {
+            TypeRef::BuiltIn(BuiltInType::Void)
+        };
 
         let mut body = Vec::new();
 
@@ -71,12 +104,12 @@ impl Lexer {
 
         self.pop_in_place()?;
 
-        debug!("Successfully read function!");
+        debug!("[{}] Successfully read function!", self.nesting);
 
         Ok(Node::Function(FunctionNode {
             name: name.clone(),
             span,
-            args: vec![], // TODO
+            args,
             body,
             flags,
             ident: Identifier {

@@ -46,7 +46,7 @@ impl Display for BlockNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "@block[{}] {{\n{}\n}}",
+            "block[{}] {{\n{}\n}}",
             self.kind,
             self.body
                 .iter()

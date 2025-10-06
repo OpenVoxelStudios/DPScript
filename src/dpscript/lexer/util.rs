@@ -75,6 +75,10 @@ pub trait LexerMethods {
         match self.eat() {
             Some((Token::Ident(id), span)) => Ok((id, span)),
 
+            // These only count as keywords when they're not idents.
+            Some((Token::Id, span)) => Ok(("id".into(), span)),
+            Some((Token::Pos, span)) => Ok(("pos".into(), span)),
+
             Some((other, span)) => Err(LexerErr::ExpectedButGot {
                 span,
                 expect: Token::Ident("".into()),
@@ -365,14 +369,15 @@ macro_rules! impl_lexer {
 
 #[macro_export]
 macro_rules! chain_parsers {
-    (($value: expr): $self: ident; [$($parser: ident),*]) => {
+    (($value: expr): $self: ident; [$($parser: ident),*]) => {'b: {
         let mut expected = Vec::new();
         let mut span = $self.loc();
         let mut got = Token::None;
 
         $(
-            tracing::debug!("Tokens: {:#?}", $self.tokens);
+            // tracing::debug!("Tokens: {:#?}", $self.tokens);
             tracing::debug!("Pos: {}", $self.pos);
+            tracing::debug!("Next: {:?}", $self.peek(0));
 
             let res = $self.$parser();
 
@@ -382,8 +387,12 @@ macro_rules! chain_parsers {
                         $self.if_next_and_eat(Token::Semi);
                     }
 
-                    return Ok(node);
+                    break 'b Ok(node);
                 }
+
+                Err(LexerErr::NoLastExpr { span: _sp }) => {
+                    // FIXME: Show an error if this was the last possible option? Or should it be silent?
+                },
 
                 Err(LexerErr::StartParse { span: sp, expect, got: tkn }) => {
                     expected.push(expect);
@@ -409,11 +418,11 @@ macro_rules! chain_parsers {
                     }
                 }
 
-                Err(other) => return Err(other),
+                Err(other) => break 'b Err(other),
             };
         )*
 
-        return Err(LexerErr::ExpectedAny {
+        break 'b Err(LexerErr::ExpectedAny {
             span,
             got,
             expected: expected
@@ -421,12 +430,12 @@ macro_rules! chain_parsers {
                 .map(|it| format!("'{it:?}'"))
                 .collect::<Vec<_>>().join(", ")
         });
-    };
+    }};
 
-    ($sep: ident, ($value: expr): $self: ident; [$($parser: ident),*]) => {
+    ($sep: ident, ($value: expr): $self: ident; [$($parser: ident),*]) => {'b: {
         if $self.peek(0).is_some_and(|it| it.0 == *$sep) {
             $self.eat();
-            return Ok(None);
+            break 'b Ok(None);
         }
 
         let mut expected = Vec::new();
@@ -434,8 +443,9 @@ macro_rules! chain_parsers {
         let mut got = Token::None;
 
         $(
-            tracing::debug!("Tokens: {:#?}", $self.tokens);
+            // tracing::debug!("Tokens: {:#?}", $self.tokens);
             tracing::debug!("Pos: {}", $self.pos);
+            tracing::debug!("Next: {:?}", $self.peek(0));
 
             let res = $self.$parser();
 
@@ -445,8 +455,12 @@ macro_rules! chain_parsers {
                         $self.if_next_and_eat(Token::Semi);
                     }
 
-                    return Ok(Some(node));
+                    break 'b Ok(Some(node));
                 }
+
+                Err(LexerErr::NoLastExpr { span: _sp }) => {
+                    // FIXME: Show an error if this was the last possible option? Or should it be silent?
+                },
 
                 Err(LexerErr::StartParse { span: sp, expect, got: tkn }) => {
                     expected.push(expect);
@@ -472,11 +486,11 @@ macro_rules! chain_parsers {
                     }
                 }
 
-                Err(other) => return Err(other),
+                Err(other) => break 'b Err(other),
             };
         )*
 
-        return Err(LexerErr::ExpectedAny {
+        break 'b Err(LexerErr::ExpectedAny {
             span,
             got,
             expected: expected
@@ -484,5 +498,5 @@ macro_rules! chain_parsers {
                 .map(|it| format!("'{it:?}'"))
                 .collect::<Vec<_>>().join(", ")
         });
-    };
+    }};
 }

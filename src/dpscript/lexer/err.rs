@@ -20,7 +20,7 @@ pub enum LexerErr {
         tkn: Token,
     },
 
-    #[error("Expected '{expect:?}', got: '{got:?}'")]
+    #[error("Expected '{expect:?}', but got: '{got:?}'")]
     #[diagnostic(code(lexer::expected_but_got))]
     ExpectedButGot {
         #[label("here")]
@@ -44,7 +44,7 @@ pub enum LexerErr {
     },
 
     #[error("Undefined type: '{ty}'")]
-    #[diagnostic(code(lexer::int_was_negative))]
+    #[diagnostic(code(lexer::unknown_type))]
     UnknownType {
         #[label("here")]
         span: SourceSpan,
@@ -53,13 +53,20 @@ pub enum LexerErr {
 
     // Exists so we can differentiate between this and the regular one.
     // This one exists specifically for identifying if a parser even started.
-    #[error("Expected '{expect:?}', got: '{got:?}'")]
+    #[error("Expected '{expect:?}', but got: '{got:?}'")]
     #[diagnostic(code(lexer::expected_but_got_s))]
     StartParse {
         #[label("here")]
         span: SourceSpan,
         expect: Token,
         got: Token,
+    },
+
+    #[error("Could not start parsing without a previous expression!")]
+    #[diagnostic(code(lexer::no_last_expr))]
+    NoLastExpr {
+        #[label("here")]
+        span: SourceSpan,
     },
 
     #[error("Unexpected end-of-file")]
@@ -76,7 +83,7 @@ pub enum LexerErr {
         span: SourceSpan,
     },
 
-    #[error("Expected any of {expected}, got {got:?}")]
+    #[error("Expected any of {expected}, but got: '{got:?}'")]
     #[diagnostic(code(lexer::expected_any_of))]
     ExpectedAny {
         #[label("here")]
@@ -85,7 +92,7 @@ pub enum LexerErr {
         got: Token,
     },
 
-    #[error("Expected any of {expected:?}, got {got:?}")]
+    #[error("Expected any of {expected:?}, but got: '{got:?}'")]
     #[diagnostic(code(lexer::expected_any_token))]
     ExpectedAnyToken {
         #[label("here")]

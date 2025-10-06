@@ -268,7 +268,7 @@ impl Tokenizer {
                 }
             },
 
-            // TODO: Should this be an error?
+            // FIXME: Should this be an error?
             None => return Ok(()),
         };
 

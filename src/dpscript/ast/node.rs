@@ -1,6 +1,9 @@
 use crate::dpscript::{
     ast::{
-        ast::Scope, binop::BinaryOpNode, block::BlockNode, call::CallNode, cond::ConditionalNode, constant::ConstantNode, enums::EnumNode, func::FunctionNode, ident::IdentNode, import::ImportNode, literal::LiteralNode, loops::LoopNode, objective::ObjectiveNode, ret::ReturnNode, special::SpecialNode, unop::UnaryOpNode, var::VarNode
+        ast::Scope, binop::BinaryOpNode, block::BlockNode, call::CallNode, cond::ConditionalNode,
+        constant::ConstantNode, enums::EnumNode, func::FunctionNode, ident::IdentNode,
+        import::ImportNode, literal::LiteralNode, loops::LoopNode, objective::ObjectiveNode,
+        ret::ReturnNode, special::SpecialNode, unop::UnaryOpNode, var::VarNode,
     },
     data::NodeInfo,
     ty::TypeRef,
@@ -54,4 +57,28 @@ node_data! {
     Import: ImportNode,
     Return: ReturnNode,
     Special: SpecialNode,
+}
+
+impl Node {
+    pub fn maybe_has_value(&self) -> bool {
+        match self {
+            Node::Constant(_)
+            | Node::Function(_)
+            | Node::Variable(_)
+            | Node::Block(_)
+            | Node::Conditional(_)
+            | Node::Enum(_)
+            | Node::Loop(_)
+            | Node::Objective(_)
+            | Node::Import(_)
+            | Node::Return(_) => false,
+
+            Node::UnaryOp(_)
+            | Node::BinaryOp(_)
+            | Node::Literal(_)
+            | Node::Call(_)
+            | Node::Ident(_)
+            | Node::Special(_) => true,
+        }
+    }
 }

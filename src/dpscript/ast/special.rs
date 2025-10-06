@@ -4,9 +4,9 @@ use dpscript_macros::HasSpan;
 use miette::SourceSpan;
 
 use crate::dpscript::{
-    ast::{ast::Scope, node::Node},
+    ast::{ast::Scope, nbt::NbtValue, node::Node},
     data::NodeInfo,
-    ty::{BuiltInType, TypeRef},
+    ty::{BuiltInType, TypeRef, schema::TEXT_COMPONENT},
 };
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
@@ -19,6 +19,7 @@ pub struct SpecialNode {
 pub enum SpecialData {
     Selector(String),
     Pos(Box<Node>, Box<Node>, Box<Node>),
+    Component(NbtValue),
 }
 
 impl NodeInfo for SpecialNode {
@@ -30,6 +31,7 @@ impl NodeInfo for SpecialNode {
         Some(match self.data {
             SpecialData::Selector(_) => TypeRef::BuiltIn(BuiltInType::Selector),
             SpecialData::Pos(_, _, _) => TypeRef::BuiltIn(BuiltInType::Pos),
+            SpecialData::Component(_) => TypeRef::TypedNBT(TEXT_COMPONENT.to_owned()),
         })
     }
 }
@@ -45,6 +47,7 @@ impl fmt::Display for SpecialData {
         match self {
             Self::Selector(v) => write!(f, "selector<\"{v}\">"),
             Self::Pos(x, y, z) => write!(f, "pos<{x}, {y}, {z}>"),
+            Self::Component(v) => write!(f, "{v}"),
         }
     }
 }

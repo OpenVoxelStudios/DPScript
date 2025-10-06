@@ -30,7 +30,7 @@ impl fmt::Display for ImportNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for set in &self.imports {
             for import in set {
-                write!(f, "@import [{import}];\n")?;
+                write!(f, "import [{import}];\n")?;
             }
         }
 

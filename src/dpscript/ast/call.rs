@@ -15,9 +15,7 @@ pub struct CallNode {
 
     /// A reference to a node that is the receiver,
     /// like when calling an object instance function.
-    ///
-    /// This will likely be stored in a [`super::binop::BinaryOpNode`], so this will have to be populated later.
-    pub receiver: Option<Box<Node>>,
+    pub receiver: Option<String>,
 
     /// The name of the function to call.
     pub func: String,
@@ -34,16 +32,12 @@ impl NodeInfo for CallNode {
 
     fn returns(&self, scope: &Scope) -> Option<TypeRef> {
         match &self.receiver {
-            Some(recv) => match recv.returns(scope) {
-                Some(ret) => scope
+            Some(recv) => match scope.lookup(recv).map(|it| it.compute_ty(scope)).flatten() {
+                Some(ty) => scope
                     .module
                     .instance_funcs
-                    .get(&ret)
-                    .map(|it| {
-                        it.get(&self.func)
-                            .map(|it| it.return_type.clone())
-                            .flatten()
-                    })
+                    .get(&ty)
+                    .map(|it| it.get(&self.func).map(|it| it.return_type.clone()))
                     .flatten(),
 
                 None => None,
@@ -53,8 +47,7 @@ impl NodeInfo for CallNode {
                 .module
                 .funcs
                 .get(&self.func)
-                .map(|it| it.return_type.clone())
-                .flatten(),
+                .map(|it| it.return_type.clone()),
         }
     }
 }

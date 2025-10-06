@@ -14,11 +14,13 @@ impl Lexer {
     pub fn read_array(&mut self) -> Result<Node> {
         self.push();
 
-        debug!("Attempting to read array...");
+        debug!("[{}] Attempting to read array...", self.nesting);
 
         let mut span = self.start_parse(Token::LeftBracket)?;
         let mut content = Vec::new();
         let mut first = true;
+
+        self.nesting += 1;
 
         while self.peek(0).is_some_and(|it| it.0 != Token::RightBracket) {
             if first {
@@ -27,8 +29,16 @@ impl Lexer {
                 self.expect(Token::Comma)?;
             }
 
+            self.nesting += 1;
+
             content.push(self.read_value()?);
+
+            self.nesting -= 1;
         }
+
+        self.nesting -= 1;
+
+        self.if_next_and_eat(Token::Comma); // trailing comma
 
         let last = self.expect_span(Token::RightBracket)?;
 
@@ -36,7 +46,7 @@ impl Lexer {
 
         self.pop_in_place()?;
 
-        debug!("Successfully read array!");
+        debug!("[{}] Successfully read array!", self.nesting);
 
         Ok(Node::Literal(LiteralNode {
             span,

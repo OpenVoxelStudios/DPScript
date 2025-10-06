@@ -10,7 +10,7 @@ impl AddSpan for SourceSpan {
     fn add(&self, other: SourceSpan) -> SourceSpan {
         (
             self.offset(),
-            (other.offset() - self.offset()) + other.len(),
+            other.offset().saturating_sub(self.offset()) + other.len(),
         )
             .into()
     }

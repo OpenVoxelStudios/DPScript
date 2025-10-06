@@ -57,6 +57,6 @@ impl fmt::Display for VarNode {
             "".into()
         };
 
-        write!(f, "@var {} @ [{}]{ty}{val};", self.name, self.location)
+        write!(f, "var {} @ [{}]{ty}{val};", self.name, self.location)
     }
 }

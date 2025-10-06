@@ -1,43 +1,26 @@
 use crate::dpscript::{
     ast::{ident::IdentNode, node::Node},
-    lexer::{Result, err::LexerErr, util::LexerMethods},
-    tokenizer::Token,
+    lexer::{parser::Lexer, util::LexerMethods, Result},
 };
 
-pub trait IdentLexer: LexerMethods {
-    fn read_ident(&mut self) -> Result<IdentNode> {
+impl Lexer {
+    pub fn read_ident(&mut self) -> Result<IdentNode> {
         let (ident, span) = self.eat_id()?;
 
         Ok(IdentNode { span, ident })
     }
 
-    fn read_ident_full(&mut self) -> Result<Node> {
+    pub fn read_ident_full(&mut self) -> Result<Node> {
         self.push();
 
-        debug!("Attempting to parse ident...");
+        debug!("[{}] Attempting to parse ident...", self.nesting);
 
-        match self.eat() {
-            Some((Token::Ident(ident), span)) => {
-                debug!("Successfully parsed ident!");
+        let (ident, span) = self.start_parse_id()?;
 
-                self.pop_in_place()?;
+        debug!("[{}] Successfully parsed ident!", self.nesting);
 
-                Ok(Node::Ident(IdentNode { span, ident }))
-            }
+        self.pop_in_place()?;
 
-            Some((other, span)) => {
-                self.pop()?;
-
-                Err(LexerErr::StartParse {
-                    span,
-                    expect: Token::Ident("".into()),
-                    got: other,
-                })
-            }
-
-            None => Err(self.eof()),
-        }
+        Ok(Node::Ident(IdentNode { span, ident }))
     }
 }
-
-impl<T: LexerMethods> IdentLexer for T {}

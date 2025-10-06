@@ -7,13 +7,12 @@ const looper = selector: "__sqrt_loop";
 pub fn sqrt(x: float) -> float {
     gm_std[looper] = 0;
 
-    // TODO: NBT literals
-    // let temp = nbt: {
-    //     var1: x,
-    //     var2: 1,
-    //     var3: [0d, 0d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 2d],
-    //     var4: [0f, 0f, 0f, x, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 0f],
-    // };
+    let temp = nbt: {
+        var1: x,
+        var2: 1,
+        var3: [0d, 0d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 2d],
+        var4: [0f, 0f, 0f, x, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 0f],
+    };
 
     return sqrt_handling(x, 1, temp);
 }
@@ -34,12 +33,10 @@ fn sqrt_handling(var1: float, var2: float, ref temp: NBT) {
     gm_std[looper] += 1;
     positive_subtract(temp);
 
-    // TODO: Range syntax
-    // if gm_std[looper] != 20.. && temp.v1m2p != "-" {
+    if gm_std[looper] < 20 && temp.v1m2p != "-" {
         sqrt_handling(temp.var1, temp.var2, temp);
-    // }
+    }
 
-    // TODO: calls with receivers
     math_entity.tp(pos: [29999999, 0, 91665]);
 
     return temp.var1;
@@ -53,6 +50,5 @@ fn positive_subtract(ref temp: NBT) {
     //     }
     // }
 
-    // TODO: range syntax, should we even have range indexing for strings?
-    // temp.v1m2p = math_entity.Pos[1][0..1];
+    temp.v1m2p = math_entity.Pos[1][0..1];
 }

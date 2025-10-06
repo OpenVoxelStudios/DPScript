@@ -11,30 +11,26 @@ pub fn say_hi() {
     // `const` means this is just something that gets substituted for the real value during compilation.
     // The `&` just adds those properties to the component.
     // The `component: ""` syntax can be shortened to `c: ""`.
-    // TODO: NBT
-    // const base = component: "Hello, " + nbt: { color: "green" };
-    // this is syntactic sugar - this is really: new array, push(...), push(...)
-    // TODO: Selectors
-    // let text = [base, selector: "@s" + nbt: { color: "red" }, component: "!"];
+    const base = component: "Hello, " + nbt: { color: "green" };
 
-    // TODO: Selectors
-    // tellraw(selector: "@s", text);
+    // this is syntactic sugar - this is really: new array, push(...), push(...)
+    let text = [base, selector: "@s" + nbt: { color: "red" }, component: "!"];
+
+    tellraw(selector: "@s", text);
 }
 
 // Every module can have one or more init blocks, which will be their own functions and added to the load tag.
 init {
-    // TODO: NBT
-    // const txt = component: "Hello, world!" + nbt: { color: "green" };
+    const txt = component: "Hello, world!" + nbt: { color: "green" };
     let data = sqrt(100);
-    // TODO: NBT
-    // const base = component: "The square root of 100 is: ";
+    
+    const base = component: "The square root of 100 is: ";
     let msg = [base, data];
 
     tellraw(all_players, [txt]);
     tellraw(all_players, msg);
 
-    // TODO: NBT
-    // const calc_base = component: "1 + 2 is: ";
+    const calc_base = component: "1 + 2 is: ";
     let calc_msg = [base, 1 + 2];
 
     tellraw(all_players, calc_msg);

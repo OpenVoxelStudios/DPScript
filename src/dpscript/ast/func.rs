@@ -2,7 +2,11 @@ use std::fmt;
 
 use crate::{
     dpscript::{
-        ast::{ast::Scope, node::Node, util::{Body, Indent}},
+        ast::{
+            ast::Scope,
+            node::Node,
+            util::{Body, Indent},
+        },
         data::NodeInfo,
         ty::TypeRef,
     },
@@ -49,7 +53,7 @@ pub struct FunctionNode {
     pub span: SourceSpan,
     pub name: String,
     pub args: Vec<FunctionArg>,
-    pub return_type: Option<TypeRef>,
+    pub return_type: TypeRef,
     pub ident: Identifier,
     pub body: Vec<Node>,
     pub flags: FuncFlags,
@@ -62,6 +66,7 @@ pub struct FunctionArg {
     pub ty: TypeRef,
     pub location: DataLocation,
     pub is_this: bool,
+    pub is_ref: bool,
 }
 
 impl NodeInfo for FunctionNode {
@@ -75,24 +80,22 @@ impl fmt::Display for FunctionNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "@fn[{}] @ [{}] -> {}:\n",
-            self.name,
-            self.ident,
-            match &self.return_type {
-                Some(it) => format!("{it}"),
-                None => "void".into(),
-            }
+            "fn[{}] @ [{}] -> {}:\n",
+            self.name, self.ident, self.return_type,
         )?;
 
         self.flags.fmt(f)?;
 
-        for arg in &self.args {
-            arg.fmt(f)?;
-        }
-
         write!(
             f,
-            "    $body: {{\n{}\n    }};",
+            "    $args: {{\n{}\n    }};\n    $body: {{\n{}\n    }};",
+            self.args
+                .iter()
+                .map(|it| format!("{it}"))
+                .collect::<Vec<_>>()
+                .join("\n")
+                .indent(8)
+                .body(),
             self.body
                 .iter()
                 .map(|it| format!("{it}"))
@@ -108,16 +111,18 @@ impl fmt::Display for FunctionNode {
 
 impl fmt::Display for FunctionArg {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let ref_s = if self.is_ref { "[ref] " } else { "" };
+
         if self.is_this {
             write!(
                 f,
-                "$arg: (this) [{}] @ [{}]: [{}];",
+                "$arg: (this) {ref_s}[{}] @ [{}]: [{}];",
                 self.name, self.location, self.ty
             )
         } else {
             write!(
                 f,
-                "$arg: [{}] @ [{}]: [{}];",
+                "$arg: {ref_s}[{}] @ [{}]: [{}];",
                 self.name, self.location, self.ty
             )
         }
