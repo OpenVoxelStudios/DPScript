@@ -1,2 +1,29 @@
+// #[enforce(in_storage)] means the compiler will make sure any variable or constant passed
+// as a value for the parameter is in data storage. Other values will error out.
+
+// `ref` means the value will not be cloned when passed to the function, and will instead
+// mutate the actual value directly.
+
+// The `{@value}` syntax in the `#[cmd]` attribute instructs the compiler to place the full
+// reference string (for /data commands) to the value in the command, for example
+// `storage [store] [path]` or `entity [entity] [path]`, instead of placing the value itself
+// there.
+
+#[cmd("data modify storage {@source} set string storage {@target} {start} {end}")]
+inline facade fn set_string(
+    #[enforce(in_storage)] ref source: str,
+    #[enforce(in_storage)] ref target: str,
+    start: int,
+    end: int
+);
+
+/// Slice a string from the start to the end.
+/// Internally, this is basically `data modify storage [...] set string storage [...] {start} {end}`.
 #[since = "0.4.0"]
-pub compiler fn nameof(object: Any);
+pub inline fn str::slice(#[this] self: str, start: int, end: int) -> str {
+    let new = clone(self);
+
+    set_string(new, start, end);
+
+    return new;
+}

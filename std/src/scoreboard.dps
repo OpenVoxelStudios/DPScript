@@ -1,0 +1,50 @@
+// TODO: Should long selectors like this be auto-generated?
+objective operation_temp: dummy = "dpscript.std.scoreboard.operation_temp";
+
+#[cmd("scoreboard players get {sel} {obj}")]
+pub inline facade fn Objective::index(#[this] obj: Objective, sel: Selector) -> int;
+
+#[cmd("scoreboard players set {sel} {obj} {value}")]
+pub inline facade fn Objective::index_assign(#[this] obj: Objective, sel: Selector, value: int) -> int;
+
+// The `#op` syntax means it shouldn't escape the string.
+#[cmd("scoreboard players operation {sel_a} {obj_a} {#op} {sel_b} {obj_b}")]
+pub inline facade fn operation(obj_a: Objective, sel_a: Selector, op: str, obj_b: Objective, sel_b: Selector) -> int;
+
+pub inline fn operation_self(obj: Objective, sel: Selector, op: str, value: int) -> int {
+    operation_temp[sel] = value;
+
+    return operation(obj, sel, op, operation_temp, sel);
+}
+
+pub inline operator fn Objective::index_add_assign(#[this] obj: Objective, sel: Selector, value: int) -> int {
+    return operation_self(obj, sel, "+=", value);
+}
+
+pub inline operator fn Objective::index_sub_assign(#[this] obj: Objective, sel: Selector, value: int) -> int {
+    return operation_self(obj, sel, "-=", value);
+}
+
+pub inline operator fn Objective::index_mul_assign(#[this] obj: Objective, sel: Selector, value: int) -> int {
+    return operation_self(obj, sel, "*=", value);
+}
+
+pub inline operator fn Objective::index_div_assign(#[this] obj: Objective, sel: Selector, value: int) -> int {
+    return operation_self(obj, sel, "/=", value);
+}
+
+pub inline operator fn Objective::index_mod_assign(#[this] obj: Objective, sel: Selector, value: int) -> int {
+    return operation_self(obj, sel, "%=", value);
+}
+
+pub inline fn Objective::min_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
+    return operation(obj, sel, "<", obj2, sel2);
+}
+
+pub inline fn Objective::max_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
+    return operation(obj, sel, ">", obj2, sel2);
+}
+
+pub inline fn Objective::swap_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
+    return operation(obj, sel, "><", obj2, sel2);
+}

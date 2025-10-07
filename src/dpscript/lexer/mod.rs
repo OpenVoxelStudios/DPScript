@@ -21,9 +21,11 @@ pub mod unop;
 pub mod util;
 pub mod var;
 
+use std::path::PathBuf;
+
 use crate::{
     dpscript::{
-        ast::node::Node,
+        ast::{ast::AST, node::Node},
         lexer::{
             err::{LexerErr, LexerFullErr},
             parser::Lexer,
@@ -50,22 +52,33 @@ impl FullLexer {
         namespace: String,
         file_name: String,
         source: String,
+        keep: bool,
         tokens: Vec<Spanned<Token>>,
     ) -> Self {
         Self {
             namespace: namespace.clone(),
             named_src: NamedSource::new(&file_name, source.clone()),
-            file_name,
             source: source.chars().collect(),
             source_str: source,
-            inner: Lexer::new(namespace, tokens),
+            inner: Lexer::new(
+                namespace,
+                PathBuf::from(&file_name)
+                    .file_name()
+                    .unwrap()
+                    .to_string_lossy()
+                    .trim_end_matches(".dps")
+                    .into(),
+                keep,
+                tokens,
+            ),
+            file_name,
         }
     }
 
-    pub fn run(self) -> Result<Vec<Node>, LexerFullErr> {
+    pub fn run(self) -> Result<AST, LexerFullErr> {
         let src = self.named_src.clone();
 
-        self.run_inner().map_err(|it| LexerFullErr {
+        self.run_inner().map(AST::new).map_err(|it| LexerFullErr {
             err: vec![it],
             source_code: src,
         })

@@ -40,7 +40,12 @@ impl Lexer {
             ty,
             value,
             location: DataLocation {
-                storage: "TODO".into(),
+                storage: format!(
+                    "{}:__dps/gen/funcs/{}/block/{}",
+                    self.namespace,
+                    self.func()?,
+                    self.block()?
+                ),
                 path: name,
             },
         }))

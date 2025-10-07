@@ -1,22 +1,30 @@
-use std::fmt::Display;
-
-use crate::dpscript::{
-    ast::{
-        ast::Scope,
-        node::Node,
-        util::{Body, Indent},
+use crate::{
+    dpscript::{
+        ast::{
+            ast::Scope,
+            attr::AttrNode,
+            node::Node,
+            util::{Body, Indent},
+        },
+        data::NodeInfo,
+        ty::TypeRef,
     },
-    data::NodeInfo,
-    ty::TypeRef,
+    util::Identifier,
 };
 use dpscript_macros::HasSpan;
 use miette::SourceSpan;
+use std::{collections::BTreeMap, fmt::Display};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct BlockNode {
     pub span: SourceSpan,
     pub body: Vec<Node>,
     pub kind: BlockKind,
+    pub ident: Identifier,
+    pub attrs: BTreeMap<String, AttrNode>,
+
+    /// Whether to exclude this node from dead code elimination.
+    pub keep: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
@@ -48,10 +56,13 @@ impl Display for BlockKind {
 
 impl Display for BlockNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let keep = if self.keep { "[keep] " } else { "" };
+
         write!(
             f,
-            "block[{}] {{\n{}\n}}",
+            "{keep}block[{}] @ {} {{\n{}\n}}",
             self.kind,
+            self.ident,
             self.body
                 .iter()
                 .map(|it| format!("{it}"))

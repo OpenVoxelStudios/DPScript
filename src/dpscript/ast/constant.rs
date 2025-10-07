@@ -15,6 +15,9 @@ pub struct ConstantNode {
     pub name: String,
     pub ty: Option<TypeRef>,
     pub value: Box<Node>,
+
+    /// Whether to exclude this node from dead code elimination.
+    pub keep: bool,
 }
 
 impl VarInfo for ConstantNode {
@@ -41,10 +44,9 @@ impl fmt::Display for ConstantNode {
             None => "".into(),
         };
 
-        if self.is_public {
-            write!(f, "const [public] {}{ty} = {};", self.name, self.value)
-        } else {
-            write!(f, "const {}{ty} = {};", self.name, self.value)
-        }
+        let keep = if self.keep { "[keep] " } else { "" };
+        let public = if self.is_public { "[public] " } else { "" };
+
+        write!(f, "{keep}const {public}{}{ty} = {};", self.name, self.value)
     }
 }

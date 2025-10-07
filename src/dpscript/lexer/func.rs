@@ -11,23 +11,47 @@ use crate::{
     util::{DataLocation, Identifier},
 };
 
+const FN_MODIFIERS: &[Token] = &[Token::Pub, Token::Facade, Token::Compiler, Token::Inline, Token::Operator];
+
 impl Lexer {
     pub fn read_func(&mut self) -> Result<Node> {
         debug!("[{}] Attempting to read function...", self.nesting);
 
         self.push();
 
-        // TODO: Use
-        let _attr = self.read_attrs();
+        let attrs = self.read_attrs()?;
+        let mut flags = FuncFlags::empty();
+        let mut span = None;
 
-        // Flags
-        // TODO: Make the modifiers not required to be in this order
-        let is_pub = self.if_next_and_eat(Token::Pub);
-        let is_facade = self.if_next_and_eat(Token::Facade);
-        let is_compiler = self.if_next_and_eat(Token::Compiler);
+        while self.peek(0).is_some_and(|it| FN_MODIFIERS.contains(&it.0)) {
+            let (it, sp) = self.eat_res()?;
 
-        let span = self.start_parse(Token::Fn)?;
-        let (name, _) = self.eat_id()?;
+            if span.is_none() {
+                span = Some(sp);
+            }
+
+            flags |= match it {
+                Token::Pub => FuncFlags::Public,
+                Token::Facade => FuncFlags::Facade,
+                Token::Compiler => FuncFlags::Compiler,
+                Token::Inline => FuncFlags::Inline,
+                Token::Operator => FuncFlags::Operator,
+
+                _ => unreachable!("How did this happen? This is a compiler bug! Please report it!"),
+            };
+        }
+
+        let fn_span = self.start_parse(Token::Fn)?;
+        let mut span = span.unwrap_or(fn_span);
+        let (mut name, _) = self.eat_id()?;
+        let mut receiver = None;
+
+        if self.if_next_and_eat(Token::DoubleColon) {
+            let (real_name, _) = self.eat_id()?;
+
+            receiver = Some(name);
+            name = real_name;
+        }
 
         self.expect(Token::LeftParen)?;
 
@@ -43,11 +67,10 @@ impl Lexer {
                 continue;
             }
 
-            // TODO: Use this
-            let _arg_attr = self.read_attrs();
-
+            let attrs = self.read_attrs()?;
             let is_ref = self.if_next_and_eat(Token::Ref);
             let name = self.eat_id()?;
+            let is_this = attrs.contains_key("this");
 
             self.expect(Token::Colon)?;
 
@@ -58,7 +81,8 @@ impl Lexer {
             }
 
             args.push(FunctionArg {
-                is_this: false,
+                is_this,
+                attrs,
                 location: DataLocation {
                     path: name.0.clone(),
                     storage: storage.clone(),
@@ -79,34 +103,34 @@ impl Lexer {
 
         let mut body = Vec::new();
 
-        if is_facade || is_compiler {
+        if flags.contains(FuncFlags::Compiler) || flags.contains(FuncFlags::Facade) {
             self.expect(Token::Semi)?;
         } else {
+            self.push_func(name.clone());
             self.expect(Token::LeftBrace)?;
 
-            let (tokens, _) = self.eat_block(Token::LeftBrace, Token::RightBrace);
-            let parser = Lexer::new(self.namespace.clone(), tokens);
+            while !self.if_next_and_eat_span(Token::RightBrace, &mut span) {
+                body.push(self.read_body()?);
+            }
 
-            body = parser.parse_body()?;
-        }
-
-        let mut flags = FuncFlags::empty();
-
-        if is_pub {
-            flags = flags | FuncFlags::Public;
-        }
-
-        if is_facade {
-            flags = flags | FuncFlags::Facade;
-        }
-
-        if is_compiler {
-            flags = flags | FuncFlags::Compiler;
+            self.pop_func()?;
         }
 
         self.pop_in_place()?;
 
         debug!("[{}] Successfully read function!", self.nesting);
+
+        let id = attrs
+            .get("name")
+            .map(|it| {
+                it.values
+                    .first()
+                    .map(|it| it.clone().as_literal().map(|it| it.as_string()))
+            })
+            .flatten()
+            .flatten()
+            .flatten()
+            .unwrap_or(format!("zzz/{}/funcs/{}", self.module, name));
 
         Ok(Node::Function(FunctionNode {
             name: name.clone(),
@@ -114,9 +138,12 @@ impl Lexer {
             args,
             body,
             flags,
+            receiver,
+            attrs,
+            keep: self.keep,
             ident: Identifier {
                 namespace: self.namespace.clone(),
-                path: name,
+                path: id,
             },
             return_type: ret,
         }))

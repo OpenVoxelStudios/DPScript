@@ -9,6 +9,7 @@ use crate::{
     util::Spanned,
 };
 use miette::{SourceOffset, SourceSpan};
+use regex::Regex;
 
 macro_rules! lexer {
     (($value: expr, $body: expr): $name: ident => [$($func: ident),*]) => {
@@ -96,12 +97,19 @@ pub struct Lexer {
     pub last: Vec<Node>,
     pub nodes: Vec<Node>,
     pub nesting: usize,
+    pub function: Vec<String>,
+    pub block: Vec<usize>,
+    pub module: String,
+    pub event_block: usize,
+    pub keep: bool,
 }
 
 impl_lexer!(Lexer);
 
 impl Lexer {
-    pub fn new(namespace: String, tokens: Vec<Spanned<Token>>) -> Self {
+    pub fn new(namespace: String, module: String, keep: bool, tokens: Vec<Spanned<Token>>) -> Self {
+        let mod_regex = Regex::new(r"(?m)[^A-Za-z0-9]").unwrap();
+
         let last = tokens
             .first()
             .map(|it| it.1.clone())
@@ -109,6 +117,7 @@ impl Lexer {
 
         Self {
             namespace,
+            module: mod_regex.replace_all(&module, "_").to_string(),
             tokens,
             pos: 0,
             last_pos: last,
@@ -116,7 +125,63 @@ impl Lexer {
             last: Vec::new(),
             nodes: Vec::new(),
             nesting: 0,
+            function: Vec::new(),
+            block: Vec::new(),
+            event_block: 0,
+            keep,
         }
+    }
+
+    pub fn func(&self) -> Result<String> {
+        self.function
+            .last()
+            .cloned()
+            .ok_or(LexerErr::IncompleteContext {
+                span: self.loc(),
+                cause: "func()",
+            })
+    }
+
+    pub fn push_func(&mut self, func: String) {
+        self.function.push(func);
+        self.block.push(0);
+    }
+
+    pub fn pop_func(&mut self) -> Result<()> {
+        self.function.pop().ok_or(LexerErr::IncompleteContext {
+            span: self.loc(),
+            cause: "pop_func() -> function",
+        })?;
+
+        self.block.pop().ok_or(LexerErr::IncompleteContext {
+            span: self.loc(),
+            cause: "pop_func() -> block",
+        })?;
+
+        Ok(())
+    }
+
+    pub fn block(&self) -> Result<usize> {
+        self.block
+            .last()
+            .copied()
+            .ok_or(LexerErr::IncompleteContext {
+                span: self.loc(),
+                cause: "block()",
+            })
+    }
+
+    pub fn inc_block(&mut self) -> Result<usize> {
+        let span = self.loc();
+
+        let block = self.block.last_mut().ok_or(LexerErr::IncompleteContext {
+            span,
+            cause: "inc_block()",
+        })?;
+
+        *block += 1;
+
+        Ok(*block)
     }
 }
 
@@ -134,6 +199,7 @@ lexer!((false, true): body => [
     read_const,
     read_var,
     read_for_loop,
+    read_while_loop,
     read_at,
     read_cond,
     read_return,

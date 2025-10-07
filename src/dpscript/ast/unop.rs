@@ -56,9 +56,9 @@ impl fmt::Display for UnaryOpNode {
         #[cfg(not(feature = "print-clarity"))]
         match self.op {
             UnaryOperation::None => write!(f, "{}", self.value),
-            UnaryOperation::Invert => write!(f, "-{}", self.value),
+            UnaryOperation::Invert => write!(f, "!{}", self.value),
             UnaryOperation::LocalOffset => write!(f, "~{}", self.value),
-            UnaryOperation::Negate => write!(f, "!{}", self.value),
+            UnaryOperation::Negate => write!(f, "-{}", self.value),
             UnaryOperation::RangeStart => write!(f, "{}..", self.value),
             UnaryOperation::RangeEnd => write!(f, "..{}", self.value),
         }

@@ -1,6 +1,6 @@
 use crate::{Result, compiler::Compiler};
 use clap::{Parser, Subcommand};
-use std::{fs, path::PathBuf};
+use std::path::PathBuf;
 
 #[derive(Debug, Clone, Parser)]
 #[command(version, about, long_about = None)]
@@ -29,11 +29,8 @@ pub enum Commands {
         #[arg(short = 'I', long)]
         dump_ir: bool,
 
-        #[arg(
-            long,
-            help = "Build manually-created IR files. THIS IS ONLY FOR DEBUG!! ERRORS HERE WILL BE HARD TO DEBUG!"
-        )]
-        build_ir: bool,
+        #[arg(short = 'D', long)]
+        allow_dead_code: bool,
     },
 
     /// Compile a single file
@@ -71,17 +68,17 @@ impl Commands {
                 dump_tokens,
                 dump_ir,
                 out_dir,
-                build_ir,
+                allow_dead_code,
             } => {
                 Compiler::new(
                     config_path.clone(),
                     out_dir.clone(),
-                    *build_ir,
                     *dump_tokens,
                     *dump_ast,
                     *dump_ir,
+                    *allow_dead_code
                 )?
-                .compile_project(&toml::de::from_str(&fs::read_to_string(config_path)?)?)?;
+                .compile_project()?;
             }
 
             Self::Compile {
@@ -90,7 +87,7 @@ impl Commands {
                 dump_tokens: _,
                 out_dir: _,
             } => {
-                todo!("soon(TM)")
+                todo!("single-file compilation is soon(TM)")
             }
         }
 

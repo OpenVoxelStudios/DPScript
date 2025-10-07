@@ -2,7 +2,7 @@ use std::{collections::BTreeMap, fmt};
 
 use miette::SourceSpan;
 
-use crate::dpscript::ast::util::serialize_snbt;
+use crate::dpscript::ast::{node::Node, util::serialize_snbt};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct NbtValue {
@@ -21,10 +21,21 @@ pub enum NbtValueData {
     Long(i64),
     Bool(bool),
     Byte(u8),
+
+    /// An expression from the AST.
+    Expr(Box<Node>),
 }
 
 impl fmt::Display for NbtValue {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "nbt<{}>", serialize_snbt(self, false))
+        #[cfg(feature = "print-clarity")]
+        {
+            write!(f, "nbt<{}>", serialize_snbt(self, true))
+        }
+
+        #[cfg(not(feature = "print-clarity"))]
+        {
+            write!(f, "nbt<{}>", serialize_snbt(self, false))
+        }
     }
 }

@@ -1,10 +1,7 @@
-use crate::{
-    dpscript::{
-        ast::{at::AtNode, node::Node},
-        lexer::{Result, parser::Lexer, util::LexerMethods},
-        tokenizer::Token,
-    },
-    util::AddSpan,
+use crate::dpscript::{
+    ast::{at::AtNode, node::Node},
+    lexer::{Result, parser::Lexer, util::LexerMethods},
+    tokenizer::Token,
 };
 
 impl Lexer {
@@ -13,14 +10,17 @@ impl Lexer {
 
         debug!("[{}] Attempting to parse at block...", self.nesting);
 
-        let span = self.start_parse(Token::At)?;
+        let mut span = self.start_parse(Token::At)?;
         let pos = Box::new(self.read_value()?);
 
         self.expect(Token::LeftBrace)?;
+        self.inc_block()?;
 
-        let (body, end) = self.eat_block(Token::LeftBrace, Token::RightBrace);
-        let body = Lexer::new(self.namespace.clone(), body).parse_body()?;
-        let span = span.add(end);
+        let mut body = Vec::new();
+
+        while !self.if_next_and_eat_span(Token::RightBrace, &mut span) {
+            body.push(self.read_body()?);
+        }
 
         self.pop_in_place()?;
 

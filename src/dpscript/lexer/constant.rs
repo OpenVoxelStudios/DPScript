@@ -44,6 +44,7 @@ impl Lexer {
             span,
             ty,
             value,
+            keep: self.keep,
         }))
     }
 }

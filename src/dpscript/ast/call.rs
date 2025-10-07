@@ -15,7 +15,7 @@ pub struct CallNode {
 
     /// A reference to a node that is the receiver,
     /// like when calling an object instance function.
-    pub receiver: Option<String>,
+    pub receiver: Vec<String>,
 
     /// The name of the function to call.
     pub func: String,
@@ -26,36 +26,37 @@ pub struct CallNode {
 
 impl NodeInfo for CallNode {
     fn is_const(&self, _scope: &Scope) -> bool {
-        // TODO: Constant functions, maybe?
         false
     }
 
-    fn returns(&self, scope: &Scope) -> Option<TypeRef> {
-        match &self.receiver {
-            Some(recv) => match scope.lookup(recv).map(|it| it.compute_ty(scope)).flatten() {
-                Some(ty) => scope
-                    .module
-                    .instance_funcs
-                    .get(&ty)
-                    .map(|it| it.get(&self.func).map(|it| it.return_type.clone()))
-                    .flatten(),
+    fn returns(&self, _scope: &Scope) -> Option<TypeRef> {
+        // match &self.receiver {
+        //     Some(recv) => match scope.lookup(recv).map(|it| it.compute_ty(scope)).flatten() {
+        //         Some(ty) => scope
+        //             .module
+        //             .instance_funcs
+        //             .get(&ty)
+        //             .map(|it| it.get(&self.func).map(|it| it.return_type.clone()))
+        //             .flatten(),
 
-                None => None,
-            },
+        //         None => None,
+        //     },
 
-            None => scope
-                .module
-                .funcs
-                .get(&self.func)
-                .map(|it| it.return_type.clone()),
-        }
+        //     None => scope
+        //         .module
+        //         .funcs
+        //         .get(&self.func)
+        //         .map(|it| it.return_type.clone()),
+        // }
+
+        todo!()
     }
 }
 
 impl fmt::Display for CallNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let recv = if let Some(it) = &self.receiver {
-            format!("[recv: {it}] ")
+        let recv = if !self.receiver.is_empty() {
+            format!("[recv: {}] ", self.receiver.join(", "))
         } else {
             "".into()
         };

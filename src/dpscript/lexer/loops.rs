@@ -1,4 +1,5 @@
 use crate::{
+    common::traits::HasSpan,
     dpscript::{
         ast::{
             loops::{LoopCondition, LoopNode},
@@ -16,7 +17,7 @@ impl Lexer {
 
         debug!("[{}] Attempting to read loop...", self.nesting);
 
-        let span = self.start_parse(Token::For)?;
+        let mut span = self.start_parse(Token::For)?;
         let var = self.read_ident()?;
 
         self.expect(Token::In)?;
@@ -60,11 +61,16 @@ impl Lexer {
         };
 
         self.expect(Token::LeftBrace)?;
+        self.inc_block()?;
+        self.nesting += 1;
 
-        let (body, end) = self.eat_block(Token::LeftBrace, Token::RightBrace);
-        let body = Lexer::new(self.namespace.clone(), body).parse_body()?;
-        let span = span.add(end);
+        let mut body = Vec::new();
 
+        while !self.if_next_and_eat_span(Token::RightBrace, &mut span) {
+            body.push(self.read_body()?);
+        }
+
+        self.nesting -= 1;
         self.pop_in_place()?;
 
         debug!("[{}] Successfully read for loop!", self.nesting);
@@ -76,5 +82,36 @@ impl Lexer {
         }))
     }
 
-    // TODO: While loop
+    pub fn read_while_loop(&mut self) -> Result<Node> {
+        self.push();
+
+        debug!("[{}] Attempting to read while loop...", self.nesting);
+
+        let mut span = self.start_parse(Token::While)?;
+        let cond = self.read_value()?;
+
+        self.expect(Token::LeftBrace)?;
+        self.inc_block()?;
+        self.nesting += 1;
+
+        let mut body = Vec::new();
+
+        while !self.if_next_and_eat_span(Token::RightBrace, &mut span) {
+            body.push(self.read_body()?);
+        }
+
+        self.nesting -= 1;
+        self.pop_in_place()?;
+
+        debug!("[{}] Successfully read while loop!", self.nesting);
+
+        Ok(Node::Loop(LoopNode {
+            body,
+            condition: LoopCondition::While {
+                span: cond.span(),
+                condition: Box::new(cond),
+            },
+            span,
+        }))
+    }
 }

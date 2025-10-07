@@ -11,11 +11,35 @@ use crate::dpscript::{
 };
 
 macro_rules! node_data {
-    { $($variant: ident: $data: ty,)* } => {
+    { $($id: ident = $variant: ident: $data: ty,)* } => {
         #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpanGroup)]
         pub enum Node {
             $($variant($data),)*
         }
+
+        $(
+            concat_idents::concat_idents!(name = is_, $id {
+                impl Node {
+                    pub fn name(&self) -> bool {
+                        match self {
+                            Self::$variant(_) => true,
+                            _ => false,
+                        }
+                    }
+                }
+            });
+
+            concat_idents::concat_idents!(name = as_, $id {
+                impl Node {
+                    pub fn name(self) -> Option<$data> {
+                        match self {
+                            Self::$variant(data) => Some(data),
+                            _ => None,
+                        }
+                    }
+                }
+            });
+        )*
 
         impl NodeInfo for Node {
             fn is_const(&self, scope: &Scope) -> bool {
@@ -42,23 +66,23 @@ macro_rules! node_data {
 }
 
 node_data! {
-    Constant: ConstantNode,
-    Function: FunctionNode,
-    UnaryOp: UnaryOpNode,
-    BinaryOp: BinaryOpNode,
-    Variable: VarNode,
-    Block: BlockNode,
-    Literal: LiteralNode,
-    Call: CallNode,
-    Conditional: ConditionalNode,
-    Enum: EnumNode,
-    Ident: IdentNode,
-    Loop: LoopNode,
-    Objective: ObjectiveNode,
-    Import: ImportNode,
-    Return: ReturnNode,
-    Special: SpecialNode,
-    At: AtNode,
+    constant = Constant: ConstantNode,
+    function = Function: FunctionNode,
+    unary_op = UnaryOp: UnaryOpNode,
+    binary_op = BinaryOp: BinaryOpNode,
+    variable = Variable: VarNode,
+    block = Block: BlockNode,
+    literal = Literal: LiteralNode,
+    call = Call: CallNode,
+    conditional = Conditional: ConditionalNode,
+    r#enum = Enum: EnumNode,
+    ident = Ident: IdentNode,
+    r#loop = Loop: LoopNode,
+    objective = Objective: ObjectiveNode,
+    import = Import: ImportNode,
+    r#return = Return: ReturnNode,
+    special = Special: SpecialNode,
+    at = At: AtNode,
 }
 
 impl Node {

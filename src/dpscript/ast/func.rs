@@ -1,9 +1,10 @@
-use std::fmt;
+use std::{collections::BTreeMap, fmt};
 
 use crate::{
     dpscript::{
         ast::{
             ast::Scope,
+            attr::AttrNode,
             node::Node,
             util::{Body, Indent},
         },
@@ -23,6 +24,7 @@ bitflags! {
         const Facade   = 0b00000010;
         const Compiler = 0b00000100;
         const Public   = 0b00001000;
+        const Operator = 0b00010000;
     }
 }
 
@@ -44,6 +46,10 @@ impl fmt::Display for FuncFlags {
             write!(f, "    $flag: Public;\n")?;
         }
 
+        if self.contains(FuncFlags::Operator) {
+            write!(f, "    $flag: Operator;\n")?;
+        }
+
         Ok(())
     }
 }
@@ -57,6 +63,11 @@ pub struct FunctionNode {
     pub ident: Identifier,
     pub body: Vec<Node>,
     pub flags: FuncFlags,
+    pub receiver: Option<String>,
+    pub attrs: BTreeMap<String, AttrNode>,
+
+    /// Whether to exclude this node from dead code elimination.
+    pub keep: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
@@ -67,6 +78,7 @@ pub struct FunctionArg {
     pub location: DataLocation,
     pub is_this: bool,
     pub is_ref: bool,
+    pub attrs: BTreeMap<String, AttrNode>,
 }
 
 impl NodeInfo for FunctionNode {
@@ -78,9 +90,16 @@ impl NodeInfo for FunctionNode {
 
 impl fmt::Display for FunctionNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let recv = match &self.receiver {
+            Some(it) => format!("{it} -> "),
+            None => "".into(),
+        };
+
+        let keep = if self.keep { "[keep] " } else { "" };
+
         write!(
             f,
-            "fn[{}] @ [{}] -> {}:\n",
+            "{keep}fn[{recv}{}] @ [{}] -> {}:\n",
             self.name, self.ident, self.return_type,
         )?;
 

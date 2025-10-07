@@ -55,6 +55,19 @@ pub trait LexerMethods {
         self.tokens().get(self.pos() - 1).cloned()
     }
 
+    fn eat_res(&mut self) -> Result<Spanned<Token>> {
+        self.set_pos(self.pos() + 1);
+
+        if let Some(tkn) = self.peek(0) {
+            self.set_last_pos(tkn.1.clone());
+        }
+
+        match self.tokens().get(self.pos() - 1).cloned() {
+            Some(it) => Ok(it),
+            None => Err(self.eof()),
+        }
+    }
+
     fn has_next(&self) -> bool {
         self.pos() < self.tokens().len()
     }
@@ -76,7 +89,6 @@ pub trait LexerMethods {
             Some((Token::Ident(id), span)) => Ok((id, span)),
 
             // These only count as keywords when they're not idents.
-            Some((Token::Id, span)) => Ok(("id".into(), span)),
             Some((Token::Pos, span)) => Ok(("pos".into(), span)),
 
             Some((other, span)) => Err(LexerErr::ExpectedButGot {
@@ -311,6 +323,26 @@ pub trait LexerMethods {
     fn if_next_and_eat(&mut self, token: Token) -> bool {
         if self.peek(0).is_some_and(|it| it.0 == token) {
             self.eat().unwrap();
+
+            true
+        } else {
+            false
+        }
+    }
+
+    fn if_next_and_eat_with_span(&mut self, token: Token) -> (bool, SourceSpan) {
+        if self.peek(0).is_some_and(|it| it.0 == token) {
+            (true, self.eat().unwrap().1)
+        } else {
+            (false, self.loc())
+        }
+    }
+
+    fn if_next_and_eat_span(&mut self, token: Token, span: &mut SourceSpan) -> bool {
+        if self.peek(0).is_some_and(|it| it.0 == token) {
+            let (_, sp) = self.eat().unwrap();
+
+            *span = span.add(sp);
 
             true
         } else {

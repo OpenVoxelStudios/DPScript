@@ -1,19 +1,13 @@
 use std::fmt;
-
 use miette::SourceSpan;
-
-use crate::dpscript::{
-    ast::{ast::Scope, ident::IdentNode},
-    data::NodeInfo,
-    ty::TypeRef,
-};
+use crate::dpscript::{ast::ast::Scope, data::NodeInfo, ty::TypeRef};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct ImportNode {
     pub span: SourceSpan,
 
-    /// A list of paths to imports.
-    pub imports: Vec<Vec<IdentNode>>,
+    /// A list of paths to imports (each part separated by '::' is a different element in the sub-Vec).
+    pub imports: Vec<Vec<String>>,
 }
 
 impl NodeInfo for ImportNode {
@@ -29,9 +23,7 @@ impl NodeInfo for ImportNode {
 impl fmt::Display for ImportNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for set in &self.imports {
-            for import in set {
-                write!(f, "import [{import}];\n")?;
-            }
+            write!(f, "import [{}];", set.join(", "))?;
         }
 
         Ok(())

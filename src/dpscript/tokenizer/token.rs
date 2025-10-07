@@ -113,9 +113,6 @@ pub enum Token {
     /// "in"
     In,
 
-    /// "id"
-    Id,
-
     /// "import"
     Import,
 
@@ -126,13 +123,10 @@ pub enum Token {
     /// "at"
     At,
 
+    /// "as"
+    As,
+
     // ========================================
-    /// "sub"
-    Sub,
-
-    /// "store"
-    Store,
-
     /// "selector"
     Selector,
 
@@ -162,9 +156,6 @@ pub enum Token {
 
     /// "pub"
     Pub,
-
-    /// "path"
-    Path,
 
     // ========================================
     /// "const"
@@ -204,8 +195,11 @@ pub enum Token {
     /// "nbt"
     Nbt,
 
-    /// "goto"
-    Goto,
+    /// "while"
+    While,
+
+    /// "operator"
+    Operator,
 
     // =============== SPECIAL ===============
     /// "<none>"
@@ -250,11 +244,8 @@ impl fmt::Debug for Token {
             Self::Range => write!(f, ".."),
             Self::If => write!(f, "if"),
             Self::In => write!(f, "in"),
-            Self::Id => write!(f, "id"),
             Self::Import => write!(f, "import"),
             Self::Inline => write!(f, "inline"),
-            Self::Sub => write!(f, "sub"),
-            Self::Store => write!(f, "store"),
             Self::Selector => write!(f, "selector"),
             Self::Export => write!(f, "export"),
             Self::Enum => write!(f, "enum"),
@@ -263,7 +254,6 @@ impl fmt::Debug for Token {
             Self::For => write!(f, "for"),
             Self::Facade => write!(f, "facade"),
             Self::Pub => write!(f, "pub"),
-            Self::Path => write!(f, "path"),
             Self::Const => write!(f, "const"),
             Self::Compiler => write!(f, "compiler"),
             Self::Component => write!(f, "component"),
@@ -275,7 +265,6 @@ impl fmt::Debug for Token {
             Self::Tick => write!(f, "tick"),
             Self::Init => write!(f, "init"),
             Self::Nbt => write!(f, "nbt"),
-            Self::Goto => write!(f, "goto"),
             Self::Pos => write!(f, "pos"),
             Self::Tilde => write!(f, "~"),
             Self::Ref => write!(f, "ref"),
@@ -286,6 +275,9 @@ impl fmt::Debug for Token {
             Self::Or => write!(f, "|"),
             Self::Xor => write!(f, "^"),
             Self::At => write!(f, "at"),
+            Self::As => write!(f, "as"),
+            Self::While => write!(f, "while"),
+            Self::Operator => write!(f, "operator"),
         }
     }
 }
@@ -323,11 +315,8 @@ impl fmt::Display for Token {
             Self::Range => write!(f, ".."),
             Self::If => write!(f, "if"),
             Self::In => write!(f, "in"),
-            Self::Id => write!(f, "id"),
             Self::Import => write!(f, "import"),
             Self::Inline => write!(f, "inline"),
-            Self::Sub => write!(f, "sub"),
-            Self::Store => write!(f, "store"),
             Self::Selector => write!(f, "selector"),
             Self::Export => write!(f, "export"),
             Self::Enum => write!(f, "enum"),
@@ -336,7 +325,6 @@ impl fmt::Display for Token {
             Self::For => write!(f, "for"),
             Self::Facade => write!(f, "facade"),
             Self::Pub => write!(f, "pub"),
-            Self::Path => write!(f, "path"),
             Self::Const => write!(f, "const"),
             Self::Compiler => write!(f, "compiler"),
             Self::Component => write!(f, "component"),
@@ -348,7 +336,6 @@ impl fmt::Display for Token {
             Self::Tick => write!(f, "tick"),
             Self::Init => write!(f, "init"),
             Self::Nbt => write!(f, "nbt"),
-            Self::Goto => write!(f, "goto"),
             Self::Pos => write!(f, "pos"),
             Self::Tilde => write!(f, "~"),
             Self::Ref => write!(f, "ref"),
@@ -359,6 +346,9 @@ impl fmt::Display for Token {
             Self::Or => write!(f, "|"),
             Self::Xor => write!(f, "^"),
             Self::At => write!(f, "at"),
+            Self::As => write!(f, "as"),
+            Self::While => write!(f, "while"),
+            Self::Operator => write!(f, "operator"),
         }
     }
 }

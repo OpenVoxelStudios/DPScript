@@ -1,4 +1,6 @@
-import std::gm::{gm_std, math_entity};
+import std::gm::gm_std;
+import std::gm::math_entity;
+import std::base::stringify;
 
 pub fn add(x: float, y: float) -> float {
     at pos: [~0, x, ~0] {
@@ -25,7 +27,7 @@ pub fn subtract(x: float, y: float) -> float {
     }
 
     at pos: [~0, x, ~0] {
-        math_entity.tp(pos: [29999999, v2p + v2s, 91665]); // "v2p + var2" is string concatenation
+        math_entity.tp(pos: [29999999, stringify(v2p + v2s), 91665]); // "v2p + var2" is string concatenation
     }
 
     let result = math_entity.Pos[1];

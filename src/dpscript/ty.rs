@@ -12,11 +12,8 @@ pub enum TypeRef {
     /// A type that is built-in to the language.
     BuiltIn(BuiltInType),
 
-    /// A type for an NBT array.
-    Array(Vec<Option<TypeRef>>),
-
     /// A type for an array with a single type.
-    SingleArray(Box<TypeRef>),
+    Array(Box<TypeRef>),
 
     /// A type for an NBT array with a set length.
     SizedArray(Box<TypeRef>, Spanned<usize>),
@@ -91,6 +88,10 @@ pub enum BuiltInType {
     #[strum(serialize = "Any")]
     Any,
 
+    /// The type of an objective. This is only used at compile time for type checking.
+    #[strum(serialize = "Objective")]
+    Objective,
+
     /// The void type. Represents nothing.
     #[strum(serialize = "void")]
     Void,
@@ -101,18 +102,7 @@ impl fmt::Display for TypeRef {
         match self {
             TypeRef::Local(it) => write!(f, "Local<{it}>"),
             TypeRef::BuiltIn(it) => write!(f, "BuiltIn<{it}>"),
-            TypeRef::Array(it) => write!(
-                f,
-                "Array<[{}]>",
-                it.iter()
-                    .map(|it| match it {
-                        None => "None".into(),
-                        Some(it) => format!("{it}"),
-                    })
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            ),
-            TypeRef::SingleArray(it) => write!(f, "SingleArray<{it}>"),
+            TypeRef::Array(it) => write!(f, "SingleArray<{it}>"),
             TypeRef::SizedArray(it, size) => write!(f, "SizedArray<[{it}; {}]>", size.0),
             TypeRef::TypedNBT(_) => write!(f, "TypedNBT"),
         }

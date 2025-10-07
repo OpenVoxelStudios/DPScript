@@ -1,4 +1,5 @@
-import std::base::{forceload_add, summon_with};
+import std::base::forceload_add;
+import std::base::summon_with;
 
 pub objective gm_std: dummy = "gm.std";
 
@@ -9,7 +10,7 @@ init {
 
     if !math_entity {
         summon_with("item_display", pos: [29999999, 0, 91665], nbt: {
-            UUID: [I; 596917, 0, 0, 65535],
+            UUID: "00091bb5-0000-0000-0000-00000000ffff",
             CustomName: "gm.math_entity",
         });
     }

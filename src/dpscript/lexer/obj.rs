@@ -36,6 +36,7 @@ impl Lexer {
             name,
             span,
             is_public,
+            keep: self.keep,
         }))
     }
 }

@@ -12,7 +12,6 @@ pub trait TypeLexer: LexerMethods {
 
         if is_arr {
             let inner = self.read_ty()?;
-
             let has_size = self.if_next_and_eat(Token::Semi);
 
             if has_size {
@@ -27,7 +26,7 @@ pub trait TypeLexer: LexerMethods {
             } else {
                 self.expect(Token::RightBracket)?;
 
-                Ok(TypeRef::Array(vec![Some(inner)]))
+                Ok(TypeRef::Array(Box::new(inner)))
             }
         } else {
             let (id, span) = self.eat_id()?;

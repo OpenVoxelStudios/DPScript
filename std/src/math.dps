@@ -1,64 +1,37 @@
-// import std::data::{set_data, get_data, clone};
+objective int_math: dummy = "int_math";
+const value: Selector = selector: "dpscript.std.int_math.value";
 
-// Are exports necessary?
-// export std::gm::sqrt::*;
+pub operator fn int::add(#[this] #[enforce(clone)] x: int, y: int) -> int {
+    int_math[value] = x;
+    int_math[value] += y;
 
-// pub fn sin(num: float) -> float {
-//     const stor = store: "dpscript:temp/ops/sin";
-//     const pat = path: "temp_val";
+    return int_math[value];
+}
 
-//     set_data(stor, pat, num);
-//     advops(stor, pat, AdvOps::Sin);
+pub operator fn int::sub(#[this] #[enforce(clone)] x: int, y: int) -> int {
+    int_math[value] = x;
+    int_math[value] -= y;
 
-//     return get_data(stor, pat);
-// }
+    return int_math[value];
+}
 
-// pub fn cos(num: float) -> float {
-//     const stor = store: "dpscript:temp/ops/cos";
-//     const pat = path: "temp_val";
+pub operator fn int::mul(#[this] #[enforce(clone)] x: int, y: int) -> int {
+    int_math[value] = x;
+    int_math[value] *= y;
 
-//     set_data(stor, pat, num);
-//     advops(stor, pat, AdvOps::Cos);
+    return int_math[value];
+}
 
-//     return get_data(stor, pat);
-// }
+pub operator fn int::div(#[this] #[enforce(clone)] x: int, y: int) -> int {
+    int_math[value] = x;
+    int_math[value] /= y;
 
-// pub fn tan(num: float) -> float {
-//     const stor = store: "dpscript:temp/ops/tan";
-//     const pat = path: "temp_val";
+    return int_math[value];
+}
 
-//     set_data(stor, pat, num);
-//     advops(stor, pat, AdvOps::Tan);
+pub operator fn int::mod(#[this] #[enforce(clone)] x: int, y: int) -> int {
+    int_math[value] = x;
+    int_math[value] %= y;
 
-//     return get_data(stor, pat);
-// }
-
-// pub fn asin(num: float) -> float {
-//     const stor = store: "dpscript:temp/ops/asin";
-//     const pat = path: "temp_val";
-
-//     set_data(stor, pat, num);
-//     advops(stor, pat, AdvOps::Asin);
-
-//     return get_data(stor, pat);
-// }
-
-// pub fn acos(num: float) -> float {
-//     const stor = store: "dpscript:temp/ops/acos";
-//     const pat = path: "temp_val";
-
-//     set_data(stor, pat, num);
-//     advops(stor, pat, AdvOps::Acos);
-
-//     return get_data(stor, pat);
-// }
-
-// pub fn atan(num: float) -> float {
-//     const stor = store: "dpscript:temp/ops/atan";
-//     const pat = path: "temp_val";
-
-//     set_data(stor, pat, num);
-//     advops(stor, pat, AdvOps::Atan);
-
-//     return get_data(stor, pat);
-// }
+    return int_math[value];
+}

@@ -19,7 +19,11 @@ pub struct ObjectiveNode {
     /// The objective trigger (/scoreboard objectives add [id] [trigger]).
     pub kind: String,
 
+    /// Whether this is publicly exported.
     pub is_public: bool,
+
+    /// Whether to exclude this node from dead code elimination.
+    pub keep: bool,
 }
 
 impl NodeInfo for ObjectiveNode {
@@ -31,18 +35,13 @@ impl NodeInfo for ObjectiveNode {
 
 impl fmt::Display for ObjectiveNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.is_public {
-            write!(
-                f,
-                "@objective [public] {} @ [{}] [kind: {}];",
-                self.name, self.id, self.kind
-            )
-        } else {
-            write!(
-                f,
-                "@objective {} @ [{}] [kind: {}];",
-                self.name, self.id, self.kind
-            )
-        }
+        let keep = if self.keep { "[keep] " } else { "" };
+        let public = if self.is_public { "[public] " } else { "" };
+
+        write!(
+            f,
+            "{keep}objective {public}{} @ [{}] [kind: {}];",
+            self.name, self.id, self.kind
+        )
     }
 }

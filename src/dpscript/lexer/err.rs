@@ -43,6 +43,16 @@ pub enum LexerErr {
         span: SourceSpan,
     },
 
+    #[error("Lexer context was incomplete!")]
+    #[diagnostic(code(lexer::incomplete_context))]
+    IncompleteContext {
+        #[label("here")]
+        span: SourceSpan,
+
+        #[help]
+        cause: &'static str,
+    },
+
     #[error("Undefined type: '{ty}'")]
     #[diagnostic(code(lexer::unknown_type))]
     UnknownType {

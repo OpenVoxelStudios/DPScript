@@ -49,28 +49,20 @@ pub struct ElseIfNode {
 }
 
 impl NodeInfo for ConditionalNode {
-    fn is_const(&self, scope: &Scope) -> bool {
-        // Since the last item in a conditional can technically return a value from it,
-        // we have to check.
-
-        self.condition.is_const(scope)
-            && self.body.is_const(scope)
-            && self.else_ifs.iter().all(|it| it.is_const(scope))
-            && self.else_body.is_const(scope)
+    fn is_const(&self, _scope: &Scope) -> bool {
+        false
     }
 
-    // TODO
     fn returns(&self, _scope: &Scope) -> Option<TypeRef> {
         None
     }
 }
 
 impl NodeInfo for ElseIfNode {
-    fn is_const(&self, scope: &Scope) -> bool {
-        self.condition.is_const(scope) && self.body.is_const(scope)
+    fn is_const(&self, _scope: &Scope) -> bool {
+        false
     }
 
-    // TODO
     fn returns(&self, _scope: &Scope) -> Option<TypeRef> {
         None
     }

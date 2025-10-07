@@ -1,3 +1,7 @@
 #[since = "0.4.0"]
-#[cmd("data get entity {sel} UUID")]
-pub facade fn uuid(#[this] sel: Selector) -> [int; 4];
+#[cmd("data get entity {target} UUID")]
+pub facade fn Entity::uuid(#[this] target: Selector) -> [int; 4];
+
+#[since = "0.4.0"]
+#[cmd("tp {target} {pos}")]
+pub facade fn Entity::tp(#[this] target: Selector, pos: Pos);

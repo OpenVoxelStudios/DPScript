@@ -8,7 +8,8 @@ use crate::{
 impl Tokenizer {
     pub(super) fn tokenize_inner(&mut self) -> Result<()> {
         let Some(ch) = self.cursor.peek() else {
-            // TODO: Should this be an error?
+            // File is empty.
+            // Yay, guys, we did it! It was *sooooooooooooo* hard...
             return Ok(());
         };
 
@@ -223,13 +224,10 @@ impl Tokenizer {
         let kw = match self.cursor.next_group_spanned(|it| it.is_not_ident()) {
             Some((group, span)) => match group.as_str() {
                 "if" => Some((Token::If, span)),
-                "id" => Some((Token::Id, span)),
                 "in" => Some((Token::In, span)),
                 "init" => Some((Token::Init, span)),
                 "inline" => Some((Token::Inline, span)),
                 "import" => Some((Token::Import, span)),
-                "sub" => Some((Token::Sub, span)),
-                "store" => Some((Token::Store, span)),
                 "selector" => Some((Token::Selector, span)),
                 "export" => Some((Token::Export, span)),
                 "enum" => Some((Token::Enum, span)),
@@ -240,7 +238,6 @@ impl Tokenizer {
                 "false" => Some((Token::Bool(false), span)),
                 "pub" => Some((Token::Pub, span)),
                 "pos" => Some((Token::Pos, span)),
-                "path" => Some((Token::Path, span)),
                 "const" => Some((Token::Const, span)),
                 "compiler" => Some((Token::Compiler, span)),
                 "component" => Some((Token::Component, span)),
@@ -251,10 +248,12 @@ impl Tokenizer {
                 "objective" => Some((Token::Objective, span)),
                 "module" => Some((Token::Module, span)),
                 "nbt" => Some((Token::Nbt, span)),
-                "goto" => Some((Token::Goto, span)),
                 "tick" => Some((Token::Tick, span)),
                 "true" => Some((Token::Bool(true), span)),
                 "at" => Some((Token::At, span)),
+                "as" => Some((Token::As, span)),
+                "while" => Some((Token::While, span)),
+                "operator" => Some((Token::Operator, span)),
 
                 other => {
                     if other.is_empty() {

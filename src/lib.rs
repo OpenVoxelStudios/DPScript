@@ -1,4 +1,4 @@
-#![feature(error_generic_member_access)]
+#![feature(error_generic_member_access, normalize_lexically)]
 
 #[macro_use]
 extern crate serde;

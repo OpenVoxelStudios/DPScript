@@ -79,5 +79,6 @@ pub fn serialize_snbt(nbt: &NbtValue, pretty: bool) -> String {
         NbtValueData::Long(val) => format!("{val}L"),
         NbtValueData::Bool(val) => format!("{}b", if *val { 1 } else { 0 }),
         NbtValueData::Byte(val) => format!("{val}b"),
+        NbtValueData::Expr(val) => format!("{val}"),
     }
 }

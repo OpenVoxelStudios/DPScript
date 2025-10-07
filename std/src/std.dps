@@ -1,7 +1,5 @@
-import std::{
-    base::tellraw,
-    selectors::all_players,
-};
+import std::base::tellraw;
+import std::selectors::all_players;
 
 pub objective config: dummy = "dpscript_config";
 pub const enable_message = selector: "enable_std_hello";

@@ -1,0 +1,18 @@
+pub const self = selector: "@s";
+pub const nearest_entity = selector: "@n";
+pub const nearest_player = selector: "@p";
+pub const random_player = selector: "@r";
+pub const all_players = selector: "@a";
+pub const all_entities = selector: "@e";
+
+#[cmd("tellraw {target} {message}")]
+pub facade fn Selector::tellraw(#[this] target: Selector, message: NBT);
+
+#[cmd("give {target} {item}")]
+pub facade fn Selector::give(#[this] target: Selector, #[id(item)] item: Ident);
+
+#[cmd("give {target} {item} {data}")]
+pub facade fn Selector::give_nbt(#[this] target: Selector, #[id(item)] item: Ident, data: NBT);
+
+#[cmd("tp {target} {position}")]
+pub facade fn Selector::tp(#[this] target: Selector, position: Pos);

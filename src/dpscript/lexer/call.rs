@@ -13,12 +13,11 @@ impl Lexer {
 
         debug!("[{}] Attempting to parse call...", self.nesting);
 
-        let mut receiver = None;
+        let mut receiver = Vec::new();
         let (mut func, mut span) = self.start_parse_id()?;
 
-        // TODO: Make this a vec
-        if self.if_next_and_eat(Token::Dot) {
-            receiver = Some(func);
+        while self.if_next_and_eat(Token::Dot) {
+            receiver.push(func);
             func = self.start_parse_id()?.0;
         }
 

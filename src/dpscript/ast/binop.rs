@@ -328,10 +328,23 @@ impl NodeInfo for BinaryOpNode {
             BinaryOperation::Range => self
                 .lhs
                 .returns(scope)
-                .map(|it| TypeRef::SingleArray(Box::new(it))),
+                .map(|it| TypeRef::Array(Box::new(it))),
 
-            BinaryOperation::Field => todo!(),
-            BinaryOperation::ArrayIndex => todo!(),
+            BinaryOperation::Field => match &*self.rhs {
+                Node::Ident(id) => scope
+                    .module
+                    .fields
+                    .get(&self.lhs.returns(scope)?)?
+                    .get(&id.ident)
+                    .cloned(),
+                _ => None,
+            },
+
+            BinaryOperation::ArrayIndex => match self.rhs.returns(scope)? {
+                TypeRef::Array(ty) | TypeRef::SizedArray(ty, _) => Some(*ty),
+
+                _ => None,
+            },
         }
     }
 }

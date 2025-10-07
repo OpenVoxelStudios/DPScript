@@ -25,6 +25,15 @@ pub enum LiteralData {
     Nbt(NbtValue),
 }
 
+impl LiteralNode {
+    pub fn as_string(self) -> Option<String> {
+        match self.data {
+            LiteralData::String(it) => Some(it),
+            _ => None,
+        }
+    }
+}
+
 impl NodeInfo for LiteralNode {
     fn is_const(&self, _scope: &Scope) -> bool {
         true
@@ -40,7 +49,7 @@ impl NodeInfo for LiteralNode {
             LiteralData::Nbt(_) => TypeRef::BuiltIn(BuiltInType::NBT),
 
             LiteralData::Array(ref data) => {
-                TypeRef::Array(data.iter().map(|it| it.returns(scope)).collect())
+                TypeRef::Array(Box::new(data.first().map(|it| it.returns(scope))??.clone()))
             }
         })
     }
