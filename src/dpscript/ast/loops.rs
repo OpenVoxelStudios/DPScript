@@ -18,6 +18,7 @@ pub struct LoopNode {
     pub span: SourceSpan,
     pub condition: LoopCondition,
     pub body: Vec<Node>,
+    pub scope: Option<Scope>,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]

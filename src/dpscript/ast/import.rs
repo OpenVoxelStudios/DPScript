@@ -1,6 +1,6 @@
-use std::fmt;
-use miette::SourceSpan;
 use crate::dpscript::{ast::ast::Scope, data::NodeInfo, ty::TypeRef};
+use miette::SourceSpan;
+use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct ImportNode {

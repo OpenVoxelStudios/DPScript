@@ -80,6 +80,7 @@ impl Lexer {
             else_ifs,
             condition: Box::new(cond),
             body,
+            scope: None,
         }))
     }
 }

@@ -26,6 +26,11 @@ impl Lexer {
 
         debug!("[{}] Successfully read at block!", self.nesting);
 
-        Ok(Node::At(AtNode { span, body, pos }))
+        Ok(Node::At(AtNode {
+            span,
+            body,
+            pos,
+            scope: None,
+        }))
     }
 }

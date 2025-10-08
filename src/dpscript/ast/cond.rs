@@ -37,6 +37,8 @@ pub struct ConditionalNode {
     /// If this is not defined by the user, this vec will be empty.
     /// If this block is empty, it should be optimized out.
     pub else_body: Vec<Node>,
+
+    pub scope: Option<Scope>,
 }
 
 /// This should never be used on its own, only as part of a [`ConditionalNode`],

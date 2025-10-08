@@ -65,6 +65,7 @@ pub struct FunctionNode {
     pub flags: FuncFlags,
     pub receiver: Option<String>,
     pub attrs: BTreeMap<String, AttrNode>,
+    pub scope: Option<Scope>,
 
     /// Whether to exclude this node from dead code elimination.
     pub keep: bool,

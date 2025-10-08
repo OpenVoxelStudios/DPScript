@@ -1,5 +1,6 @@
 pub mod ast;
 pub mod at;
+pub mod attr;
 pub mod binop;
 pub mod block;
 pub mod call;
@@ -19,4 +20,3 @@ pub mod special;
 pub mod unop;
 pub mod util;
 pub mod var;
-pub mod attr;

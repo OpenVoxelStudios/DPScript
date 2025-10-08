@@ -1,5 +1,5 @@
-use miette::SourceSpan;
 use crate::dpscript::ast::node::Node;
+use miette::SourceSpan;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct AttrNode {

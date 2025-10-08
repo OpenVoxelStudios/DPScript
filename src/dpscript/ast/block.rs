@@ -22,6 +22,7 @@ pub struct BlockNode {
     pub kind: BlockKind,
     pub ident: Identifier,
     pub attrs: BTreeMap<String, AttrNode>,
+    pub scope: Option<Scope>,
 
     /// Whether to exclude this node from dead code elimination.
     pub keep: bool,

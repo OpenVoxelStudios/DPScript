@@ -11,7 +11,13 @@ use crate::{
     util::{DataLocation, Identifier},
 };
 
-const FN_MODIFIERS: &[Token] = &[Token::Pub, Token::Facade, Token::Compiler, Token::Inline, Token::Operator];
+const FN_MODIFIERS: &[Token] = &[
+    Token::Pub,
+    Token::Facade,
+    Token::Compiler,
+    Token::Inline,
+    Token::Operator,
+];
 
 impl Lexer {
     pub fn read_func(&mut self) -> Result<Node> {
@@ -141,6 +147,7 @@ impl Lexer {
             receiver,
             attrs,
             keep: self.keep,
+            scope: None,
             ident: Identifier {
                 namespace: self.namespace.clone(),
                 path: id,

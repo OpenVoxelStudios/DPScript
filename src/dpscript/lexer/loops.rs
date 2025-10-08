@@ -79,6 +79,7 @@ impl Lexer {
             body,
             condition,
             span,
+            scope: None,
         }))
     }
 
@@ -107,6 +108,7 @@ impl Lexer {
 
         Ok(Node::Loop(LoopNode {
             body,
+            scope: None,
             condition: LoopCondition::While {
                 span: cond.span(),
                 condition: Box::new(cond),

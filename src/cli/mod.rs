@@ -76,7 +76,7 @@ impl Commands {
                     *dump_tokens,
                     *dump_ast,
                     *dump_ir,
-                    *allow_dead_code
+                    *allow_dead_code,
                 )?
                 .compile_project()?;
             }

@@ -17,6 +17,7 @@ pub struct AtNode {
     pub span: SourceSpan,
     pub pos: Box<Node>,
     pub body: Vec<Node>,
+    pub scope: Option<Scope>,
 }
 
 impl NodeInfo for AtNode {

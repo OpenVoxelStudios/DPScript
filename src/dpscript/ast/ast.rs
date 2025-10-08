@@ -11,7 +11,7 @@ use crate::dpscript::{
     },
     ty::TypeRef,
 };
-use std::collections::HashMap;
+use std::{collections::BTreeMap, sync::Arc};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct AST {
@@ -26,28 +26,29 @@ pub struct AST {
     pub nodes: Vec<Node>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, Default)]
 pub struct Module {
     /// A map of globals to their value types.
     /// These globals aren't things like functions, only variables.
-    pub globals: HashMap<String, ConstantNode>,
+    pub globals: BTreeMap<String, ConstantNode>,
 
     /// A map of function names to nodes (which are their definitions).
-    pub funcs: HashMap<String, FunctionNode>,
+    pub funcs: BTreeMap<String, FunctionNode>,
 
     /// A map of types to user-defined instance methods.
-    pub instance_funcs: HashMap<TypeRef, HashMap<String, FunctionNode>>,
+    pub instance_funcs: BTreeMap<TypeRef, BTreeMap<String, FunctionNode>>,
 
     /// A map of types to their fields' types.
-    pub fields: HashMap<TypeRef, HashMap<String, TypeRef>>,
+    pub fields: BTreeMap<TypeRef, BTreeMap<String, TypeRef>>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct Scope {
-    pub module: Module,
+    #[serde(skip)]
+    pub module: Arc<Module>,
 
     /// A map of local variables to their value types.
-    pub locals: HashMap<String, VarNode>,
+    pub locals: BTreeMap<String, VarNode>,
 }
 
 macro_rules! only {

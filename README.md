@@ -66,3 +66,8 @@ error detection and validation possible. Don't worry anymore about strange issue
 - [ ] Package Registry
 - [ ] Build system support for the package registry
 - [ ] IR-level optimizer
+
+## Credits
+
+- Created by @KodeurKubik and @RedstoneWizard08
+- Most floating-point arithmetic is done using @gibbsly's amazing [gm](https://github.com/gibbsly/gm) datapack, ported to DPScript

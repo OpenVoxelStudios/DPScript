@@ -81,6 +81,7 @@ impl Lexer {
             body,
             attrs,
             keep: self.keep,
+            scope: None,
             ident: Identifier {
                 namespace: self.namespace.clone(),
                 path: id,

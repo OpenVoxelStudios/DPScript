@@ -9,7 +9,11 @@
 // `storage [store] [path]` or `entity [entity] [path]`, instead of placing the value itself
 // there.
 
-#[cmd("data modify storage {@source} set string storage {@target} {start} {end}")]
+/// Converts any value to a string.
+pub inline compiler fn stringify(value: Any) -> str;
+
+/// Set a string from a source to a target, slicing it.
+#[cmd("data modify {@source} set string {@target} {start} {end}")]
 inline facade fn set_string(
     #[enforce(in_storage)] ref source: str,
     #[enforce(in_storage)] ref target: str,
@@ -18,7 +22,7 @@ inline facade fn set_string(
 );
 
 /// Slice a string from the start to the end.
-/// Internally, this is basically `data modify storage [...] set string storage [...] {start} {end}`.
+/// Internally, this is basically `data modify [...] set string [...] {start} {end}`.
 #[since = "0.4.0"]
 pub inline fn str::slice(#[this] self: str, start: int, end: int) -> str {
     let new = clone(self);
