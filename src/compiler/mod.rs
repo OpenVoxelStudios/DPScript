@@ -58,9 +58,11 @@ impl Compiler {
             fs::create_dir_all(&dump_dir)?;
         }
 
-        let style = ProgressStyle::with_template("[{bar:40.cyan/blue}] {pos:.blue} of {len:.blue}")
-            .unwrap()
-            .progress_chars("## ");
+        let style = ProgressStyle::with_template(
+            "[{bar:40.cyan/blue}] {pos:.blue} of {len:.blue}",
+        )
+        .unwrap()
+        .progress_chars("=> ");
 
         let mut asts: Vec<AST> = Vec::new();
         let pb = MultiProgress::new();
@@ -123,25 +125,38 @@ impl Compiler {
         );
 
         let mut warnings = 0;
+        let pb = ProgressBar::new(asts.len() as u64).with_style(style.clone());
 
         for ast in asts.clone() {
+            pb.inc(1);
+
+            pb.println(format!(
+                "   {} {}",
+                "Analyzing".green().bold(),
+                ast.module.cyan().bold(),
+            ));
+
             let errs = Validator::new(ast, Arc::clone(&modules)).run()?;
 
             if !errs.errors.is_empty() {
+                pb.finish();
+
                 return Err(errs.into());
             }
 
             if !errs.warnings.is_empty() {
                 for warn in errs.warnings {
-                    println!(
+                    pb.println(format!(
                         "{:?}",
                         miette::Report::new(warn).with_source_code(errs.code.clone())
-                    );
+                    ));
 
                     warnings += 1;
                 }
             }
         }
+
+        pb.finish();
 
         warn!("Generated {warnings} warnings.");
 
