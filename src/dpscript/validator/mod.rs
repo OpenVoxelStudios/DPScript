@@ -75,7 +75,9 @@ impl Validator {
         self.scopes.last().ok_or(VErr::NoScope)
     }
 
-    pub fn validate(&mut self, node: &Node) -> Result<()> {
+    pub fn validate(&mut self, _node: &Node) -> Result<()> {
+        // TODO: Everything
+
         Ok(())
     }
 }
