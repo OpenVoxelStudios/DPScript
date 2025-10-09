@@ -31,9 +31,9 @@ macro_rules! node_data {
 
             concat_idents::concat_idents!(name = as_, $id {
                 impl Node {
-                    pub fn name(self) -> Option<$data> {
+                    pub fn name(&self) -> Option<$data> {
                         match self {
-                            Self::$variant(data) => Some(data),
+                            Self::$variant(data) => Some(data.clone()),
                             _ => None,
                         }
                     }

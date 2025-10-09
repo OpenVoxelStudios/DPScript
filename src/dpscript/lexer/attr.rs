@@ -36,7 +36,7 @@ impl Lexer {
             }
 
             self.expect(Token::RightBracket)?;
-            attrs.insert(name.clone(), AttrNode { span, name, values });
+            attrs.insert(name.to_owned(), AttrNode { span, name, values });
         }
 
         Ok(attrs)

@@ -49,7 +49,7 @@ pub trait LexerMethods {
         self.set_pos(self.pos() + 1);
 
         if let Some(tkn) = self.peek(0) {
-            self.set_last_pos(tkn.1.clone());
+            self.set_last_pos(tkn.1);
         }
 
         self.tokens().get(self.pos() - 1).cloned()
@@ -59,7 +59,7 @@ pub trait LexerMethods {
         self.set_pos(self.pos() + 1);
 
         if let Some(tkn) = self.peek(0) {
-            self.set_last_pos(tkn.1.clone());
+            self.set_last_pos(tkn.1);
         }
 
         match self.tokens().get(self.pos() - 1).cloned() {
@@ -77,7 +77,7 @@ pub trait LexerMethods {
     }
 
     fn loc(&self) -> SourceSpan {
-        self.last_pos().clone()
+        self.last_pos()
     }
 
     fn eof(&self) -> LexerErr {
@@ -253,7 +253,7 @@ pub trait LexerMethods {
                     self.pop()?;
 
                     Err(LexerErr::StartParse {
-                        span: span.clone(),
+                        span,
                         expect: token,
                         got: tok,
                     })
@@ -281,7 +281,7 @@ pub trait LexerMethods {
                     self.pop()?;
 
                     Err(LexerErr::StartParse {
-                        span: span.clone(),
+                        span,
                         expect: Token::Ident("".into()),
                         got: tok,
                     })
@@ -309,7 +309,7 @@ pub trait LexerMethods {
                     self.pop()?;
 
                     Err(LexerErr::ExpectedAnyToken {
-                        span: span.clone(),
+                        span,
                         expected: tokens,
                         got: tok,
                     })

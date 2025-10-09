@@ -10,3 +10,5 @@ tsconfig.tsbuildinfo
 dist
 vscode-test-web
 .vscode-test-web
+perf.data*
+flamegraph.svg

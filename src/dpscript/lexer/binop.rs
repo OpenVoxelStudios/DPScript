@@ -21,7 +21,7 @@ impl Lexer {
             return Err(LexerErr::NoLastExpr { span: self.loc() });
         };
 
-        let lhs = Box::new(last.clone());
+        let lhs = Box::new(last.to_owned());
 
         let (op_tkn, _) = self.start_parse_any(vec![
             Token::Plus,        // +
@@ -106,7 +106,7 @@ impl Lexer {
             return Err(LexerErr::NoLastExpr { span: self.loc() });
         };
 
-        let lhs = Box::new(last.clone());
+        let lhs = Box::new(last.to_owned());
 
         let (op_tkn, _) = self.start_parse_any(vec![
             Token::Or,  // |, ||
@@ -166,7 +166,7 @@ impl Lexer {
             return Err(LexerErr::NoLastExpr { span: self.loc() });
         };
 
-        let lhs = Box::new(last.clone());
+        let lhs = Box::new(last.to_owned());
 
         let (op_tkn, _) = self.start_parse_any(vec![
             Token::Dot,         // lhs.rhs

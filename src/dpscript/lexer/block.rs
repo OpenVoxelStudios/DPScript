@@ -65,7 +65,7 @@ impl Lexer {
             .map(|it| {
                 it.values
                     .first()
-                    .map(|it| it.clone().as_literal().map(|it| it.as_string()))
+                    .map(|it| it.as_literal().map(|it| it.as_string()))
             })
             .flatten()
             .flatten()

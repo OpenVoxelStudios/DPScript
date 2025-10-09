@@ -52,7 +52,7 @@ impl Lexer {
 
             Some((other, span)) => {
                 return Err(LexerErr::Unexpected {
-                    span: span.clone(),
+                    span: *span,
                     tkn: other.clone(),
                 });
             }

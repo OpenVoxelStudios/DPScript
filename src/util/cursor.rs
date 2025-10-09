@@ -280,14 +280,14 @@ impl Cursor<String, NamedSource<String>> {
         let s = data.as_ref().to_string();
 
         Self {
-            src: s.clone(),
             inner: s.chars().collect(),
+            meta: NamedSource::new(file, s.clone()),
+            src: s,
             pos: 0,
-            meta: NamedSource::new(file, s),
         }
     }
 
-    fn find_line(&self, pos: usize) -> usize {
+    pub fn find_line(&self, pos: usize) -> usize {
         let mut lines = 0;
 
         for item in &self.inner[0..pos] {
@@ -299,7 +299,7 @@ impl Cursor<String, NamedSource<String>> {
         lines
     }
 
-    fn find_char(&self, pos: usize) -> usize {
+    pub fn find_char(&self, pos: usize) -> usize {
         let line = self.find_line(pos);
         let mut lines = 0;
         let mut chars = 0;
@@ -318,25 +318,11 @@ impl Cursor<String, NamedSource<String>> {
     }
 
     pub fn span(&self, length: usize) -> SourceSpan {
-        SourceSpan::new(
-            SourceOffset::from_location(
-                &self.src,
-                self.find_line(self.pos) + 1,
-                self.find_char(self.pos),
-            ),
-            length,
-        )
+        SourceSpan::new(SourceOffset::from(self.pos), length)
     }
 
     pub fn span_prev(&self, length: usize, back: usize) -> SourceSpan {
-        SourceSpan::new(
-            SourceOffset::from_location(
-                &self.src,
-                self.find_line(self.pos - back) + 1,
-                self.find_char(self.pos - back),
-            ),
-            length,
-        )
+        SourceSpan::new(SourceOffset::from(self.pos - back), length)
     }
 
     pub fn next_group_spanned(&mut self, end: impl Fn(&char) -> bool) -> Option<Spanned<String>> {

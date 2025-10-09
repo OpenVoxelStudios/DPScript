@@ -131,7 +131,7 @@ impl Lexer {
             .map(|it| {
                 it.values
                     .first()
-                    .map(|it| it.clone().as_literal().map(|it| it.as_string()))
+                    .map(|it| it.as_literal().map(|it| it.as_string()))
             })
             .flatten()
             .flatten()
@@ -139,7 +139,7 @@ impl Lexer {
             .unwrap_or(format!("zzz/{}/funcs/{}", self.module, name));
 
         Ok(Node::Function(FunctionNode {
-            name: name.clone(),
+            name,
             span,
             args,
             body,
