@@ -8,7 +8,7 @@ use crate::dpscript::{
 use dpscript_macros::HasSpan;
 use miette::SourceSpan;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct ConstantNode {
     pub is_public: bool,
     pub span: SourceSpan,

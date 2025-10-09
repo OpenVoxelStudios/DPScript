@@ -12,7 +12,7 @@ use crate::dpscript::{
 
 macro_rules! node_data {
     { $($id: ident = $variant: ident: $data: ty,)* } => {
-        #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpanGroup)]
+        #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpanGroup)]
         pub enum Node {
             $($variant($data),)*
         }

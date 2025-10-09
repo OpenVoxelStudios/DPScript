@@ -6,7 +6,7 @@ use crate::dpscript::{ast::node::Node, data::NodeInfo};
 
 use super::ast::Scope;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct ReturnNode {
     pub span: SourceSpan,
     pub value: Option<Box<Node>>,

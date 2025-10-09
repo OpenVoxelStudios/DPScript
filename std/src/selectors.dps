@@ -1,9 +1,9 @@
-pub const self = selector: "@s";
-pub const nearest_entity = selector: "@n";
-pub const nearest_player = selector: "@p";
-pub const random_player = selector: "@r";
-pub const all_players = selector: "@a";
-pub const all_entities = selector: "@e";
+pub const self: Selector = selector: "@s";
+pub const nearest_entity: Selector = selector: "@n";
+pub const nearest_player: Selector = selector: "@p";
+pub const random_player: Selector = selector: "@r";
+pub const all_players: Selector = selector: "@a";
+pub const all_entities: Selector = selector: "@e";
 
 #[cmd("tellraw {target} {message}")]
 pub facade fn Selector::tellraw(#[this] target: Selector, message: NBT);

@@ -1,8 +1,8 @@
-import std::base::tellraw;
+import std::selectors::tellraw;
 import std::selectors::all_players;
 
 pub objective config: dummy = "dpscript_config";
-pub const enable_message = selector: "enable_std_hello";
+pub const enable_message: Selector = selector: "enable_std_hello";
 
 init {
     const welcome = [c: "Thank you for using DPScript!" + nbt: { bold: true }];

@@ -54,7 +54,7 @@ impl fmt::Display for FuncFlags {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct FunctionNode {
     pub span: SourceSpan,
     pub name: String,
@@ -71,7 +71,7 @@ pub struct FunctionNode {
     pub keep: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct FunctionArg {
     pub span: SourceSpan,
     pub name: String,

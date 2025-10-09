@@ -1,9 +1,8 @@
-import std::base::tp_pos;
-import std::data::set_string_entity;
+import std::entity::tp;
 import std::gm::gm_std;
 import std::gm::math_entity;
 
-const looper = selector: "__sqrt_loop";
+const looper: Selector = selector: "__sqrt_loop";
 
 pub fn sqrt(x: float) -> float {
     gm_std[looper] = 0;

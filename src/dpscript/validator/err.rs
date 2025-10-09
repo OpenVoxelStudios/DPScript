@@ -1,0 +1,94 @@
+use miette::{Diagnostic, NamedSource, SourceSpan};
+use thiserror::Error;
+
+use crate::dpscript::ty::TypeRef;
+
+#[derive(Debug, Error, Diagnostic)]
+pub enum ValidatorErr {
+    #[error("Unresolved import: '{path}' (from module '{module}')")]
+    #[diagnostic(code(validator::unresolved_import))]
+    UnresolvedImport {
+        #[label("here")]
+        span: SourceSpan,
+        path: String,
+        module: String,
+    },
+
+    #[error("Duplicate import: '{name}")]
+    #[diagnostic(code(validator::duplicate_import))]
+    DuplicateImport {
+        #[label("here")]
+        span: SourceSpan,
+        name: String,
+    },
+
+    #[error("Module not found: '{module}'")]
+    #[diagnostic(code(validator::module_not_found))]
+    ModuleNotFound {
+        #[label("here")]
+        span: SourceSpan,
+        module: String,
+    },
+
+    #[error("Cannot compute type for value!")]
+    #[diagnostic(code(validator::cannot_compute_type))]
+    CannotComputeType {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("Type mismatch: expected '{expected}', got '{got}'!")]
+    #[diagnostic(code(validator::type_mismatch))]
+    TypeMismatch {
+        #[label("here")]
+        span: SourceSpan,
+        expected: TypeRef,
+        got: TypeRef,
+    },
+}
+
+/// An error occured during the validation step. This is ALWAYS a compiler bug.
+#[derive(Debug, Error, Diagnostic)]
+pub enum ValidationErr {
+    #[error("Failed to process import - path was empty!")]
+    #[diagnostic(code(compiler::empty_import_path))]
+    EmptyImportPath {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("Scope stack was empty!.")]
+    #[diagnostic(code(compiler::no_scope))]
+    NoScope,
+}
+
+#[derive(Debug, Error, Diagnostic)]
+#[diagnostic(severity(Warning))]
+pub enum ValidatorWarn {
+    #[error("Type inference on constants is discouraged.")]
+    #[diagnostic(code(compiler::const_no_explicit_type))]
+    ConstNoExplicitType {
+        #[label("here")]
+        span: SourceSpan,
+    },
+}
+
+#[derive(Debug, Error, Diagnostic)]
+#[error("Validation results:")]
+#[diagnostic()]
+pub struct AllErrors {
+    #[source_code]
+    pub code: NamedSource<String>,
+
+    #[related]
+    pub errors: Vec<ValidatorErr>,
+
+    #[related]
+    pub warnings: Vec<ValidatorWarn>,
+}
+
+pub type Err = ValidatorErr;
+pub type Warn = ValidatorWarn;
+pub type VErr = ValidationErr;
+
+pub type Result<T, E = ValidationErr> = core::result::Result<T, E>;

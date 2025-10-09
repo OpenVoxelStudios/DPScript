@@ -3,7 +3,7 @@ import std::base::summon_with;
 
 pub objective gm_std: dummy = "gm.std";
 
-pub const math_entity = selector: "91bb5-0-0-0-ffff";
+pub const math_entity: Selector = selector: "91bb5-0-0-0-ffff";
 
 init {
     forceload_add(29999999, 91665);

@@ -14,7 +14,7 @@ use crate::dpscript::{
 
 use super::ast::Scope;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct ConditionalNode {
     pub span: SourceSpan,
 
@@ -43,7 +43,7 @@ pub struct ConditionalNode {
 
 /// This should never be used on its own, only as part of a [`ConditionalNode`],
 /// so it won't be a valid variant for a regular [`Node`].
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct ElseIfNode {
     pub span: SourceSpan,
     pub condition: Node,

@@ -1,10 +1,11 @@
-use std::fmt;
-
-use miette::SourceSpan;
-
-use crate::dpscript::data::NodeInfo;
-
 use super::ast::Scope;
+use crate::dpscript::{
+    ast::var::VarInfo,
+    data::NodeInfo,
+    ty::{BuiltInType, TypeRef},
+};
+use miette::SourceSpan;
+use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct ObjectiveNode {
@@ -30,6 +31,16 @@ impl NodeInfo for ObjectiveNode {
     fn is_const(&self, _scope: &Scope) -> bool {
         // This is the declaration of a variable that gets removed during compilation, so therefore it is not constant.
         false
+    }
+}
+
+impl VarInfo for ObjectiveNode {
+    fn compute_ty(&self, _scope: &Scope) -> Option<TypeRef> {
+        Some(TypeRef::BuiltIn(BuiltInType::Objective))
+    }
+
+    fn is_const_var(&self) -> bool {
+        true
     }
 }
 

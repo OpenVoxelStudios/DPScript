@@ -1,6 +1,6 @@
 import std::gm::gm_std;
 import std::gm::math_entity;
-import std::base::stringify;
+import std::intrinsics::stringify;
 
 pub fn add(x: float, y: float) -> float {
     at pos: [~0, x, ~0] {

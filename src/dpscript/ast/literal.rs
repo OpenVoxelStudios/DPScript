@@ -8,13 +8,13 @@ use crate::dpscript::{
     ty::{BuiltInType, TypeRef},
 };
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct LiteralNode {
     pub span: SourceSpan,
     pub data: LiteralData,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub enum LiteralData {
     String(String),
     Int(i64),

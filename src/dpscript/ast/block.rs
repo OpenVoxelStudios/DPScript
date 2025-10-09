@@ -15,7 +15,7 @@ use dpscript_macros::HasSpan;
 use miette::SourceSpan;
 use std::{collections::BTreeMap, fmt::Display};
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct BlockNode {
     pub span: SourceSpan,
     pub body: Vec<Node>,

@@ -4,46 +4,39 @@ use miette::{NamedSource, SourceOffset, SourceSpan};
 use std::{collections::HashMap, fs, path::PathBuf};
 use walkdir::WalkDir;
 
-/// return: Vec<(namespace, keep (is_not_dependency), Vec<file>)>
-pub fn get_source_files(
-    dir: &PathBuf,
-    pack: &PackToml,
-) -> Result<Vec<(String, bool, Vec<String>)>> {
+pub fn get_pack_source_files(src_dir: &PathBuf) -> Vec<PathBuf> {
     let mut files = Vec::new();
 
-    files.push((pack.pack.name.clone(), true, get_pack_source_files(dir)));
-
-    files.extend(
-        resolve_deps(pack)?
-            .iter()
-            .map(|(v, ns)| (ns.clone(), false, get_pack_source_files(v)))
-            .collect::<Vec<_>>(),
-    );
-
-    Ok(files)
-}
-
-fn get_pack_source_files(dir: &PathBuf) -> Vec<String> {
-    let root = dir.join("src");
-    let mut files = Vec::new();
-
-    let walk = WalkDir::new(&root)
+    let walk = WalkDir::new(&src_dir)
         .into_iter()
         .filter_map(|v| v.ok())
         .filter(|v| v.file_name().to_str().unwrap().ends_with(".dps"))
         .collect::<Vec<_>>();
 
     for entry in walk {
-        let path = entry.path();
-
-        files.push(path.to_str().unwrap().into());
+        files.push(entry.path().to_path_buf());
     }
 
     files
 }
 
-fn resolve_deps(proj: &PackToml) -> Result<HashMap<PathBuf, String>> {
+pub fn resolve_pack_deps(root: &PathBuf) -> Result<Vec<PackageInfo>> {
+    Ok(resolve_deps(root, true)?.into_values().collect())
+}
+
+fn resolve_deps(path: &PathBuf, root: bool) -> Result<HashMap<String, PackageInfo>> {
+    let proj = toml::from_str::<PackToml>(&fs::read_to_string(path.join("pack.toml"))?)?;
     let mut dep_dirs = HashMap::new();
+
+    dep_dirs.insert(
+        proj.pack.name.clone(),
+        PackageInfo {
+            pack: proj.clone(),
+            path: path.clone(),
+            src_path: path.join("src"),
+            keep: root,
+        },
+    );
 
     for (item, path) in &proj.dependencies {
         let path = PathBuf::from(path);
@@ -67,16 +60,25 @@ fn resolve_deps(proj: &PackToml) -> Result<HashMap<PathBuf, String>> {
 
         let path = path.canonicalize()?;
 
-        if !dep_dirs.contains_key(&path) {
-            dep_dirs.insert(path, toml.pack.name.clone());
-        }
-
-        for (item, ns) in resolve_deps(&toml)? {
-            if !dep_dirs.contains_key(&item) {
-                dep_dirs.insert(item, ns);
-            }
-        }
+        dep_dirs.extend(resolve_deps(&path, false)?);
     }
 
     Ok(dep_dirs)
+}
+
+/// Package info.
+#[derive(Debug, Clone, PartialEq)]
+pub struct PackageInfo {
+    /// The package's pack.toml info.
+    pub pack: PackToml,
+
+    /// The root path to the package.
+    pub path: PathBuf,
+
+    /// The sources path of the package.
+    pub src_path: PathBuf,
+
+    /// Whether to exclude this package's code from dead code elimination.
+    /// This will be true if this is the root project we are compiling.
+    pub keep: bool,
 }

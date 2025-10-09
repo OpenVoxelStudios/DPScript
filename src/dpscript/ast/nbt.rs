@@ -4,13 +4,13 @@ use miette::SourceSpan;
 
 use crate::dpscript::ast::{node::Node, util::serialize_snbt};
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct NbtValue {
     pub span: SourceSpan,
     pub data: NbtValueData,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub enum NbtValueData {
     Map(BTreeMap<String, NbtValue>),
     Array(Vec<NbtValue>),

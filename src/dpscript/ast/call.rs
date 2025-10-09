@@ -9,7 +9,7 @@ use crate::dpscript::{
     ty::TypeRef,
 };
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct CallNode {
     pub span: SourceSpan,
 

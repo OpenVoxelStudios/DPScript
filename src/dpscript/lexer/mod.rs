@@ -39,6 +39,7 @@ use miette::NamedSource;
 pub type Result<T, E = LexerErr> = core::result::Result<T, E>;
 
 pub struct FullLexer {
+    pub module: String,
     pub file_name: String,
     pub source: Vec<char>,
     pub source_str: String,
@@ -49,6 +50,7 @@ pub struct FullLexer {
 
 impl FullLexer {
     pub fn new(
+        module: String,
         namespace: String,
         file_name: String,
         source: String,
@@ -56,6 +58,7 @@ impl FullLexer {
         tokens: Vec<Spanned<Token>>,
     ) -> Self {
         Self {
+            module,
             namespace: namespace.clone(),
             named_src: NamedSource::new(&file_name, source.clone()),
             source: source.chars().collect(),
@@ -77,11 +80,14 @@ impl FullLexer {
 
     pub fn run(self) -> Result<AST, LexerFullErr> {
         let src = self.named_src.clone();
+        let module = self.module.clone();
 
-        self.run_inner().map(AST::new).map_err(|it| LexerFullErr {
-            err: vec![it],
-            source_code: src,
-        })
+        self.run_inner()
+            .map(|it| AST::new(module, src.clone(), it))
+            .map_err(|it| LexerFullErr {
+                err: vec![it],
+                source_code: src,
+            })
     }
 
     fn run_inner(self) -> Result<Vec<Node>> {

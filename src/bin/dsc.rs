@@ -1,6 +1,8 @@
 use clap::Parser;
 use dpscript::cli::Cli;
 use miette::highlighters::SyntectHighlighter;
+use tracing::level_filters::LevelFilter;
+use tracing_subscriber::EnvFilter;
 
 pub fn main() -> miette::Result<()> {
     miette::set_hook(Box::new(|_| {
@@ -18,7 +20,14 @@ pub fn main() -> miette::Result<()> {
         )
     }))?;
 
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            EnvFilter::builder()
+                .with_default_directive(LevelFilter::INFO.into())
+                .from_env_lossy(),
+        )
+        .init();
+
     Cli::parse().run()?;
 
     Ok(())

@@ -15,7 +15,7 @@ impl Lexer {
 
         let is_public = self.if_next_and_eat(Token::Pub);
         let span = self.start_parse(Token::Objective)?;
-        let (id, _) = self.eat_id()?;
+        let (name, _) = self.eat_id()?;
 
         self.expect(Token::Colon)?;
 
@@ -23,8 +23,8 @@ impl Lexer {
 
         self.expect(Token::Equal)?;
 
-        let (name, name_span) = self.eat_str()?;
-        let span = span.add(name_span);
+        let (id, id_span) = self.eat_str()?;
+        let span = span.add(id_span);
 
         self.pop_in_place()?;
 

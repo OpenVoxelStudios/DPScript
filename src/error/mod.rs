@@ -3,19 +3,20 @@ mod dep;
 mod lexer;
 mod lowerer;
 mod tokenizer;
-mod validator;
 
 pub use compiler::*;
 pub use dep::*;
 pub use lexer::*;
 pub use lowerer::*;
 pub use tokenizer::*;
-pub use validator::*;
 
 use miette::Diagnostic;
 use thiserror::Error;
 
-use crate::dpscript::lexer::err::{LexerErr, LexerFullErr};
+use crate::dpscript::{
+    lexer::err::{LexerErr, LexerFullErr},
+    validator::err::{AllErrors, ValidationErr},
+};
 
 #[derive(Debug, Error, Diagnostic)]
 pub enum Error {
@@ -37,39 +38,15 @@ pub enum Error {
 
     #[error(transparent)]
     #[diagnostic(transparent)]
-    LexerFull(#[from] LexerFullErr),
+    FullLexer(#[from] LexerFullErr),
 
     #[error(transparent)]
     #[diagnostic(transparent)]
-    UnnamedLexer(#[from] UnnamedLexerError),
+    AllValidator(#[from] AllErrors),
 
     #[error(transparent)]
     #[diagnostic(transparent)]
-    Validator(#[from] ValidatorError),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    DuoValidator(#[from] DuoValidatorError),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    UnnamedValidator(#[from] UnnamedValidatorError),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    UnnamedDuoValidator(#[from] UnnamedDuoValidatorError),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    UnsourcedValidator(#[from] UnsourcedValidatorError),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    Lowerer(#[from] LowererError),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    UnnamedLowerer(#[from] UnnamedLowererError),
+    Validator(#[from] ValidationErr),
 
     #[error(transparent)]
     #[diagnostic(transparent)]

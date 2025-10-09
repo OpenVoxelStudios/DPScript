@@ -9,13 +9,13 @@ use crate::dpscript::{
     ty::{BuiltInType, TypeRef, schema::TEXT_COMPONENT},
 };
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct SpecialNode {
     pub span: SourceSpan,
     pub data: SpecialData,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub enum SpecialData {
     Selector(String),
     Pos(Box<Node>, Box<Node>, Box<Node>),

@@ -1,7 +1,7 @@
 // commented out because i'm gonna leave the import parsing sorta unimplemented for now
 // (definitely not procrastination no way nuh uh)
-import std::base::tellraw;
-import std::math::sqrt;
+import std::gm::sqrt::sqrt;
+import std::selectors::tellraw;
 import std::selectors::all_players;
 
 // This is a basic function:

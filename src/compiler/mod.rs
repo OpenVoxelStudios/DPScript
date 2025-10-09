@@ -1,12 +1,13 @@
 use crate::{
     Result,
-    dpscript::{ast::ast::AST, lexer::FullLexer, tokenizer::Tokenizer},
-    pack::{PackToml, get_source_files},
+    dpscript::{ast::ast::AST, lexer::FullLexer, tokenizer::Tokenizer, validator::Validator},
+    pack::{PackToml, get_pack_source_files, resolve_pack_deps},
 };
-use indicatif::{ProgressIterator, ProgressStyle};
+use colored::Colorize;
+use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use ron::ser::PrettyConfig;
 use serde::{Deserialize, Serialize};
-use std::{fs, path::PathBuf};
+use std::{collections::HashMap, fs, path::PathBuf, sync::Arc};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Compiler {
@@ -51,7 +52,7 @@ impl Compiler {
 
     pub fn compile_project(&self) -> Result<()> {
         let dump_dir = self.out_dir.join(".dpscript");
-        let source_files = get_source_files(&self.base, &self.config)?;
+        let pkgs = resolve_pack_deps(&self.base)?;
 
         if !dump_dir.exists() {
             fs::create_dir_all(&dump_dir)?;
@@ -61,17 +62,52 @@ impl Compiler {
             .unwrap()
             .progress_chars("## ");
 
-        let mut asts = Vec::new();
+        let mut asts: Vec<AST> = Vec::new();
+        let pb = MultiProgress::new();
+        let master = pb.add(ProgressBar::new(pkgs.len() as u64).with_style(style.clone()));
 
-        for (ns, keep, path) in source_files
-            .into_iter()
-            .flat_map(|(ns, keep, pat)| pat.into_iter().map(move |it| (ns.clone(), keep, it)))
-            .collect::<Vec<_>>()
-            .into_iter()
-            .progress_with_style(style)
-        {
-            asts.push(self.create_ast(ns, &PathBuf::from(path), keep || self.allow_dead_code)?);
+        for pkg in pkgs {
+            master.inc(1);
+
+            master.println(format!(
+                "   {} {} {}{}",
+                "Parsing".green().bold(),
+                pkg.pack.pack.name.cyan().bold(),
+                "v".magenta().bold(),
+                pkg.pack.pack.version.magenta().bold()
+            ));
+
+            let files = get_pack_source_files(&pkg.src_path);
+            let fpb = pb.add(ProgressBar::new(files.len() as u64).with_style(style.clone()));
+
+            for file in files {
+                let path = file.strip_prefix(&pkg.src_path).unwrap();
+                let path = format!("{}", path.display());
+
+                fpb.inc(1);
+
+                fpb.println(format!(
+                    "      + {} {}",
+                    "Compiling".purple().bold(),
+                    path.blue().bold()
+                ));
+
+                let path = path.trim_end_matches(".dps");
+                let module = path.replace("\\", "::").replace("/", "::");
+                let module = format!("{}::{}", pkg.pack.pack.name, module);
+
+                asts.push(self.create_ast(
+                    module,
+                    &pkg.pack.pack.name,
+                    &file,
+                    pkg.keep || self.allow_dead_code,
+                )?);
+            }
+
+            fpb.finish_and_clear();
         }
+
+        master.finish();
 
         if asts.is_empty() {
             warn!("No source files found!");
@@ -79,65 +115,95 @@ impl Compiler {
             return Ok(());
         }
 
-        let mut full = AST::new(Vec::new());
+        let modules = Arc::new(
+            asts.clone()
+                .into_iter()
+                .map(|it| (it.module.clone(), it))
+                .collect::<HashMap<_, _>>(),
+        );
 
-        for ast in asts {
-            full = full.merge(ast);
-        }
+        let mut warnings = 0;
 
-        if self.dump_ast {
-            let dump_file = dump_dir.join("merged.nodes.ron");
+        for ast in asts.clone() {
+            let errs = Validator::new(ast, Arc::clone(&modules)).run()?;
 
-            fs::write(
-                dump_file,
-                ron::ser::to_string_pretty(&full.nodes, PrettyConfig::new())?,
-            )?;
-
-            let dump_file = dump_dir.join("merged.nodes.dpir");
-
-            fs::write(
-                dump_file,
-                full.nodes
-                    .iter()
-                    .map(|it| format!("{it}"))
-                    .collect::<Vec<_>>()
-                    .join("\n\n"),
-            )?;
-
-            let dump_file = dump_dir.join("merged.ast.ron");
-
-            fs::write(
-                dump_file,
-                ron::ser::to_string_pretty(&full, PrettyConfig::new())?,
-            )?;
-
-            let merged_dir = dump_dir.join("merged");
-
-            if !merged_dir.exists() {
-                fs::create_dir_all(&merged_dir)?;
+            if !errs.errors.is_empty() {
+                return Err(errs.into());
             }
 
-            // dump_ast_part!(ast.top_level => merged_dir);
-            // dump_ast_part!(ast.imports => merged_dir);
-            // dump_ast_part!(ast.funcs => merged_dir);
-            // dump_ast_part!(ast.vars => merged_dir);
-            // dump_ast_part!(ast.blocks => merged_dir);
-            // dump_ast_part!(ast.enums => merged_dir);
-            // dump_ast_part!(ast.objectives => merged_dir);
-            // dump_ast_part!(ast.modules => merged_dir);
-            // dump_ast_part!(ast.exports => merged_dir);
+            if !errs.warnings.is_empty() {
+                for warn in errs.warnings {
+                    println!(
+                        "{:?}",
+                        miette::Report::new(warn).with_source_code(errs.code.clone())
+                    );
 
-            // if let Ok(it) = &ast.export_nodes() {
-            //     let path = merged_dir.join("export_nodes.ron");
-
-            //     fs::write(path, ron::ser::to_string_pretty(it, PrettyConfig::new())?)?;
-            // }
+                    warnings += 1;
+                }
+            }
         }
+
+        warn!("Generated {warnings} warnings.");
+
+        // if self.dump_ast {
+        // let dump_file = dump_dir.join("merged.nodes.ron");
+
+        // fs::write(
+        //     dump_file,
+        //     ron::ser::to_string_pretty(&full.nodes, PrettyConfig::new())?,
+        // )?;
+
+        // let dump_file = dump_dir.join("merged.nodes.dpir");
+
+        // fs::write(
+        //     dump_file,
+        //     full.nodes
+        //         .iter()
+        //         .map(|it| format!("{it}"))
+        //         .collect::<Vec<_>>()
+        //         .join("\n\n"),
+        // )?;
+
+        // let dump_file = dump_dir.join("merged.ast.ron");
+
+        // fs::write(
+        //     dump_file,
+        //     ron::ser::to_string_pretty(&full, PrettyConfig::new())?,
+        // )?;
+
+        // let merged_dir = dump_dir.join("merged");
+
+        // if !merged_dir.exists() {
+        //     fs::create_dir_all(&merged_dir)?;
+        // }
+
+        // dump_ast_part!(ast.top_level => merged_dir);
+        // dump_ast_part!(ast.imports => merged_dir);
+        // dump_ast_part!(ast.funcs => merged_dir);
+        // dump_ast_part!(ast.vars => merged_dir);
+        // dump_ast_part!(ast.blocks => merged_dir);
+        // dump_ast_part!(ast.enums => merged_dir);
+        // dump_ast_part!(ast.objectives => merged_dir);
+        // dump_ast_part!(ast.modules => merged_dir);
+        // dump_ast_part!(ast.exports => merged_dir);
+
+        // if let Ok(it) = &ast.export_nodes() {
+        //     let path = merged_dir.join("export_nodes.ron");
+
+        //     fs::write(path, ron::ser::to_string_pretty(it, PrettyConfig::new())?)?;
+        // }
+        // }
 
         Ok(())
     }
 
-    fn create_ast(&self, namespace: impl AsRef<str>, file: &PathBuf, keep: bool) -> Result<AST> {
+    fn create_ast(
+        &self,
+        module: String,
+        namespace: impl AsRef<str>,
+        file: &PathBuf,
+        keep: bool,
+    ) -> Result<AST> {
         let file_name = file.to_str().unwrap();
         let data = fs::read_to_string(&file)?;
         let tokens = Tokenizer::new(&file_name, data.clone()).run()?.tokens();
@@ -191,6 +257,7 @@ impl Compiler {
         }
 
         let ast = FullLexer::new(
+            module,
             namespace.as_ref().into(),
             file_name.into(),
             data,

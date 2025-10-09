@@ -12,7 +12,7 @@ use crate::dpscript::{
 
 use super::ast::Scope;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct AtNode {
     pub span: SourceSpan,
     pub pos: Box<Node>,

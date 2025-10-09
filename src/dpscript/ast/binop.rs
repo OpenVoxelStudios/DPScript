@@ -15,7 +15,7 @@ use crate::{
     util::Spanned,
 };
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct BinaryOpNode {
     pub span: SourceSpan,
     pub op: BinaryOperation,
@@ -251,6 +251,22 @@ impl BinaryOperation {
             other => panic!(
                 "Binary operation cannot be used as an assignment operator: {other:?}\nThis is a compiler bug! Please report this!"
             ),
+        }
+    }
+
+    pub fn is_assign(&self) -> bool {
+        match self {
+            Self::Assign
+            | Self::AddAssign
+            | Self::SubAssign
+            | Self::MulAssign
+            | Self::DivAssign
+            | Self::ModAssign
+            | Self::BitAndAssign
+            | Self::BitOrAssign
+            | Self::BitXorAssign => true,
+
+            _ => false,
         }
     }
 
