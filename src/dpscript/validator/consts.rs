@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use crate::{
     common::traits::HasSpan,
     dpscript::{
@@ -12,22 +14,26 @@ use crate::{
 
 impl Validator {
     pub fn validate_constants(&mut self) -> Result<()> {
-        for (_, node) in self.ast.constants.clone() {
-            self.validate_constant(&node)?;
+        let mut out = BTreeMap::new();
+
+        for (k, mut node) in self.ast.scope.constants.clone() {
+            self.validate_constant(&mut node)?;
+            out.insert(k, node);
         }
+
+        self.ast.scope.constants = out;
 
         Ok(())
     }
 
-    pub fn validate_constant(&mut self, node: &ConstantNode) -> Result<()> {
+    pub fn validate_constant(&mut self, node: &mut ConstantNode) -> Result<()> {
         if node.ty.is_none() {
             self.warnings
                 .push(Warn::ConstNoExplicitType { span: node.span() });
         }
 
-        self.scopes.push(self.global_scope.clone());
-        self.validate(&node.value)?;
-        self.scopes.pop();
+        self.validate_ident(&(node.name.clone(), node.span))?; // TODO: Better span so it's actually the name
+        self.validate(&mut node.value)?;
 
         let ret = node.value.returns(&self.global_scope);
 
@@ -46,6 +52,10 @@ impl Validator {
                 span: node.value.span(),
             });
         }
+
+        self.scope_mut()?
+            .locals
+            .insert(node.name.clone(), node.as_var());
 
         Ok(())
     }

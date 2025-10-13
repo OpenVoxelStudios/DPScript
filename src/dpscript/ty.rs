@@ -4,7 +4,7 @@ use strum::{Display, EnumString};
 
 use crate::util::Spanned;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum TypeRef {
     /// A local (user-defined) type.
     Local(String),
@@ -21,6 +21,44 @@ pub enum TypeRef {
     /// A type for NBT data with a specific schema.
     /// If this should instead be unvalidated, use [`BuiltInType::NBT`].
     TypedNBT(NBTSchema),
+}
+
+impl Eq for TypeRef {}
+
+impl PartialEq for TypeRef {
+    fn eq(&self, other: &Self) -> bool {
+        match self {
+            Self::Local(a) => match other {
+                Self::Local(b) => a == b,
+                _ => false,
+            },
+
+            Self::BuiltIn(a) => match other {
+                Self::BuiltIn(b) => a == b,
+                Self::TypedNBT(_) => matches!(a, BuiltInType::NBT),
+                _ => false,
+            },
+
+            Self::Array(a) => match other {
+                Self::Array(b) => a == b,
+                Self::SizedArray(b, _) => a == b,
+                _ => false,
+            },
+
+            Self::SizedArray(a, _) => match other {
+                Self::SizedArray(b, _) => a == b,
+                _ => false,
+            },
+
+            Self::TypedNBT(a) => match other {
+                Self::TypedNBT(b) => a == b,
+                // We have to, it has to be reflexive because of Eq for a BTreeMap.
+                // TODO: Can we still do schema validation as long as it's on both sides?
+                Self::BuiltIn(BuiltInType::NBT) => true,
+                _ => false,
+            },
+        }
+    }
 }
 
 // For strum variants - primitives should be lowercase, others shuold be PascalCase.

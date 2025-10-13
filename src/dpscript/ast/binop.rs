@@ -348,7 +348,6 @@ impl NodeInfo for BinaryOpNode {
 
             BinaryOperation::Field => match &*self.rhs {
                 Node::Ident(id) => scope
-                    .module
                     .fields
                     .get(&self.lhs.returns(scope)?)?
                     .get(&id.ident)

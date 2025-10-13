@@ -8,7 +8,7 @@ use crate::{
 
 impl Validator {
     pub fn validate_imports(&mut self) -> Result<()> {
-        for node in &self.ast.imports {
+        for node in &self.ast.scope.imports {
             for item in &node.imports {
                 let mut item = item.clone();
 
@@ -28,7 +28,7 @@ impl Validator {
                 let module = item.join("::");
 
                 if let Some(it) = self.modules.get(&module) {
-                    if let Some(value) = it.exports.get(&name) {
+                    if let Some(value) = it.scope.exports.get(&name) {
                         self.imports.insert(name, value.clone());
                     } else {
                         self.errors.push(Err::UnresolvedImport {

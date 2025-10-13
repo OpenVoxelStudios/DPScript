@@ -3,6 +3,7 @@ use thiserror::Error;
 
 use crate::dpscript::ty::TypeRef;
 
+/// This is a code error on the user's end.
 #[derive(Debug, Error, Diagnostic)]
 pub enum ValidatorErr {
     #[error("Unresolved import: '{path}' (from module '{module}')")]
@@ -45,6 +46,28 @@ pub enum ValidatorErr {
         expected: TypeRef,
         got: TypeRef,
     },
+
+    #[error("'{id}' is not a valid identifier!")]
+    #[diagnostic(code(validator::invalid_ident))]
+    InvalidIdent {
+        #[label("here")]
+        span: SourceSpan,
+        id: String,
+    },
+
+    #[error("Unexpected function body!")]
+    #[diagnostic(code(validator::unexpected_body))]
+    UnexpectedBody {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("Block must have a type!")]
+    #[diagnostic(code(validator::untyped_block))]
+    UntypedBlock {
+        #[label("here")]
+        span: SourceSpan,
+    },
 }
 
 /// An error occured during the validation step. This is ALWAYS a compiler bug.
@@ -68,6 +91,16 @@ pub enum ValidatorWarn {
     #[error("Type inference on constants is discouraged.")]
     #[diagnostic(code(compiler::const_no_explicit_type))]
     ConstNoExplicitType {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    /// *those who know.* \
+    /// `This thing is my CAS project :P` \
+    /// `- Redstone`
+    #[error("PTSD.")]
+    #[diagnostic(code(compiler::ib_ptsd))]
+    IbPtsd {
         #[label("here")]
         span: SourceSpan,
     },

@@ -14,7 +14,7 @@ use crate::dpscript::{
     },
     ty::TypeRef,
 };
-use std::{collections::BTreeMap, sync::Arc};
+use std::collections::BTreeMap;
 
 /// The type of an exported object.
 /// These will have all their bodies cleared, since it's unnecessary when just being used for type checking.
@@ -35,33 +35,33 @@ pub struct AST {
     /// The source code of the module.
     #[serde(skip)]
     pub code: NamedSource<String>,
-    pub imports: Vec<ImportNode>,
-    pub constants: BTreeMap<String, ConstantNode>,
-    pub objectives: BTreeMap<String, ObjectiveNode>,
-    pub functions: BTreeMap<String, FunctionNode>,
-    pub blocks: Vec<BlockNode>,
-    pub enums: BTreeMap<String, EnumNode>,
-
-    /// All the symbols the module exports.
-    pub exports: BTreeMap<String, ExportType>,
 
     /// All the nodes, including the ones above.
     pub nodes: Vec<Node>,
+
+    pub scope: Scope,
+}
+
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Default)]
+pub struct Scope {
+    /// A map of local variables to their value types.
+    pub locals: BTreeMap<String, VarNode>,
 
     /// A map of types to user-defined instance methods.
     pub instance_funcs: BTreeMap<String, BTreeMap<String, FunctionNode>>,
 
     /// A map of types to their fields' types.
     pub fields: BTreeMap<TypeRef, BTreeMap<String, TypeRef>>,
-}
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
-pub struct Scope {
-    #[serde(skip)]
-    pub module: Arc<AST>,
+    /// All the symbols the module exports.
+    pub exports: BTreeMap<String, ExportType>,
 
-    /// A map of local variables to their value types.
-    pub locals: BTreeMap<String, VarNode>,
+    pub imports: Vec<ImportNode>,
+    pub constants: BTreeMap<String, ConstantNode>,
+    pub objectives: BTreeMap<String, ObjectiveNode>,
+    pub functions: BTreeMap<String, FunctionNode>,
+    pub blocks: Vec<BlockNode>,
+    pub enums: BTreeMap<String, EnumNode>,
 }
 
 macro_rules! only {
@@ -91,23 +91,27 @@ impl AST {
         Self {
             module,
             code,
-            exports: collect_exports(&nodes),
-            blocks: only!(nodes: Block),
-            constants: only!(m; nodes: Constant),
-            enums: only!(m; nodes: Enum),
-            functions: only!(m; nodes: Function),
-            imports: only!(nodes: Import),
-            objectives: only!(m; nodes: Objective),
-            fields: BTreeMap::new(), // TODO
 
-            // My little baby abomination... I'm so proud of it :) (*sobbing*)
-            instance_funcs: only!(nodes: Function)
-                .into_iter()
-                .filter_map(|it| it.receiver.clone().map(|r| (r, (it.name.clone(), it))))
-                .into_group_map()
-                .into_iter()
-                .map(|(k, v)| (k, v.into_iter().collect::<BTreeMap<_, _>>()))
-                .collect::<BTreeMap<_, _>>(),
+            scope: Scope {
+                locals: BTreeMap::new(),
+                exports: collect_exports(&nodes),
+                blocks: only!(nodes: Block),
+                constants: only!(m; nodes: Constant),
+                enums: only!(m; nodes: Enum),
+                functions: only!(m; nodes: Function),
+                imports: only!(nodes: Import),
+                objectives: only!(m; nodes: Objective),
+                fields: BTreeMap::new(), // TODO
+
+                // My little baby abomination... I'm so proud of it :) (*sobbing*)
+                instance_funcs: only!(nodes: Function)
+                    .into_iter()
+                    .filter_map(|it| it.receiver.clone().map(|r| (r, (it.name.clone(), it))))
+                    .into_group_map()
+                    .into_iter()
+                    .map(|(k, v)| (k, v.into_iter().collect::<BTreeMap<_, _>>()))
+                    .collect::<BTreeMap<_, _>>(),
+            },
 
             nodes,
         }
@@ -119,12 +123,10 @@ impl Scope {
         match self.locals.get(&var.as_ref().to_string()) {
             Some(it) => Some(it),
             None => self
-                .module
                 .constants
                 .get(&var.as_ref().to_string())
                 .map(|it| it as &dyn VarInfo)
                 .or(self
-                    .module
                     .objectives
                     .get(&var.as_ref().to_string())
                     .map(|it| it as &dyn VarInfo)),

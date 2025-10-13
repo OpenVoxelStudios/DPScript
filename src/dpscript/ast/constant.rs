@@ -1,9 +1,16 @@
 use std::fmt;
 
-use crate::dpscript::{
-    ast::{ast::Scope, node::Node, var::VarInfo},
-    data::NodeInfo,
-    ty::TypeRef,
+use crate::{
+    dpscript::{
+        ast::{
+            ast::Scope,
+            node::Node,
+            var::{VarInfo, VarNode},
+        },
+        data::NodeInfo,
+        ty::TypeRef,
+    },
+    util::DataLocation,
 };
 use dpscript_macros::HasSpan;
 use miette::SourceSpan;
@@ -18,6 +25,21 @@ pub struct ConstantNode {
 
     /// Whether to exclude this node from dead code elimination.
     pub keep: bool,
+}
+
+impl ConstantNode {
+    pub fn as_var(&self) -> VarNode {
+        VarNode {
+            span: self.span,
+            name: self.name.clone(),
+            ty: self.ty.clone(),
+            value: Some(self.value.clone()),
+            location: DataLocation {
+                storage: "dpscript:__internal".into(),
+                path: "__compiler_internal".into(), // Constants aren't available at runtime so this is a dummy location
+            },
+        }
+    }
 }
 
 impl VarInfo for ConstantNode {
