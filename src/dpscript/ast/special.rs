@@ -1,6 +1,7 @@
 use std::fmt;
 
 use dpscript_macros::HasSpan;
+use flexstr::SharedStr;
 use miette::SourceSpan;
 
 use crate::dpscript::{
@@ -17,7 +18,7 @@ pub struct SpecialNode {
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub enum SpecialData {
-    Selector(String),
+    Selector(SharedStr),
     Pos(Box<Node>, Box<Node>, Box<Node>),
     Component(NbtValue),
 }

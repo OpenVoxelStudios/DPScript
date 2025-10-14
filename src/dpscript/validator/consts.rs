@@ -16,12 +16,16 @@ impl Validator {
     pub fn validate_constants(&mut self) -> Result<()> {
         let mut out = BTreeMap::new();
 
-        for (k, mut node) in self.ast.scope.constants.clone() {
+        // TODO: Can we use scope_mut() here to make sure it's always the same scope?
+        // We risk interference this way.
+        let scope = self.scope()?.clone();
+
+        for (k, mut node) in scope.constants.clone() {
             self.validate_constant(&mut node)?;
             out.insert(k, node);
         }
 
-        self.ast.scope.constants = out;
+        self.scope_mut()?.constants = out;
 
         Ok(())
     }
@@ -35,7 +39,7 @@ impl Validator {
         self.validate_ident(&(node.name.clone(), node.span))?; // TODO: Better span so it's actually the name
         self.validate(&mut node.value)?;
 
-        let ret = node.value.returns(&self.global_scope);
+        let ret = node.value.returns(self.scope()?);
 
         if let Some(ret) = ret {
             if let Some(ty) = &node.ty {
@@ -48,14 +52,14 @@ impl Validator {
                 }
             }
         } else {
+            // We're not just gonna blindly trust it :P
             self.errors.push(Err::CannotComputeType {
                 span: node.value.span(),
             });
         }
 
         self.scope_mut()?
-            .locals
-            .insert(node.name.clone(), node.as_var());
+            .add_local(node.name.clone(), node.as_var());
 
         Ok(())
     }

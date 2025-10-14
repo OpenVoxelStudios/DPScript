@@ -1,5 +1,7 @@
 use std::collections::BTreeMap;
 
+use flexstr::SharedStr;
+
 use crate::{
     common::traits::HasSpan,
     dpscript::{
@@ -13,7 +15,7 @@ use crate::{
 impl Lexer {
     /// Read an attribute.
     /// THIS WILL NOT PUSH/POP THE STACK!
-    pub fn read_attrs(&mut self) -> Result<BTreeMap<String, AttrNode>> {
+    pub fn read_attrs(&mut self) -> Result<BTreeMap<SharedStr, AttrNode>> {
         let mut attrs = BTreeMap::new();
 
         while self.if_next_and_eat(Token::Hash) && self.if_next_and_eat(Token::LeftBracket) {

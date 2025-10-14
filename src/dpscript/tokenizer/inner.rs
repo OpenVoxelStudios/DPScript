@@ -100,7 +100,7 @@ impl Tokenizer {
                 let len = buf.len();
 
                 Some((
-                    Token::String(String::from_iter(buf)),
+                    Token::String(String::from_iter(buf).into()),
                     self.cursor.span_prev(len, len),
                 ))
             }

@@ -8,8 +8,8 @@ use crate::{
     impl_lexer,
     util::Spanned,
 };
+use flexstr::SharedStr;
 use miette::{SourceOffset, SourceSpan};
-use regex::Regex;
 
 macro_rules! lexer {
     (($value: expr, $body: expr): $name: ident => [$($func: ident),*]) => {
@@ -91,25 +91,42 @@ macro_rules! lexer {
 pub struct Lexer {
     pub tokens: Vec<Spanned<Token>>,
     pub pos: usize,
-    pub namespace: String,
+    pub namespace: SharedStr,
     pub last_pos: SourceSpan,
     pub stack: Vec<usize>,
     pub last: Vec<Node>,
     pub nodes: Vec<Node>,
     pub nesting: usize,
-    pub function: Vec<String>,
+    pub function: Vec<SharedStr>,
     pub block: Vec<usize>,
-    pub module: String,
+    pub module: SharedStr,
     pub event_block: usize,
     pub keep: bool,
 }
 
 impl_lexer!(Lexer);
 
-impl Lexer {
-    pub fn new(namespace: String, module: String, keep: bool, tokens: Vec<Spanned<Token>>) -> Self {
-        let mod_regex = Regex::new(r"(?m)[^A-Za-z0-9]").unwrap();
+pub fn fast_ident(inp: &str) -> SharedStr {
+    let mut s = String::new();
 
+    for ch in inp.chars() {
+        if ch.is_alphanumeric() || ch == '_' {
+            s.push(ch);
+        } else {
+            s.push('_');
+        }
+    }
+
+    s.into()
+}
+
+impl Lexer {
+    pub fn new(
+        namespace: SharedStr,
+        module: String,
+        keep: bool,
+        tokens: Vec<Spanned<Token>>,
+    ) -> Self {
         let last = tokens
             .first()
             .map(|it| it.1.clone())
@@ -117,7 +134,7 @@ impl Lexer {
 
         Self {
             namespace,
-            module: mod_regex.replace_all(&module, "_").to_string(),
+            module: fast_ident(&module),
             tokens,
             pos: 0,
             last_pos: last,
@@ -132,7 +149,7 @@ impl Lexer {
         }
     }
 
-    pub fn func(&self) -> Result<String> {
+    pub fn func(&self) -> Result<SharedStr> {
         self.function
             .last()
             .cloned()
@@ -142,7 +159,7 @@ impl Lexer {
             })
     }
 
-    pub fn push_func(&mut self, func: String) {
+    pub fn push_func(&mut self, func: SharedStr) {
         self.function.push(func);
         self.block.push(0);
     }

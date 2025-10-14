@@ -25,7 +25,7 @@ impl Validator {
                     continue;
                 }
 
-                let module = item.join("::");
+                let module = item.join("::").into();
 
                 if let Some(it) = self.modules.get(&module) {
                     if let Some(value) = it.scope.exports.get(&name) {

@@ -9,9 +9,7 @@ impl Validator {
 
         // TODO: types & values
 
-        self.scope_mut()?
-            .locals
-            .insert(node.name.clone(), node.clone());
+        self.scope_mut()?.add_local(node.name.clone(), node.clone());
 
         Ok(())
     }

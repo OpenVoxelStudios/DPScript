@@ -1,3 +1,4 @@
+use flexstr::SharedStr;
 use miette::{Diagnostic, NamedSource, SourceSpan};
 use thiserror::Error;
 
@@ -11,8 +12,8 @@ pub enum ValidatorErr {
     UnresolvedImport {
         #[label("here")]
         span: SourceSpan,
-        path: String,
-        module: String,
+        path: SharedStr,
+        module: SharedStr,
     },
 
     #[error("Duplicate import: '{name}")]
@@ -20,7 +21,7 @@ pub enum ValidatorErr {
     DuplicateImport {
         #[label("here")]
         span: SourceSpan,
-        name: String,
+        name: SharedStr,
     },
 
     #[error("Module not found: '{module}'")]
@@ -28,7 +29,7 @@ pub enum ValidatorErr {
     ModuleNotFound {
         #[label("here")]
         span: SourceSpan,
-        module: String,
+        module: SharedStr,
     },
 
     #[error("Cannot compute type for value!")]
@@ -52,7 +53,7 @@ pub enum ValidatorErr {
     InvalidIdent {
         #[label("here")]
         span: SourceSpan,
-        id: String,
+        id: SharedStr,
     },
 
     #[error("Unexpected function body!")]
@@ -111,7 +112,7 @@ pub enum ValidatorWarn {
 #[diagnostic()]
 pub struct AllErrors {
     #[source_code]
-    pub code: NamedSource<String>,
+    pub code: NamedSource<SharedStr>,
 
     #[related]
     pub errors: Vec<ValidatorErr>,

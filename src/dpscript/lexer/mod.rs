@@ -34,26 +34,27 @@ use crate::{
     },
     util::Spanned,
 };
+use flexstr::SharedStr;
 use miette::NamedSource;
 
 pub type Result<T, E = LexerErr> = core::result::Result<T, E>;
 
 pub struct FullLexer {
-    pub module: String,
-    pub file_name: String,
+    pub module: SharedStr,
+    pub file_name: SharedStr,
     pub source: Vec<char>,
-    pub source_str: String,
-    pub named_src: NamedSource<String>,
-    pub namespace: String,
+    pub source_str: SharedStr,
+    pub named_src: NamedSource<SharedStr>,
+    pub namespace: SharedStr,
     pub inner: Lexer,
 }
 
 impl FullLexer {
     pub fn new(
-        module: String,
-        namespace: String,
-        file_name: String,
-        source: String,
+        module: SharedStr,
+        namespace: SharedStr,
+        file_name: SharedStr,
+        source: SharedStr,
         keep: bool,
         tokens: Vec<Spanned<Token>>,
     ) -> Self {
@@ -65,7 +66,7 @@ impl FullLexer {
             source_str: source,
             inner: Lexer::new(
                 namespace,
-                PathBuf::from(&file_name)
+                PathBuf::from(&file_name.to_string())
                     .file_name()
                     .unwrap()
                     .to_string_lossy()

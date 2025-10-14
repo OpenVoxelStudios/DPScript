@@ -8,12 +8,13 @@ use crate::{
     },
     util::DataLocation,
 };
+use flexstr::SharedStr;
 use miette::SourceSpan;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct VarNode {
     pub span: SourceSpan,
-    pub name: String,
+    pub name: SharedStr,
     pub ty: Option<TypeRef>,
     pub value: Option<Box<Node>>,
     pub location: DataLocation,

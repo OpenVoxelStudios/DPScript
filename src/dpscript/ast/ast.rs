@@ -1,3 +1,4 @@
+use flexstr::SharedStr;
 use itertools::Itertools;
 use miette::NamedSource;
 
@@ -30,11 +31,11 @@ pub enum ExportType {
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct AST {
     /// The module's name (a::b::c)
-    pub module: String,
+    pub module: SharedStr,
 
     /// The source code of the module.
     #[serde(skip)]
-    pub code: NamedSource<String>,
+    pub code: NamedSource<SharedStr>,
 
     /// All the nodes, including the ones above.
     pub nodes: Vec<Node>,
@@ -44,24 +45,27 @@ pub struct AST {
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Default)]
 pub struct Scope {
+    /// The module, function, or block name.
+    pub name: SharedStr,
+
     /// A map of local variables to their value types.
-    pub locals: BTreeMap<String, VarNode>,
+    pub locals: BTreeMap<SharedStr, VarNode>,
 
     /// A map of types to user-defined instance methods.
-    pub instance_funcs: BTreeMap<String, BTreeMap<String, FunctionNode>>,
+    pub instance_funcs: BTreeMap<SharedStr, BTreeMap<SharedStr, FunctionNode>>,
 
     /// A map of types to their fields' types.
-    pub fields: BTreeMap<TypeRef, BTreeMap<String, TypeRef>>,
+    pub fields: BTreeMap<TypeRef, BTreeMap<SharedStr, TypeRef>>,
 
     /// All the symbols the module exports.
-    pub exports: BTreeMap<String, ExportType>,
+    pub exports: BTreeMap<SharedStr, ExportType>,
 
     pub imports: Vec<ImportNode>,
-    pub constants: BTreeMap<String, ConstantNode>,
-    pub objectives: BTreeMap<String, ObjectiveNode>,
-    pub functions: BTreeMap<String, FunctionNode>,
+    pub constants: BTreeMap<SharedStr, ConstantNode>,
+    pub objectives: BTreeMap<SharedStr, ObjectiveNode>,
+    pub functions: BTreeMap<SharedStr, FunctionNode>,
     pub blocks: Vec<BlockNode>,
-    pub enums: BTreeMap<String, EnumNode>,
+    pub enums: BTreeMap<SharedStr, EnumNode>,
 }
 
 macro_rules! only {
@@ -87,12 +91,13 @@ macro_rules! only {
 }
 
 impl AST {
-    pub fn new(module: String, code: NamedSource<String>, nodes: Vec<Node>) -> Self {
+    pub fn new(module: SharedStr, code: NamedSource<SharedStr>, nodes: Vec<Node>) -> Self {
         Self {
-            module,
+            module: module.clone(),
             code,
 
             scope: Scope {
+                name: module,
                 locals: BTreeMap::new(),
                 exports: collect_exports(&nodes),
                 blocks: only!(nodes: Block),
@@ -119,22 +124,38 @@ impl AST {
 }
 
 impl Scope {
-    pub fn lookup(&self, var: impl AsRef<str>) -> Option<&dyn VarInfo> {
-        match self.locals.get(&var.as_ref().to_string()) {
+    pub fn new(name: SharedStr) -> Self {
+        Self {
+            name,
+            ..Default::default()
+        }
+    }
+
+    pub fn lookup(&self, var: &SharedStr) -> Option<&dyn VarInfo> {
+        debug!("Scope: {}", self.name);
+        debug!("Lookup var: {}", var);
+        debug!("Local names: {:?}", self.locals.keys());
+
+        debug!("Lookup result: {:#?}", self.locals.get(var));
+
+        match self.locals.get(var) {
             Some(it) => Some(it),
             None => self
                 .constants
-                .get(&var.as_ref().to_string())
+                .get(var)
                 .map(|it| it as &dyn VarInfo)
-                .or(self
-                    .objectives
-                    .get(&var.as_ref().to_string())
-                    .map(|it| it as &dyn VarInfo)),
+                .or(self.objectives.get(var).map(|it| it as &dyn VarInfo)),
         }
+    }
+
+    pub fn add_local(&mut self, name: SharedStr, value: VarNode) {
+        debug!("Scope [{}] -> adding local: {name}", self.name);
+
+        self.locals.insert(name, value);
     }
 }
 
-pub fn collect_exports(nodes: &Vec<Node>) -> BTreeMap<String, ExportType> {
+pub fn collect_exports(nodes: &Vec<Node>) -> BTreeMap<SharedStr, ExportType> {
     let mut map = BTreeMap::new();
 
     for node in nodes {

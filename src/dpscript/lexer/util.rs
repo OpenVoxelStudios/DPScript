@@ -1,3 +1,4 @@
+use flexstr::SharedStr;
 use miette::{SourceOffset, SourceSpan};
 
 use crate::{
@@ -17,7 +18,7 @@ pub trait LexerMethods {
     fn last_pos(&self) -> SourceSpan;
     fn set_last_pos(&mut self, pos: SourceSpan);
     fn tokens(&self) -> &Vec<Spanned<Token>>;
-    fn ns(&self) -> String;
+    fn ns(&self) -> SharedStr;
 
     fn push(&mut self) {
         let pos = self.pos();
@@ -84,7 +85,7 @@ pub trait LexerMethods {
         LexerErr::EOF { span: self.loc() }
     }
 
-    fn eat_id(&mut self) -> Result<(String, SourceSpan)> {
+    fn eat_id(&mut self) -> Result<(SharedStr, SourceSpan)> {
         match self.eat() {
             Some((Token::Ident(id), span)) => Ok((id, span)),
 
@@ -101,7 +102,7 @@ pub trait LexerMethods {
         }
     }
 
-    fn eat_str(&mut self) -> Result<(String, SourceSpan)> {
+    fn eat_str(&mut self) -> Result<(SharedStr, SourceSpan)> {
         match self.eat() {
             Some((Token::String(s), span)) => Ok((s, span)),
 
@@ -272,7 +273,7 @@ pub trait LexerMethods {
         }
     }
 
-    fn start_parse_id(&mut self) -> Result<(String, SourceSpan)> {
+    fn start_parse_id(&mut self) -> Result<(SharedStr, SourceSpan)> {
         match self.peek(0).cloned() {
             Some((tok, span)) => {
                 if let Token::Ident(val) = tok {
@@ -392,7 +393,8 @@ macro_rules! impl_lexer {
             fn tokens(&self) -> &Vec<$crate::util::Spanned<$crate::dpscript::tokenizer::Token>> {
                 &self.tokens
             }
-            fn ns(&self) -> String {
+
+            fn ns(&self) -> SharedStr {
                 self.namespace.clone()
             }
         }

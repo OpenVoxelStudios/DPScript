@@ -1,6 +1,7 @@
 use std::fmt;
 
 use dpscript_macros::HasSpan;
+use flexstr::SharedStr;
 use miette::SourceSpan;
 
 use crate::dpscript::{
@@ -15,10 +16,10 @@ pub struct CallNode {
 
     /// A reference to a node that is the receiver,
     /// like when calling an object instance function.
-    pub receiver: Vec<String>,
+    pub receiver: Vec<SharedStr>,
 
     /// The name of the function to call.
-    pub func: String,
+    pub func: SharedStr,
 
     /// The arguments the function was called with.
     pub args: Vec<Node>,

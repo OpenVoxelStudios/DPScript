@@ -1,5 +1,4 @@
-use once_cell::sync::Lazy;
-use regex::Regex;
+use flexstr::SharedStr;
 
 use crate::{
     dpscript::validator::{
@@ -9,17 +8,25 @@ use crate::{
     util::Spanned,
 };
 
-pub const IDENT_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?m)^[A-Za-z_][A-Za-z0-9_]*$").unwrap());
-
 impl Validator {
-    pub fn validate_ident(&mut self, id: &Spanned<String>) -> Result<()> {
+    pub fn validate_ident(&mut self, id: &Spanned<SharedStr>) -> Result<()> {
         if id.0.to_lowercase() == "ib" {
             // :(
             self.warnings.push(Warn::IbPtsd { span: id.1 });
         }
 
-        if !IDENT_REGEX.is_match(&id.0) {
+        // A regex was the original impl, but this is pretty slow compared to other things
+        // Looking at the flamegraph, regex_automata took about half of the processing
+        // time, and removing only this cut it down to about a fifth or so
+
+        let valid = id.0.chars().all(|it| it.is_alphanumeric() || it == '_')
+            && id
+                .0
+                .chars()
+                .next()
+                .is_some_and(|it| it.is_alphabetic() || it == '_');
+
+        if !valid {
             self.errors.push(Err::InvalidIdent {
                 span: id.1,
                 id: id.0.clone(),

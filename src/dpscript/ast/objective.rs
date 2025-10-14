@@ -4,6 +4,7 @@ use crate::dpscript::{
     data::NodeInfo,
     ty::{BuiltInType, TypeRef},
 };
+use flexstr::SharedStr;
 use miette::SourceSpan;
 use std::fmt;
 
@@ -12,13 +13,13 @@ pub struct ObjectiveNode {
     pub span: SourceSpan,
 
     /// The name of the objective (for reference in DPScript).
-    pub name: String,
+    pub name: SharedStr,
 
     /// The actual ID of the scoreboard objective in Minecraft.
-    pub id: String,
+    pub id: SharedStr,
 
     /// The objective trigger (/scoreboard objectives add [id] [trigger]).
-    pub kind: String,
+    pub kind: SharedStr,
 
     /// Whether this is publicly exported.
     pub is_public: bool,

@@ -1,3 +1,5 @@
+use flexstr::SharedStr;
+
 use crate::{
     dpscript::{
         ast::{
@@ -62,7 +64,7 @@ impl Lexer {
         self.expect(Token::LeftParen)?;
 
         let mut args = Vec::new();
-        let storage = format!("{}:__dps/gen/funcs/{}/args", self.namespace, name);
+        let storage: SharedStr = format!("{}:__dps/gen/funcs/{}/args", self.namespace, name).into();
 
         loop {
             if self.if_next_and_eat(Token::RightParen) {
@@ -136,7 +138,7 @@ impl Lexer {
             .flatten()
             .flatten()
             .flatten()
-            .unwrap_or(format!("zzz/{}/funcs/{}", self.module, name));
+            .unwrap_or(format!("zzz/{}/funcs/{}", self.module, name).into());
 
         Ok(Node::Function(FunctionNode {
             name,

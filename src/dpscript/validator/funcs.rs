@@ -35,13 +35,18 @@ impl Validator {
             }
         }
 
-        self.scopes.push(Scope::default());
+        debug!("Pushing scope (func): {}", node.ident);
+
+        self.scopes
+            .push(Scope::new(format!("{}", node.ident).into()));
 
         for item in &mut node.body {
             self.validate(item)?;
         }
 
         node.scope = self.scopes.pop();
+
+        debug!("Popped scope!");
 
         Ok(())
     }

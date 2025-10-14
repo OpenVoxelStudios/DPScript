@@ -4,6 +4,7 @@ use crate::{
     pack::{PackToml, get_pack_source_files, resolve_pack_deps},
 };
 use colored::Colorize;
+use flexstr::SharedStr;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use ron::ser::PrettyConfig;
 use serde::{Deserialize, Serialize};
@@ -58,11 +59,9 @@ impl Compiler {
             fs::create_dir_all(&dump_dir)?;
         }
 
-        let style = ProgressStyle::with_template(
-            "[{bar:40.cyan/blue}] {pos:.blue} of {len:.blue}",
-        )
-        .unwrap()
-        .progress_chars("=> ");
+        let style = ProgressStyle::with_template("[{bar:40.cyan/blue}] {pos:.blue} of {len:.blue}")
+            .unwrap()
+            .progress_chars("=> ");
 
         let mut asts: Vec<AST> = Vec::new();
         let pb = MultiProgress::new();
@@ -81,6 +80,7 @@ impl Compiler {
 
             let files = get_pack_source_files(&pkg.src_path);
             let fpb = pb.add(ProgressBar::new(files.len() as u64).with_style(style.clone()));
+            let ns: SharedStr = pkg.pack.pack.name.clone().into();
 
             for file in files {
                 let path = file.strip_prefix(&pkg.src_path).unwrap();
@@ -99,8 +99,8 @@ impl Compiler {
                 let module = format!("{}::{}", pkg.pack.pack.name, module);
 
                 asts.push(self.create_ast(
-                    module,
-                    &pkg.pack.pack.name,
+                    module.into(),
+                    ns.clone(),
                     &file,
                     pkg.keep || self.allow_dead_code,
                 )?);
@@ -214,13 +214,13 @@ impl Compiler {
 
     fn create_ast(
         &self,
-        module: String,
-        namespace: impl AsRef<str>,
+        module: SharedStr,
+        namespace: SharedStr,
         file: &PathBuf,
         keep: bool,
     ) -> Result<AST> {
         let file_name = file.to_str().unwrap();
-        let data = fs::read_to_string(&file)?;
+        let data: SharedStr = fs::read_to_string(&file)?.into();
         let tokens = Tokenizer::new(&file_name, data.clone()).run()?.tokens();
         let dump_dir = self.out_dir.join(".dpscript");
         let parent = file.parent().unwrap();

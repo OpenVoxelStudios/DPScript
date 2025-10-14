@@ -45,7 +45,8 @@ impl Lexer {
                     self.namespace,
                     self.func()?,
                     self.block()?
-                ),
+                )
+                .into(),
                 path: name,
             },
         }))

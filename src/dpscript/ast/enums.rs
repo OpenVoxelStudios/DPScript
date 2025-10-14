@@ -2,6 +2,7 @@ use std::fmt;
 
 use super::ast::Scope;
 use crate::dpscript::data::NodeInfo;
+use flexstr::SharedStr;
 use miette::SourceSpan;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
@@ -9,12 +10,12 @@ pub struct EnumNode {
     pub span: SourceSpan,
 
     /// The name of the enum.
-    pub name: String,
+    pub name: SharedStr,
 
     /// The enum's values.
     /// Each has their numerical ID assigned according to their order.
     /// This cannot be specified by the user currently.
-    pub values: Vec<String>,
+    pub values: Vec<SharedStr>,
 }
 
 impl NodeInfo for EnumNode {

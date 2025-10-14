@@ -13,13 +13,14 @@ use crate::{
     util::DataLocation,
 };
 use dpscript_macros::HasSpan;
+use flexstr::SharedStr;
 use miette::SourceSpan;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct ConstantNode {
     pub is_public: bool,
     pub span: SourceSpan,
-    pub name: String,
+    pub name: SharedStr,
     pub ty: Option<TypeRef>,
     pub value: Box<Node>,
 

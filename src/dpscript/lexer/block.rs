@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+use flexstr::SharedStr;
 use miette::SourceSpan;
 
 use crate::{
@@ -42,10 +43,10 @@ impl Lexer {
         &mut self,
         mut span: SourceSpan,
         kind: BlockKind,
-        attrs: BTreeMap<String, AttrNode>,
+        attrs: BTreeMap<SharedStr, AttrNode>,
     ) -> Result<Node> {
         self.expect(Token::LeftBrace)?;
-        self.push_func(kind.to_string());
+        self.push_func(kind.to_string().into());
 
         let mut body = Vec::new();
 
@@ -70,10 +71,7 @@ impl Lexer {
             .flatten()
             .flatten()
             .flatten()
-            .unwrap_or(format!(
-                "zzz/{}/blocks/{kind}/{}",
-                self.module, self.event_block
-            ));
+            .unwrap_or(format!("zzz/{}/blocks/{kind}/{}", self.module, self.event_block).into());
 
         Ok(Node::Block(BlockNode {
             kind,

@@ -1,15 +1,17 @@
 use std::fmt;
 
+use flexstr::SharedStr;
+
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Identifier {
-    pub namespace: String,
-    pub path: String,
+    pub namespace: SharedStr,
+    pub path: SharedStr,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct DataLocation {
-    pub storage: String,
-    pub path: String,
+    pub storage: SharedStr,
+    pub path: SharedStr,
 }
 
 impl fmt::Display for Identifier {

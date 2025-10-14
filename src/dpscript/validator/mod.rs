@@ -10,6 +10,7 @@ pub mod unop;
 pub mod vars;
 
 pub use err::Result;
+use flexstr::SharedStr;
 
 use crate::dpscript::{
     ast::{
@@ -25,10 +26,10 @@ pub struct Validator {
     pub ast: AST,
 
     /// The resolved imports, for processing the module top-down.
-    pub imports: HashMap<String, ExportType>,
+    pub imports: HashMap<SharedStr, ExportType>,
 
     /// A map available modules.
-    pub modules: Arc<HashMap<String, AST>>,
+    pub modules: Arc<HashMap<SharedStr, AST>>,
 
     /// The errors generated during validation.
     pub errors: Vec<Err>,
@@ -44,9 +45,9 @@ pub struct Validator {
 }
 
 impl Validator {
-    pub fn new(ast: AST, modules: Arc<HashMap<String, AST>>) -> Self {
+    pub fn new(ast: AST, modules: Arc<HashMap<SharedStr, AST>>) -> Self {
         let mut me = Self {
-            global_scope: Scope::default(),
+            global_scope: Scope::new(ast.module.clone()),
             ast,
             modules,
             imports: HashMap::new(),
