@@ -133,6 +133,10 @@ pub enum BuiltInType {
     /// The void type. Represents nothing.
     #[strum(serialize = "void")]
     Void,
+
+    /// An entity transform (rotation, translation, etc.)
+    #[strum(serialize = "Transform")]
+    Transform,
 }
 
 impl fmt::Display for TypeRef {
@@ -143,6 +147,61 @@ impl fmt::Display for TypeRef {
             TypeRef::Array(it) => write!(f, "SingleArray<{it}>"),
             TypeRef::SizedArray(it, size) => write!(f, "SizedArray<[{it}; {}]>", size.0),
             TypeRef::TypedNBT(_) => write!(f, "TypedNBT"),
+        }
+    }
+}
+
+impl TypeRef {
+    pub fn is_numeric(&self) -> bool {
+        match self {
+            TypeRef::BuiltIn(it) => it.is_numeric(),
+
+            _ => false,
+        }
+    }
+
+    pub fn is_any(&self) -> bool {
+        match self {
+            TypeRef::BuiltIn(BuiltInType::Any) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_nbt(&self) -> bool {
+        match self {
+            TypeRef::BuiltIn(BuiltInType::NBT) => true,
+            TypeRef::TypedNBT(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_array(&self) -> bool {
+        match self {
+            TypeRef::Array(_)
+            | TypeRef::SizedArray(_, _)
+            | TypeRef::BuiltIn(BuiltInType::Any)
+            | TypeRef::BuiltIn(BuiltInType::Objective) => true,
+            _ => false,
+        }
+    }
+}
+
+impl BuiltInType {
+    pub fn is_numeric(&self) -> bool {
+        match self {
+            BuiltInType::Int | BuiltInType::Float | BuiltInType::Double => true,
+            BuiltInType::Any => true, // This is technically true, since we don't check any.
+
+            BuiltInType::Boolean
+            | BuiltInType::String
+            | BuiltInType::Time
+            | BuiltInType::Identifier
+            | BuiltInType::NBT
+            | BuiltInType::Selector
+            | BuiltInType::Pos
+            | BuiltInType::Objective
+            | BuiltInType::Void
+            | BuiltInType::Transform => false,
         }
     }
 }

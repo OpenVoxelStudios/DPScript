@@ -45,7 +45,7 @@ fn resolve_deps(path: &PathBuf, root: bool) -> Result<HashMap<String, PackageInf
         let toml = toml::from_str::<PackToml>(&data)?;
 
         if toml.pack.name != item.clone() {
-            let src = NamedSource::new(file.to_str().unwrap(), data.clone());
+            let src = NamedSource::new(file.to_str().unwrap(), data.clone()).with_language("toml");
 
             return Err(DependencyError {
                 src,

@@ -254,6 +254,8 @@ impl Tokenizer {
                 "as" => Some((Token::As, span)),
                 "while" => Some((Token::While, span)),
                 "operator" => Some((Token::Operator, span)),
+                "instance" => Some((Token::Instance, span)),
+                "field" => Some((Token::Field, span)),
 
                 other => {
                     if other.is_empty() {

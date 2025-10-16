@@ -30,7 +30,7 @@ fn run_lexer(tokens: Vec<Spanned<Token>>, lines: usize) -> AST {
         "benchmark".into(),
         "benchmark".into(),
         "benchmark.dps".into(),
-        BENCH_CODE.repeat(lines),
+        BENCH_CODE.repeat(lines).into(),
         true,
         tokens,
     );

@@ -1,0 +1,117 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug unit tests in library 'dpscript'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--package=dpscript"
+                ]
+            }
+        },
+        {
+            "name": "Debug executable 'dsc'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "run",
+                    "--bin=dsc",
+                    "--package=dpscript"
+                ]
+            },
+            "args": []
+        },
+        {
+            "name": "[compile example] Debug executable 'dsc'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "run",
+                    "--bin=dsc",
+                    "--package=dpscript"
+                ]
+            },
+            "args": ["-C", "example", "build", "-ATId"]
+        },
+        {
+            "name": "Debug unit tests in executable 'dsc'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--bin=dsc",
+                    "--package=dpscript"
+                ]
+            }
+        },
+        {
+            "name": "Debug executable 'dscls'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "run",
+                    "--bin=dscls",
+                    "--package=dpscript"
+                ]
+            },
+            "args": []
+        },
+        {
+            "name": "Debug unit tests in executable 'dscls'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--bin=dscls",
+                    "--package=dpscript"
+                ]
+            }
+        },
+        {
+            "name": "Debug benchmark 'lexer'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--bench=lexer",
+                    "--package=dpscript"
+                ]
+            }
+        },
+        {
+            "name": "Debug benchmark 'tokenizer'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--bench=tokenizer",
+                    "--package=dpscript"
+                ]
+            }
+        },
+        {
+            "name": "Debug unit tests in library 'flexstr'",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--package=flexstr"
+                ]
+            }
+        }
+    ]
+}

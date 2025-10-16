@@ -2,10 +2,10 @@
 objective operation_temp: dummy = "dpscript.std.scoreboard.operation_temp";
 
 #[cmd("scoreboard players get {sel} {obj}")]
-pub inline facade fn Objective::index(#[this] obj: Objective, sel: Selector) -> int;
+pub inline instance facade fn Objective::index(#[this] obj: Objective, sel: Selector) -> int;
 
 #[cmd("scoreboard players set {sel} {obj} {value}")]
-pub inline facade fn Objective::index_assign(#[this] obj: Objective, sel: Selector, value: int) -> int;
+pub inline instance facade fn Objective::index_assign(#[this] obj: Objective, sel: Selector, value: int) -> int;
 
 // The `#op` syntax means it shouldn't escape the string.
 #[cmd("scoreboard players operation {sel_a} {obj_a} {#op} {sel_b} {obj_b}")]
@@ -37,14 +37,14 @@ pub inline operator fn Objective::index_mod_assign(#[this] obj: Objective, sel: 
     return operation_self(obj, sel, "%=", value);
 }
 
-pub inline fn Objective::min_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
+pub inline instance fn Objective::min_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
     return operation(obj, sel, "<", obj2, sel2);
 }
 
-pub inline fn Objective::max_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
+pub inline instance fn Objective::max_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
     return operation(obj, sel, ">", obj2, sel2);
 }
 
-pub inline fn Objective::swap_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
+pub inline instance fn Objective::swap_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
     return operation(obj, sel, "><", obj2, sel2);
 }

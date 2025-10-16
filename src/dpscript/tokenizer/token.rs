@@ -202,6 +202,12 @@ pub enum Token {
     /// "operator"
     Operator,
 
+    /// "instance"
+    Instance,
+
+    /// "field"
+    Field,
+
     // =============== SPECIAL ===============
     /// "<none>"
     /// This should never be parsed, it should only be used for error messages.
@@ -279,6 +285,8 @@ impl fmt::Debug for Token {
             Self::As => write!(f, "as"),
             Self::While => write!(f, "while"),
             Self::Operator => write!(f, "operator"),
+            Self::Instance => write!(f, "instance"),
+            Self::Field => write!(f, "field"),
         }
     }
 }
@@ -350,6 +358,8 @@ impl fmt::Display for Token {
             Self::As => write!(f, "as"),
             Self::While => write!(f, "while"),
             Self::Operator => write!(f, "operator"),
+            Self::Instance => write!(f, "instance"),
+            Self::Field => write!(f, "field"),
         }
     }
 }

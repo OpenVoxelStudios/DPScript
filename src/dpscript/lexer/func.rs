@@ -19,6 +19,7 @@ const FN_MODIFIERS: &[Token] = &[
     Token::Compiler,
     Token::Inline,
     Token::Operator,
+    Token::Instance,
 ];
 
 impl Lexer {
@@ -44,6 +45,7 @@ impl Lexer {
                 Token::Compiler => FuncFlags::Compiler,
                 Token::Inline => FuncFlags::Inline,
                 Token::Operator => FuncFlags::Operator,
+                Token::Instance => FuncFlags::Instance,
 
                 _ => unreachable!("How did this happen? This is a compiler bug! Please report it!"),
             };
@@ -51,15 +53,15 @@ impl Lexer {
 
         let fn_span = self.start_parse(Token::Fn)?;
         let mut span = span.unwrap_or(fn_span);
-        let (mut name, _) = self.eat_id()?;
         let mut receiver = None;
 
-        if self.if_next_and_eat(Token::DoubleColon) {
-            let (real_name, _) = self.eat_id()?;
-
-            receiver = Some(name);
-            name = real_name;
+        // Both operator & instance functions will need to have a receiver
+        if flags.contains(FuncFlags::Instance) || flags.contains(FuncFlags::Operator) {
+            receiver = Some(self.read_ty()?);
+            self.expect(Token::DoubleColon)?;
         }
+
+        let (name, _) = self.eat_id()?;
 
         self.expect(Token::LeftParen)?;
 

@@ -1,19 +1,18 @@
 //! Binary operations
 
-use std::fmt;
-
-use dpscript_macros::HasSpan;
-use miette::SourceSpan;
-
 use crate::{
+    common::traits::HasSpan,
     dpscript::{
         ast::{ast::Scope, node::Node},
         data::NodeInfo,
         tokenizer::Token,
         ty::{BuiltInType, TypeRef},
     },
-    util::Spanned,
+    util::{AddSpan, Spanned},
 };
+use dpscript_macros::HasSpan;
+use miette::SourceSpan;
+use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct BinaryOpNode {
@@ -346,17 +345,69 @@ impl NodeInfo for BinaryOpNode {
                 .returns(scope)
                 .map(|it| TypeRef::Array(Box::new(it))),
 
-            BinaryOperation::Field => match &*self.rhs {
-                Node::Ident(id) => scope
-                    .fields
-                    .get(&self.lhs.returns(scope)?)?
-                    .get(&id.ident)
-                    .cloned(),
-                _ => None,
+            BinaryOperation::Field => match self.lhs.returns(scope) {
+                Some(TypeRef::BuiltIn(BuiltInType::NBT)) => {
+                    Some(TypeRef::BuiltIn(BuiltInType::Any))
+                }
+
+                Some(lhs) => match &*self.rhs {
+                    Node::Ident(id) => scope.lookup_field(&lhs, &id.ident).map(|it| it.ty.clone()),
+
+                    Node::BinaryOp(it) => match it.op {
+                        BinaryOperation::ArrayIndex => BinaryOpNode {
+                            lhs: Box::new(Node::BinaryOp(BinaryOpNode {
+                                lhs: self.lhs.clone(),
+                                op: BinaryOperation::Field,
+                                rhs: it.lhs.clone(),
+                                span: self.lhs.span().add(it.lhs.span()),
+                            })),
+                            op: BinaryOperation::ArrayIndex,
+                            rhs: it.rhs.clone(),
+                            span: self.lhs.span().add(it.rhs.span()),
+                        }
+                        .returns(scope),
+
+                        BinaryOperation::Field => BinaryOpNode {
+                            lhs: Box::new(Node::BinaryOp(BinaryOpNode {
+                                lhs: self.lhs.clone(),
+                                op: BinaryOperation::Field,
+                                rhs: it.lhs.clone(),
+                                span: self.lhs.span().add(it.lhs.span()),
+                            })),
+                            op: BinaryOperation::Field,
+                            rhs: it.rhs.clone(),
+                            span: self.lhs.span().add(it.rhs.span()),
+                        }
+                        .returns(scope),
+
+                        _ => None,
+                    },
+
+                    Node::Call(it) => {
+                        if self.op == BinaryOperation::Field {
+                            scope
+                                .lookup_inst_fn(&lhs, &it.func)
+                                .map(|it| it.return_type.clone())
+                        } else {
+                            scope.lookup_fn(&it.func).map(|it| it.return_type.clone())
+                        }
+                    }
+
+                    _ => None,
+                },
+
+                None => None,
             },
 
-            BinaryOperation::ArrayIndex => match self.rhs.returns(scope)? {
+            BinaryOperation::ArrayIndex => match self.lhs.returns(scope)? {
                 TypeRef::Array(ty) | TypeRef::SizedArray(ty, _) => Some(*ty),
+                TypeRef::BuiltIn(BuiltInType::Pos) => Some(TypeRef::BuiltIn(BuiltInType::Double)),
+                TypeRef::BuiltIn(BuiltInType::Any) => Some(TypeRef::BuiltIn(BuiltInType::Any)),
+                TypeRef::BuiltIn(BuiltInType::NBT) => Some(TypeRef::BuiltIn(BuiltInType::Any)),
+
+                TypeRef::BuiltIn(BuiltInType::Objective) => {
+                    Some(TypeRef::BuiltIn(BuiltInType::Int))
+                }
 
                 _ => None,
             },

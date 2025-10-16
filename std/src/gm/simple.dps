@@ -1,6 +1,10 @@
 import std::gm::gm_std;
 import std::gm::math_entity;
 import std::intrinsics::stringify;
+import std::selectors::Pos;
+import std::transform::transformation;
+import std::transform::translation;
+import std::intrinsics::slice;
 
 pub fn add(x: float, y: float) -> float {
     at pos: [~0, x, ~0] {
@@ -57,7 +61,7 @@ pub fn divide(x: float, y: float) -> float {
     // don't you love when 0f
     math_entity.transformation = [0f,0f,0f,x,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,y];
     
-    let result = transformation.translation[0];
+    let result = math_entity.transformation.translation[0]; // FIXME: is this math_entity or @s?
 
     return result;
 }

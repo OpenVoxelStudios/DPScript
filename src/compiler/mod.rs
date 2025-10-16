@@ -1,6 +1,7 @@
 use crate::{
     Result,
     dpscript::{ast::ast::AST, lexer::FullLexer, tokenizer::Tokenizer, validator::Validator},
+    error::CompleteValidationErrors,
     pack::{PackToml, get_pack_source_files, resolve_pack_deps},
 };
 use colored::Colorize;
@@ -8,7 +9,12 @@ use flexstr::SharedStr;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use ron::ser::PrettyConfig;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fs, path::PathBuf, sync::Arc};
+use std::{
+    collections::{BTreeMap, HashMap},
+    fs,
+    path::PathBuf,
+    sync::Arc,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Compiler {
@@ -20,6 +26,8 @@ pub struct Compiler {
     pub dump_ast: bool,
     pub dump_ir: bool,
     pub allow_dead_code: bool,
+    pub detailed: bool,
+    pub quiet: bool,
 }
 
 impl Compiler {
@@ -30,6 +38,8 @@ impl Compiler {
         dump_ast: bool,
         dump_ir: bool,
         allow_dead_code: bool,
+        detailed: bool,
+        quiet: bool,
     ) -> Result<Self> {
         let base = config_path.canonicalize()?.parent().unwrap().to_path_buf();
         let config = fs::read_to_string(&config_path)?;
@@ -48,6 +58,8 @@ impl Compiler {
             dump_tokens,
             out_dir,
             allow_dead_code,
+            detailed,
+            quiet,
         })
     }
 
@@ -64,35 +76,52 @@ impl Compiler {
             .progress_chars("=> ");
 
         let mut asts: Vec<AST> = Vec::new();
-        let pb = MultiProgress::new();
-        let master = pb.add(ProgressBar::new(pkgs.len() as u64).with_style(style.clone()));
+
+        let pb = if self.quiet {
+            None
+        } else {
+            Some(MultiProgress::new())
+        };
+
+        let master = pb
+            .as_ref()
+            .map(|pb| pb.add(ProgressBar::new(pkgs.len() as u64).with_style(style.clone())));
 
         for pkg in pkgs {
-            master.inc(1);
+            if let Some(master) = &master {
+                master.inc(1);
 
-            master.println(format!(
-                "   {} {} {}{}",
-                "Parsing".green().bold(),
-                pkg.pack.pack.name.cyan().bold(),
-                "v".magenta().bold(),
-                pkg.pack.pack.version.magenta().bold()
-            ));
+                master.println(format!(
+                    "   {} {} {}{}",
+                    "Parsing".green().bold(),
+                    pkg.pack.pack.name.cyan().bold(),
+                    "v".magenta().bold(),
+                    pkg.pack.pack.version.magenta().bold()
+                ));
+            }
 
             let files = get_pack_source_files(&pkg.src_path);
-            let fpb = pb.add(ProgressBar::new(files.len() as u64).with_style(style.clone()));
             let ns: SharedStr = pkg.pack.pack.name.clone().into();
+
+            let fpb = pb
+                .as_ref()
+                .map(|pb| pb.add(ProgressBar::new(files.len() as u64).with_style(style.clone())));
 
             for file in files {
                 let path = file.strip_prefix(&pkg.src_path).unwrap();
                 let path = format!("{}", path.display());
 
-                fpb.inc(1);
+                if let Some(fpb) = &fpb {
+                    fpb.inc(1);
 
-                fpb.println(format!(
-                    "      + {} {}",
-                    "Compiling".purple().bold(),
-                    path.blue().bold()
-                ));
+                    if self.detailed {
+                        fpb.println(format!(
+                            "      + {} {}",
+                            "Parsing".purple().bold(),
+                            path.blue().bold()
+                        ));
+                    }
+                }
 
                 let path = path.trim_end_matches(".dps");
                 let module = path.replace("\\", "::").replace("/", "::");
@@ -106,13 +135,19 @@ impl Compiler {
                 )?);
             }
 
-            fpb.finish_and_clear();
+            if let Some(fpb) = fpb {
+                fpb.finish_and_clear();
+            }
         }
 
-        master.finish();
+        if let Some(master) = master {
+            master.finish_and_clear();
+        }
 
         if asts.is_empty() {
-            warn!("No source files found!");
+            if !self.quiet {
+                warn!("No source files found!");
+            }
 
             return Ok(());
         }
@@ -125,38 +160,92 @@ impl Compiler {
         );
 
         let mut warnings = 0;
-        let pb = ProgressBar::new(asts.len() as u64).with_style(style.clone());
+        let mut pretty = BTreeMap::new();
 
-        for ast in asts.clone() {
-            pb.inc(1);
+        for ast in &asts {
+            pretty.entry(&ast.namespace).or_insert(Vec::new()).push(ast);
+        }
 
-            pb.println(format!(
-                "   {} {}",
-                "Analyzing".green().bold(),
-                ast.module.cyan().bold(),
-            ));
+        let mut analyzed = Vec::new();
+        let mut errors = Vec::new();
 
-            let errs = Validator::new(ast, Arc::clone(&modules)).run()?;
+        let pb = if self.quiet {
+            None
+        } else {
+            Some(MultiProgress::new())
+        };
 
-            if !errs.errors.is_empty() {
-                pb.finish();
+        let master = pb
+            .as_ref()
+            .map(|pb| pb.add(ProgressBar::new(pretty.len() as u64).with_style(style.clone())));
 
-                return Err(errs.into());
+        for (ns, asts) in pretty {
+            if let Some(master) = &master {
+                master.inc(1);
+
+                master.println(format!(
+                    "   {} {}",
+                    "Analyzing".green().bold(),
+                    ns.cyan().bold(),
+                ));
             }
 
-            if !errs.warnings.is_empty() {
-                for warn in errs.warnings {
-                    pb.println(format!(
-                        "{:?}",
-                        miette::Report::new(warn).with_source_code(errs.code.clone())
-                    ));
+            let mpb = pb
+                .as_ref()
+                .map(|pb| pb.add(ProgressBar::new(asts.len() as u64).with_style(style.clone())));
 
-                    warnings += 1;
+            for ast in asts {
+                if let Some(mpb) = &mpb {
+                    mpb.inc(1);
+
+                    if self.detailed {
+                        mpb.println(format!(
+                            "      + {} {}",
+                            "Analyzing".purple().bold(),
+                            ast.module.blue().bold()
+                        ));
+                    }
                 }
+
+                let (errs, ast) = Validator::new(ast.clone(), Arc::clone(&modules)).run()?;
+
+                if !errs.errors.is_empty() {
+                    errors.push(errs.into());
+                    continue;
+                }
+
+                if !errs.warnings.is_empty() {
+                    for warn in errs.warnings {
+                        let msg = format!(
+                            "{:?}",
+                            miette::Report::new(warn).with_source_code(errs.code.clone())
+                        );
+
+                        if let Some(mpb) = &mpb {
+                            mpb.println(msg);
+                        } else {
+                            println!("{}", msg);
+                        }
+
+                        warnings += 1;
+                    }
+                }
+
+                analyzed.push(ast);
+            }
+
+            if let Some(mpb) = mpb {
+                mpb.finish_and_clear();
             }
         }
 
-        pb.finish();
+        if let Some(master) = master {
+            master.finish_and_clear();
+        }
+
+        if !errors.is_empty() {
+            return Err(CompleteValidationErrors { errors }.into());
+        }
 
         warn!("Generated {warnings} warnings.");
 

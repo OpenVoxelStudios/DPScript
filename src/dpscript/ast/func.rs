@@ -7,6 +7,7 @@ use crate::{
             attr::AttrNode,
             node::Node,
             util::{Body, Indent},
+            var::VarNode,
         },
         data::NodeInfo,
         ty::TypeRef,
@@ -26,6 +27,7 @@ bitflags! {
         const Compiler = 0b00000100;
         const Public   = 0b00001000;
         const Operator = 0b00010000;
+        const Instance = 0b00100000;
     }
 }
 
@@ -51,6 +53,10 @@ impl fmt::Display for FuncFlags {
             write!(f, "    $flag: Operator;\n")?;
         }
 
+        if self.contains(FuncFlags::Instance) {
+            write!(f, "    $flag: Instance;\n")?;
+        }
+
         Ok(())
     }
 }
@@ -64,7 +70,7 @@ pub struct FunctionNode {
     pub ident: Identifier,
     pub body: Vec<Node>,
     pub flags: FuncFlags,
-    pub receiver: Option<SharedStr>,
+    pub receiver: Option<TypeRef>,
     pub attrs: BTreeMap<SharedStr, AttrNode>,
     pub scope: Option<Scope>,
 
@@ -146,6 +152,18 @@ impl fmt::Display for FunctionArg {
                 "$arg: {ref_s}[{}] @ [{}]: [{}];",
                 self.name, self.location, self.ty
             )
+        }
+    }
+}
+
+impl FunctionArg {
+    pub fn to_var(&self) -> VarNode {
+        VarNode {
+            span: self.span,
+            name: self.name.clone(),
+            ty: Some(self.ty.clone()),
+            value: None,
+            location: self.location.clone(),
         }
     }
 }

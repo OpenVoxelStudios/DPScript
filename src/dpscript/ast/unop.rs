@@ -7,7 +7,7 @@ use miette::SourceSpan;
 use crate::dpscript::{
     ast::{ast::Scope, node::Node},
     data::NodeInfo,
-    ty::TypeRef,
+    ty::{BuiltInType, TypeRef},
 };
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
@@ -47,7 +47,15 @@ impl NodeInfo for UnaryOpNode {
     }
 
     fn returns(&self, scope: &Scope) -> Option<TypeRef> {
-        self.value.returns(scope)
+        match self.op {
+            UnaryOperation::Invert => Some(TypeRef::BuiltIn(BuiltInType::Boolean)),
+
+            UnaryOperation::RangeEnd | UnaryOperation::RangeStart => {
+                Some(TypeRef::Array(Box::new(self.value.returns(scope)?)))
+            }
+
+            _ => self.value.returns(scope),
+        }
     }
 }
 

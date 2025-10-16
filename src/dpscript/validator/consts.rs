@@ -16,11 +16,12 @@ impl Validator {
     pub fn validate_constants(&mut self) -> Result<()> {
         let mut out = BTreeMap::new();
 
-        // TODO: Can we use scope_mut() here to make sure it's always the same scope?
-        // We risk interference this way.
-        let scope = self.scope()?.clone();
+        for (k, mut node) in self.ast.scope.constants.clone() {
+            self.validate_constant(&mut node)?;
+            out.insert(k, node);
+        }
 
-        for (k, mut node) in scope.constants.clone() {
+        for (k, mut node) in self.scope()?.constants.clone() {
             self.validate_constant(&mut node)?;
             out.insert(k, node);
         }
@@ -36,7 +37,7 @@ impl Validator {
                 .push(Warn::ConstNoExplicitType { span: node.span() });
         }
 
-        self.validate_ident(&(node.name.clone(), node.span))?; // TODO: Better span so it's actually the name
+        self.validate_ident((&node.name, node.span))?; // TODO: Better span so it's actually the name
         self.validate(&mut node.value)?;
 
         let ret = node.value.returns(self.scope()?);

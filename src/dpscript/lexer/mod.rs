@@ -7,6 +7,7 @@ pub mod call;
 pub mod cond;
 pub mod constant;
 pub mod err;
+pub mod field;
 pub mod func;
 pub mod id;
 pub mod import;
@@ -61,7 +62,7 @@ impl FullLexer {
         Self {
             module,
             namespace: namespace.clone(),
-            named_src: NamedSource::new(&file_name, source.clone()),
+            named_src: NamedSource::new(&file_name, source.clone()).with_language("dpscript"),
             source: source.chars().collect(),
             source_str: source,
             inner: Lexer::new(
@@ -80,11 +81,12 @@ impl FullLexer {
     }
 
     pub fn run(self) -> Result<AST, LexerFullErr> {
+        let namespace = self.namespace.clone();
         let src = self.named_src.clone();
         let module = self.module.clone();
 
         self.run_inner()
-            .map(|it| AST::new(module, src.clone(), it))
+            .map(|it| AST::new(namespace, module, src.clone(), it))
             .map_err(|it| LexerFullErr {
                 err: vec![it],
                 source_code: src,

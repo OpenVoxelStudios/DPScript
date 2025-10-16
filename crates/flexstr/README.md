@@ -1,5 +1,7 @@
 # flexstr
 
+> This was modified to enable the use of a `SharedString` with the `miette` crate.
+
 [![Crate](https://img.shields.io/crates/v/flexstr)](https://crates.io/crates/flexstr)
 [![Docs](https://docs.rs/flexstr/badge.svg)](https://docs.rs/flexstr)
 [![Build](https://github.com/nu11ptr/flexstr/workflows/CI/badge.svg)](https://github.com/nu11ptr/flexstr/actions)

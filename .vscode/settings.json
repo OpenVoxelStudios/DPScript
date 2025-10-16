@@ -3,5 +3,16 @@
     "java.jdt.ls.java.home": "/usr/lib/jvm/temurin-21-jdk",
     "java.import.gradle.java.home": "/usr/lib/jvm/temurin-21-jdk",
     "dscls.trace.server": "verbose",
-    "deno.enable": true
+    "deno.enable": true,
+    "editor.detectIndentation": false,
+    "prettier.tabWidth": 4,
+    "editor.tabSize": 4,
+    "yaml.schemaStore.enable": true,
+    "yaml.schemas": {
+        "https://www.schemastore.org/sublime-syntax.json": "*.sublime.yaml"
+    },
+    "rust-analyzer.cargo.buildScripts.enable": true,
+    "rust-analyzer.inlayHints.bindingModeHints.enable": true,
+    "rust-analyzer.inlayHints.chainingHints.enable": true,
+    "rust-analyzer.inlayHints.closureCaptureHints.enable": true
 }

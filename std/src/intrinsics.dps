@@ -9,6 +9,9 @@
 // `storage [store] [path]` or `entity [entity] [path]`, instead of placing the value itself
 // there.
 
+/// Clone the value given into a compiler-assigned temporary storage.
+pub inline compiler fn clone(value: Any) -> Any;
+
 /// Converts any value to a string.
 pub inline compiler fn stringify(value: Any) -> str;
 
@@ -24,7 +27,7 @@ inline facade fn set_string(
 /// Slice a string from the start to the end.
 /// Internally, this is basically `data modify [...] set string [...] {start} {end}`.
 #[since = "0.4.0"]
-pub inline fn str::slice(#[this] self: str, start: int, end: int) -> str {
+pub inline instance fn Any::slice(#[this] self: Any, start: int, end: int) -> str {
     let new = clone(self);
 
     set_string(new, start, end);

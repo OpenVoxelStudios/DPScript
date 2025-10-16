@@ -27,8 +27,10 @@ impl Validator {
 
         debug!("Pushing scope (block): {}", node.ident);
 
-        self.scopes
-            .push(Scope::new(format!("{}", node.ident).into()));
+        self.scopes.push(Scope::new(
+            format!("{}", node.ident).into(),
+            self.scopes.clone(),
+        ));
 
         for item in &mut node.body {
             self.validate(item)?;

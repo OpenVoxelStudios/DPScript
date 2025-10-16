@@ -1,12 +1,21 @@
 use crate::{Result, compiler::Compiler};
 use clap::{Parser, Subcommand};
-use std::path::PathBuf;
+use clap_verbosity_flag::{InfoLevel, Verbosity};
+use std::{env::set_current_dir, path::PathBuf};
+use tracing::level_filters::LevelFilter;
+use tracing_subscriber::EnvFilter;
 
 #[derive(Debug, Clone, Parser)]
 #[command(version, about, long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
+
+    #[command(flatten)]
+    pub verbosity: Verbosity<InfoLevel>,
+
+    #[arg(short = 'C', long)]
+    pub cwd: Option<PathBuf>,
 }
 
 #[derive(Debug, Clone, Subcommand)]
@@ -31,6 +40,9 @@ pub enum Commands {
 
         #[arg(short = 'D', long)]
         allow_dead_code: bool,
+
+        #[arg(short, long)]
+        detailed: bool,
     },
 
     /// Compile a single file
@@ -46,6 +58,9 @@ pub enum Commands {
 
         #[arg(short = 'T', long)]
         dump_tokens: bool,
+
+        #[arg(short, long)]
+        detailed: bool,
     },
 }
 
@@ -54,13 +69,26 @@ impl Cli {
         Self::parse().run()
     }
 
-    pub fn run(&self) -> Result<()> {
-        self.command.run()
+    pub fn run(self) -> Result<()> {
+        tracing_subscriber::fmt()
+            .with_env_filter(
+                EnvFilter::builder()
+                    .with_default_directive(LevelFilter::INFO.into())
+                    .from_env_lossy(),
+            )
+            .with_max_level(self.verbosity)
+            .init();
+
+        if let Some(cwd) = &self.cwd {
+            set_current_dir(cwd)?;
+        }
+
+        self.command.run(self.verbosity.is_silent())
     }
 }
 
 impl Commands {
-    pub fn run(&self) -> Result<()> {
+    pub fn run(self, quiet: bool) -> Result<()> {
         match self {
             Self::Build {
                 config_path,
@@ -69,14 +97,17 @@ impl Commands {
                 dump_ir,
                 out_dir,
                 allow_dead_code,
+                detailed,
             } => {
                 Compiler::new(
-                    config_path.clone(),
-                    out_dir.clone(),
-                    *dump_tokens,
-                    *dump_ast,
-                    *dump_ir,
-                    *allow_dead_code,
+                    config_path,
+                    out_dir,
+                    dump_tokens,
+                    dump_ast,
+                    dump_ir,
+                    allow_dead_code,
+                    detailed,
+                    quiet,
                 )?
                 .compile_project()?;
             }
@@ -86,6 +117,7 @@ impl Commands {
                 dump_ast: _,
                 dump_tokens: _,
                 out_dir: _,
+                detailed: _,
             } => {
                 todo!("single-file compilation is soon(TM)")
             }

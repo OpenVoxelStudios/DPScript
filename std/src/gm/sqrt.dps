@@ -1,6 +1,10 @@
 import std::entity::tp;
 import std::gm::gm_std;
 import std::gm::math_entity;
+import std::selectors::Pos;
+import std::transform::transformation;
+import std::transform::translation;
+import std::intrinsics::slice;
 
 const looper: Selector = selector: "__sqrt_loop";
 
@@ -32,7 +36,19 @@ fn sqrt_handling(var1: float, var2: float, ref temp: NBT) {
     gm_std[looper] += 1;
     positive_subtract(temp);
 
-    if gm_std[looper] < 20 && temp.v1m2p != "-" {
+    // FIXME: Compiler bug - binary operations don't parse well, this has to be two variables
+    // This being two variables also creates an optimization problem
+
+    let a = gm_std[looper] < 20;
+    let b = temp.v1m2p != "-";
+
+    // if gm_std[looper] < 20 && temp.v1m2p != "-" {
+    // ^^^ This should work, but the compiler parses it as
+    // gm_std[looper] < ((20 && temp.v1m2p) != "-") (or something in the same vein)
+    // which doesn't make any sense.
+    // FIXME!! PLEASE!!
+
+    if a && b {
         sqrt_handling(temp.var1, temp.var2, temp);
     }
 
@@ -48,5 +64,5 @@ fn positive_subtract(ref temp: NBT) {
         }
     }
 
-    temp.v1m2p = math_entity.Pos[1][0..1];
+    temp.v1m2p = math_entity.Pos[1].slice(0, 1);
 }

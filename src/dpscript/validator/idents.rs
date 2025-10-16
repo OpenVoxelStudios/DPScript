@@ -9,7 +9,7 @@ use crate::{
 };
 
 impl Validator {
-    pub fn validate_ident(&mut self, id: &Spanned<SharedStr>) -> Result<()> {
+    pub fn validate_ident(&mut self, id: Spanned<&SharedStr>) -> Result<()> {
         if id.0.to_lowercase() == "ib" {
             // :(
             self.warnings.push(Warn::IbPtsd { span: id.1 });

@@ -31,7 +31,7 @@ impl<T: HasBits + Clone> Cursor<T, NamedSource<String>> {
             src: data.clone(),
             inner: data.get_bits(),
             pos: 0,
-            meta: NamedSource::new(file, code.as_ref().into()),
+            meta: NamedSource::new(file, code.as_ref().into()).with_language("dpscript"),
         }
     }
 }
@@ -281,7 +281,7 @@ impl Cursor<String, NamedSource<String>> {
 
         Self {
             inner: s.chars().collect(),
-            meta: NamedSource::new(file, s.clone()),
+            meta: NamedSource::new(file, s.clone()).with_language("dpscript"),
             src: s,
             pos: 0,
         }

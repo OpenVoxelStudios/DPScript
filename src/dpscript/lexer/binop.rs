@@ -11,6 +11,11 @@ use crate::{
     util::AddSpan,
 };
 
+// This code... is ass.
+// Please fix.
+// If you don't fix it, and instead make the problem worse, please increment this counter.
+// Times the problem grew: 3
+
 impl Lexer {
     pub fn read_binop(&mut self) -> Result<Node> {
         self.push();
@@ -166,7 +171,7 @@ impl Lexer {
             return Err(LexerErr::NoLastExpr { span: self.loc() });
         };
 
-        let lhs = Box::new(last.to_owned());
+        let mut lhs = Box::new(last.to_owned());
 
         let (op_tkn, _) = self.start_parse_any(vec![
             Token::Dot,         // lhs.rhs
@@ -174,7 +179,7 @@ impl Lexer {
             Token::Range,       // lhs .. rhs
         ])?;
 
-        let op = match op_tkn {
+        let mut op = match op_tkn {
             Token::Dot => BinaryOperation::Field,
             Token::LeftBracket => BinaryOperation::ArrayIndex,
             Token::Range => BinaryOperation::Range,
@@ -188,7 +193,7 @@ impl Lexer {
 
         self.nesting += 1;
 
-        let rhs = Box::new(self.read_value()?);
+        let mut rhs = Box::new(self.read_value()?);
 
         self.nesting -= 1;
 
@@ -203,6 +208,39 @@ impl Lexer {
         }
 
         debug!("[{}] Successfully parsed a binary op value!", self.nesting);
+
+        // FIXUP! THE OUTPUT IF KEPT LIKE THIS IS BROKEN AS CRAP!
+        // binop<O: a, binop<P: b, c>> -> binop<P: binop<O: a, b>, c>
+
+        if let Node::BinaryOp(rhs_op) = *rhs {
+            if rhs_op.op != BinaryOperation::ArrayIndex {
+                // This is REALLY frickin hacky.
+                // There HAS to be a better way.
+
+                // binary<ArrayIndex, binary<Field, math_entity, binary<Field, transformation, translation>>, 0>
+                // needs to become
+                // binary<ArrayIndex, binary<Field, binary<Field, math_entity, transformation>, translation>, 0>
+
+                // isolated:
+                // binary<Field, math_entity, binary<Field, transformation, translation>>
+                // needs to become
+                // binary<Field, binary<Field, math_entity, transformation>, translation>
+
+                // basically, binary operations NEED to be left-aligned
+
+                lhs = Box::new(Node::BinaryOp(BinaryOpNode {
+                    span: lhs.span().add(rhs_op.lhs.span()),
+                    lhs: lhs,
+                    op,
+                    rhs: rhs_op.lhs,
+                }));
+
+                op = rhs_op.op;
+                rhs = rhs_op.rhs;
+            } else {
+                rhs = Box::new(Node::BinaryOp(rhs_op));
+            }
+        }
 
         self.pop_in_place()?;
 

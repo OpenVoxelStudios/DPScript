@@ -8,6 +8,7 @@ use crate::{
         lexer::{Result, parser::Lexer, util::LexerMethods},
         tokenizer::Token,
     },
+    util::Identifier,
 };
 
 impl Lexer {
@@ -17,6 +18,12 @@ impl Lexer {
         debug!("[{}] Attempting to read conditional...", self.nesting);
 
         let mut span = self.start_parse(Token::If)?;
+        let block_id = format!(
+            "zzz/{}/funcs/{}/blocks/{}",
+            self.module,
+            self.func()?,
+            self.block()?
+        );
 
         self.nesting += 1;
 
@@ -38,6 +45,13 @@ impl Lexer {
 
         while self.if_next_and_eat(Token::Else) {
             if self.if_next_and_eat(Token::If) {
+                let block_id = format!(
+                    "zzz/{}/funcs/{}/blocks/{}",
+                    self.module,
+                    self.func()?,
+                    self.block()?
+                );
+
                 self.nesting += 1;
 
                 let cond = self.read_value()?;
@@ -58,6 +72,11 @@ impl Lexer {
                     span,
                     condition: cond,
                     body: body,
+                    scope: None,
+                    ident: Identifier {
+                        namespace: self.namespace.clone(),
+                        path: block_id.into(),
+                    },
                 })
             } else {
                 self.expect(Token::LeftBrace)?;
@@ -70,6 +89,15 @@ impl Lexer {
             }
         }
 
+        let else_block_id = format!(
+            "zzz/{}/funcs/{}/blocks/{}",
+            self.module,
+            self.func()?,
+            self.block()?
+        );
+
+        self.inc_block()?;
+
         debug!("[{}] Successfully read conditional!", self.nesting);
 
         self.pop_in_place()?;
@@ -80,6 +108,14 @@ impl Lexer {
             else_ifs,
             condition: Box::new(cond),
             body,
+            ident: Identifier {
+                namespace: self.namespace.clone(),
+                path: block_id.into(),
+            },
+            else_ident: Identifier {
+                namespace: self.namespace.clone(),
+                path: else_block_id.into(),
+            },
             scope: None,
         }))
     }

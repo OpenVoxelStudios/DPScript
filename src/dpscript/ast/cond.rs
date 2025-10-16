@@ -3,20 +3,23 @@ use std::fmt;
 use dpscript_macros::HasSpan;
 use miette::SourceSpan;
 
-use crate::dpscript::{
+use crate::{dpscript::{
     ast::{
         node::Node,
         util::{Body, Indent},
     },
     data::NodeInfo,
     ty::TypeRef,
-};
+}, util::Identifier};
 
 use super::ast::Scope;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct ConditionalNode {
     pub span: SourceSpan,
+
+    /// The identifier of the condition node's body.
+    pub ident: Identifier,
 
     /// The condition for this 'if' node.
     pub condition: Box<Node>,
@@ -38,6 +41,9 @@ pub struct ConditionalNode {
     /// If this block is empty, it should be optimized out.
     pub else_body: Vec<Node>,
 
+    /// The identifier of the condition node's else block body.
+    pub else_ident: Identifier,
+
     pub scope: Option<Scope>,
 }
 
@@ -48,6 +54,8 @@ pub struct ElseIfNode {
     pub span: SourceSpan,
     pub condition: Node,
     pub body: Vec<Node>,
+    pub ident: Identifier,
+    pub scope: Option<Scope>,
 }
 
 impl NodeInfo for ConditionalNode {

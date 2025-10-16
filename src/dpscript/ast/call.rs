@@ -30,27 +30,26 @@ impl NodeInfo for CallNode {
         false
     }
 
-    fn returns(&self, _scope: &Scope) -> Option<TypeRef> {
-        // match &self.receiver {
-        //     Some(recv) => match scope.lookup(recv).map(|it| it.compute_ty(scope)).flatten() {
-        //         Some(ty) => scope
-        //             .module
-        //             .instance_funcs
-        //             .get(&ty)
-        //             .map(|it| it.get(&self.func).map(|it| it.return_type.clone()))
-        //             .flatten(),
+    fn returns(&self, scope: &Scope) -> Option<TypeRef> {
+        match self.receiver.len() {
+            1.. => {
+                let mut current = None;
 
-        //         None => None,
-        //     },
+                for id in &self.receiver {
+                    if let Some(ty) = current {
+                        current = Some(scope.fields.get(&ty)?.get(id)?.ty.clone());
+                    } else {
+                        current = scope.lookup(id)?.compute_ty(scope);
+                    }
+                }
 
-        //     None => scope
-        //         .module
-        //         .funcs
-        //         .get(&self.func)
-        //         .map(|it| it.return_type.clone()),
-        // }
+                scope
+                    .lookup_inst_fn(&current?, &self.func)
+                    .map(|it| it.return_type.clone())
+            }
 
-        todo!()
+            0 => scope.lookup_fn(&self.func).map(|it| it.return_type.clone()),
+        }
     }
 }
 

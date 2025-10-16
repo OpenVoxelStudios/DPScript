@@ -1,11 +1,13 @@
 pub mod binop;
 pub mod blocks;
+pub mod cond;
 pub mod consts;
 pub mod enums;
 pub mod err;
 pub mod funcs;
 pub mod idents;
 pub mod import;
+pub mod objective;
 pub mod unop;
 pub mod vars;
 
@@ -47,7 +49,7 @@ pub struct Validator {
 impl Validator {
     pub fn new(ast: AST, modules: Arc<HashMap<SharedStr, AST>>) -> Self {
         let mut me = Self {
-            global_scope: Scope::new(ast.module.clone()),
+            global_scope: Scope::new(ast.module.clone(), Vec::new()),
             ast,
             modules,
             imports: HashMap::new(),
@@ -60,17 +62,21 @@ impl Validator {
         me
     }
 
-    pub fn run(mut self) -> Result<AllErrors> {
+    pub fn run(mut self) -> Result<(AllErrors, AST)> {
         self.validate_imports()?;
+        self.validate_objectives()?;
         self.validate_constants()?;
         self.validate_funcs()?;
         self.validate_blocks()?;
 
-        Ok(AllErrors {
-            code: self.ast.code.clone(),
-            errors: self.errors,
-            warnings: self.warnings,
-        })
+        Ok((
+            AllErrors {
+                code: self.ast.code.clone(),
+                errors: self.errors,
+                warnings: self.warnings,
+            },
+            self.ast,
+        ))
     }
 
     pub fn scope(&self) -> Result<&Scope> {
@@ -85,10 +91,15 @@ impl Validator {
         // TODO: Everything
 
         match node {
+            Node::Import(v) => self.validate_import(v)?,
             Node::Constant(v) => self.validate_constant(v)?,
             Node::Function(v) => self.validate_func(v)?,
             Node::Variable(v) => self.validate_variable(v)?,
             Node::Block(v) => self.validate_block(v)?,
+            Node::BinaryOp(v) => self.validate_binop(v)?,
+            Node::Enum(v) => self.validate_enum(v)?,
+            Node::Conditional(v) => self.validate_cond(v)?,
+
             _ => {} // TODO
         }
 

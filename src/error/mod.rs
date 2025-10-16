@@ -19,6 +19,13 @@ use crate::dpscript::{
 };
 
 #[derive(Debug, Error, Diagnostic)]
+#[error("Validation failed:")]
+pub struct CompleteValidationErrors {
+    #[related]
+    pub errors: Vec<AllErrors>,
+}
+
+#[derive(Debug, Error, Diagnostic)]
 pub enum Error {
     #[error("An error occured!")]
     #[diagnostic(code(dpscript::error::basic), url(docsrs))]
@@ -43,6 +50,10 @@ pub enum Error {
     #[error(transparent)]
     #[diagnostic(transparent)]
     AllValidator(#[from] AllErrors),
+
+    #[error(transparent)]
+    #[diagnostic(transparent)]
+    AllValidator2(#[from] CompleteValidationErrors),
 
     #[error(transparent)]
     #[diagnostic(transparent)]

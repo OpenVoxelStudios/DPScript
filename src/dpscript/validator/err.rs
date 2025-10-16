@@ -39,6 +39,27 @@ pub enum ValidatorErr {
         span: SourceSpan,
     },
 
+    #[error("Cannot index into a value that is not an array!")]
+    #[diagnostic(code(validator::not_an_array))]
+    NotAnArray {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("Can only index an array with an integer!")]
+    #[diagnostic(code(validator::non_integer_index))]
+    NonIntIndex {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("Unable to infer type for value!")]
+    #[diagnostic(code(validator::cannot_infer_type))]
+    CannotInferType {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
     #[error("Type mismatch: expected '{expected}', got '{got}'!")]
     #[diagnostic(code(validator::type_mismatch))]
     TypeMismatch {
@@ -66,6 +87,22 @@ pub enum ValidatorErr {
     #[error("Block must have a type!")]
     #[diagnostic(code(validator::untyped_block))]
     UntypedBlock {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("Cannot perform binary operation on types '{lhs}' and '{rhs}'!")]
+    #[diagnostic(code(validator::incompatible_types))]
+    IncompatibleTypes {
+        #[label("here")]
+        span: SourceSpan,
+        lhs: TypeRef,
+        rhs: TypeRef,
+    },
+
+    #[error("Condition expression did not return a boolean!")]
+    #[diagnostic(code(validator::cond_not_bool))]
+    CondNotBool {
         #[label("here")]
         span: SourceSpan,
     },

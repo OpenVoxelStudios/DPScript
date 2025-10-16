@@ -1,10 +1,6 @@
 use crate::dpscript::{
     ast::{
-        ast::Scope, at::AtNode, binop::BinaryOpNode, block::BlockNode, call::CallNode,
-        cond::ConditionalNode, constant::ConstantNode, enums::EnumNode, func::FunctionNode,
-        ident::IdentNode, import::ImportNode, literal::LiteralNode, loops::LoopNode,
-        objective::ObjectiveNode, ret::ReturnNode, special::SpecialNode, unop::UnaryOpNode,
-        var::VarNode,
+        ast::Scope, at::AtNode, binop::BinaryOpNode, block::BlockNode, call::CallNode, cond::ConditionalNode, constant::ConstantNode, enums::EnumNode, field::FieldNode, func::FunctionNode, ident::IdentNode, import::ImportNode, literal::LiteralNode, loops::LoopNode, objective::ObjectiveNode, ret::ReturnNode, special::SpecialNode, unop::UnaryOpNode, var::VarNode
     },
     data::NodeInfo,
     ty::TypeRef,
@@ -83,6 +79,7 @@ node_data! {
     r#return = Return: ReturnNode,
     special = Special: SpecialNode,
     at = At: AtNode,
+    field = Field: FieldNode,
 }
 
 impl Node {
@@ -98,7 +95,8 @@ impl Node {
             | Node::Objective(_)
             | Node::Import(_)
             | Node::Return(_)
-            | Node::At(_) => false,
+            | Node::At(_)
+            | Node::Field(_) => false,
 
             Node::UnaryOp(_)
             | Node::BinaryOp(_)

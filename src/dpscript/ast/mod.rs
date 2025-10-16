@@ -7,6 +7,7 @@ pub mod call;
 pub mod cond;
 pub mod constant;
 pub mod enums;
+pub mod field;
 pub mod func;
 pub mod ident;
 pub mod import;

@@ -208,7 +208,8 @@ lexer!((false, false): top_level => [
     read_init_block,
     read_tick_block,
     read_objective,
-    read_const
+    read_const,
+    read_field
 ]);
 
 lexer!((false, true): body => [
