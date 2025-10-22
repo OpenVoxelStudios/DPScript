@@ -13,7 +13,7 @@ pub fn say_hi() {
     let text = [base, selector: "@s" + nbt: { color: "red" }, component: "!"];
 
     // declare a selector
-    let self = selector: "@s";
+    const self: Selector = selector: "@s";
 
     // tell them something!
     self.tellraw(text);

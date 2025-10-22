@@ -204,6 +204,13 @@ pub enum ValidatorErr {
         span: SourceSpan,
         got: TypeRef,
     },
+
+    #[error("Value is not const-safe!")]
+    #[diagnostic(code(validator::not_const_safe))]
+    NotConstSafe {
+        #[label("here")]
+        span: SourceSpan,
+    },
 }
 
 /// An error occured during the validation step. This is ALWAYS a compiler bug.

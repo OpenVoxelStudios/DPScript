@@ -40,6 +40,12 @@ impl Validator {
         self.validate_ident((&node.name, node.span))?; // TODO: Better span so it's actually the name
         self.validate(&mut node.value)?;
 
+        if !node.value.is_const(self.scope()?) {
+            self.errors.push(Err::NotConstSafe {
+                span: node.value.span(),
+            });
+        }
+
         let ret = node.value.returns(self.scope()?);
 
         if let Some(ret) = ret {
