@@ -81,67 +81,107 @@ cmd_enums! {
         #[print = "run {command}"]
         Run { command: Box<Command> },
 
-        #[print = "store result {inner}"]
-        StoreResult { inner: ExecuteStore },
+        #[print = "store result {inner} {next}"]
+        StoreResult {
+            inner: ExecuteStore,
+            next: Box<ExecuteCommand>,
+        },
 
-        #[print = "store success {inner}"]
-        StoreSuccess { inner: ExecuteStore },
+        #[print = "store success {inner} {next}"]
+        StoreSuccess {
+            inner: ExecuteStore,
+            next: Box<ExecuteCommand>,
+        },
 
-        #[print = "align {axes}"]
-        Align { axes: Literal },
+        #[print = "align {axes} {next}"]
+        Align {
+            axes: Literal,
+            next: Box<ExecuteCommand>,
+        },
 
-        #[print = "anchored {anchor}"]
+        #[print = "anchored {anchor} {next}"]
         Anchored {
             #[doc = "eyes | feet"]
             anchor: Literal,
+            next: Box<ExecuteCommand>,
         },
 
-        #[print = "as {targets}"]
-        As { targets: Literal },
+        #[print = "as {targets} {next}"]
+        As {
+            targets: Literal,
+            next: Box<ExecuteCommand>,
+        },
 
-        #[print = "at {targets}"]
-        At { targets: Literal },
+        #[print = "at {targets} {next}"]
+        At {
+            targets: Literal,
+            next: Box<ExecuteCommand>,
+        },
 
-        #[print = "facing {pos}"]
-        Facing { pos: BlockPos },
+        #[print = "facing {pos} {next}"]
+        Facing {
+            pos: BlockPos,
+            next: Box<ExecuteCommand>,
+        },
 
-        #[print = "facing entity {targets} {anchor}"]
+        #[print = "facing entity {targets} {anchor} {next}"]
         FacingEntity {
             targets: Literal,
 
             #[doc = "eyes | feet"]
             anchor: Literal,
+            next: Box<ExecuteCommand>,
         },
 
-        #[print = "in {dimension}"]
-        In { dimension: Literal },
+        #[print = "in {dimension} {next}"]
+        In {
+            dimension: Literal,
+            next: Box<ExecuteCommand>,
+        },
 
-        #[print = "on {relation}"]
+        #[print = "on {relation} {next}"]
         On {
             #[doc = "attacker | controller | leasher | origin | owner | passengers | target | vehicle"]
             relation: Literal,
+            next: Box<ExecuteCommand>,
         },
 
-        #[print = "positioned {pos}"]
-        Positioned { pos: BlockPos },
+        #[print = "positioned {pos} {next}"]
+        Positioned {
+            pos: BlockPos,
+            next: Box<ExecuteCommand>,
+        },
 
-        #[print = "positioned as {targets}"]
-        PositionedAs { targets: Literal },
+        #[print = "positioned as {targets} {next}"]
+        PositionedAs {
+            targets: Literal,
+            next: Box<ExecuteCommand>,
+        },
 
-        #[print = "positioned over {heightmap}"]
+        #[print = "positioned over {heightmap} {next}"]
         PositionedOver {
             #[doc = "world_surface | motion_blocking | motion_blocking_no_leaves | ocean_floor"]
             heightmap: Literal,
+            next: Box<ExecuteCommand>,
         },
 
-        #[print = "rotated {rot}"]
-        Rotated { rot: Rotation },
+        #[print = "rotated {rot} {next}"]
+        Rotated {
+            rot: Rotation,
+            next: Box<ExecuteCommand>,
+        },
 
-        #[print = "rotated as {targets}"]
-        RotatedAs { targets: Literal },
+        #[print = "rotated as {targets} {next}"]
+        RotatedAs {
+            targets: Literal,
+            next: Box<ExecuteCommand>,
+        },
 
-        #[print = "summon {entity}"]
-        Summon { entity: Literal },
+        #[print = "summon {entity} {next}"]
+        Summon {
+            entity: Literal,
+            next: Box<ExecuteCommand>,
+        },
     }
 
     pub enum Rotation {
@@ -242,5 +282,40 @@ cmd_enums! {
         x: Literal,
         y: Literal,
         z: Literal,
+    }
+}
+
+#[cfg(test)]
+pub mod tests {
+    use crate::mc::{Command, ExecuteCommand, ExecuteStore, Literal};
+
+    #[test]
+    pub fn test_cmd() {
+        let cmd = Command::Execute {
+            inner: ExecuteCommand::StoreResult {
+                inner: ExecuteStore::Score {
+                    targets: Literal::Inline {
+                        inner: "foo".into(),
+                    },
+                    objective: Literal::Inline {
+                        inner: "bar".into(),
+                    },
+                },
+                next: Box::new(ExecuteCommand::Run {
+                    command: Box::new(Command::Tellraw {
+                        selector: Literal::Inline {
+                            inner: "foo".into(),
+                        },
+                        message: Literal::Inline {
+                            inner: "bar".into(),
+                        },
+                    }),
+                }),
+            },
+        };
+
+        let expect = "execute store result score foo bar run tellraw foo bar";
+
+        assert_eq!(format!("{cmd}"), expect);
     }
 }
