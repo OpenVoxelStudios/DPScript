@@ -5,6 +5,7 @@ import std::selectors::Pos;
 import std::transform::transformation;
 import std::transform::translation;
 import std::intrinsics::slice;
+import std::intrinsics::float_of;
 
 const looper: Selector = selector: "__sqrt_loop";
 
@@ -21,7 +22,7 @@ pub fn sqrt(x: float) -> float {
     return sqrt_handling(x, 1, temp);
 }
 
-fn sqrt_handling(var1: float, var2: float, ref temp: NBT) {
+fn sqrt_handling(var1: float, var2: float, ref temp: NBT) -> float {
     at pos: [~0, var1, ~0] {
         math_entity.tp(pos: [29999999, ~var2, 91665]);
     }
@@ -34,7 +35,7 @@ fn sqrt_handling(var1: float, var2: float, ref temp: NBT) {
     temp.var2 = math_entity.transformation.translation[0];
 
     gm_std[looper] += 1;
-    positive_subtract(temp);
+    positive_subtract(var2, temp);
 
     // FIXME: Compiler bug - binary operations don't parse well, this has to be two variables
     // This being two variables also creates an optimization problem
@@ -57,10 +58,10 @@ fn sqrt_handling(var1: float, var2: float, ref temp: NBT) {
     return temp.var1;
 }
 
-fn positive_subtract(ref temp: NBT) {
-    at pos: [~0, temp.var1, ~0] {
+fn positive_subtract(var2: float, ref temp: NBT) {
+    at pos: [~0, float_of(temp.var1), ~0] {
         at pos: [~0, ~-0.000000001, ~0] {
-            math_entity.tp(pos: [29999999, ~-var2, 91665]);
+            math_entity.tp(pos: [29999999, ~0 - var2, 91665]);
         }
     }
 

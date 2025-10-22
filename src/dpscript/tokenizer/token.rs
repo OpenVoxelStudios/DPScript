@@ -1,6 +1,5 @@
 use std::fmt;
 
-use flexstr::SharedStr;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, PartialOrd)]
@@ -16,13 +15,13 @@ pub enum Token {
     Double(f64),
 
     /// "\\"...\\""
-    String(SharedStr),
+    String(String),
 
     /// "true" or "false"
     Bool(bool),
 
     /// "[ident]"
-    Ident(SharedStr),
+    Ident(String),
 
     // =============== SYMBOLS ===============
     /// "!"

@@ -30,7 +30,7 @@ init {
     }
     
     if config[enable_message] != 0 {
-        tellraw(all_players, welcome);
-        tellraw(all_players, hint);
+        all_players.tellraw(welcome);
+        all_players.tellraw(hint);
     }
 }

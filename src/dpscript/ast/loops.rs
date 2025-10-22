@@ -2,14 +2,14 @@ use std::fmt;
 
 use miette::SourceSpan;
 
-use crate::dpscript::{
+use crate::{dpscript::{
     ast::{
         ident::IdentNode,
         node::Node,
         util::{Body, Indent},
     },
     data::NodeInfo,
-};
+}, util::Identifier};
 
 use super::ast::Scope;
 
@@ -19,6 +19,7 @@ pub struct LoopNode {
     pub condition: LoopCondition,
     pub body: Vec<Node>,
     pub scope: Option<Scope>,
+    pub ident: Identifier,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]

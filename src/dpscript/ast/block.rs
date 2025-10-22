@@ -12,7 +12,6 @@ use crate::{
     util::Identifier,
 };
 use dpscript_macros::HasSpan;
-use flexstr::SharedStr;
 use miette::SourceSpan;
 use std::{collections::BTreeMap, fmt::Display};
 
@@ -22,7 +21,7 @@ pub struct BlockNode {
     pub body: Vec<Node>,
     pub kind: BlockKind,
     pub ident: Identifier,
-    pub attrs: BTreeMap<SharedStr, AttrNode>,
+    pub attrs: BTreeMap<String, AttrNode>,
     pub scope: Option<Scope>,
 
     /// Whether to exclude this node from dead code elimination.

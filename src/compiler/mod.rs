@@ -5,7 +5,6 @@ use crate::{
     pack::{PackToml, get_pack_source_files, resolve_pack_deps},
 };
 use colored::Colorize;
-use flexstr::SharedStr;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use ron::ser::PrettyConfig;
 use serde::{Deserialize, Serialize};
@@ -101,7 +100,7 @@ impl Compiler {
             }
 
             let files = get_pack_source_files(&pkg.src_path);
-            let ns: SharedStr = pkg.pack.pack.name.clone().into();
+            let ns: String = pkg.pack.pack.name.clone().into();
 
             let fpb = pb
                 .as_ref()
@@ -303,20 +302,20 @@ impl Compiler {
 
     fn create_ast(
         &self,
-        module: SharedStr,
-        namespace: SharedStr,
+        module: String,
+        namespace: String,
         file: &PathBuf,
         keep: bool,
     ) -> Result<AST> {
         let file_name = file.to_str().unwrap();
-        let data: SharedStr = fs::read_to_string(&file)?.into();
+        let data: String = fs::read_to_string(&file)?.into();
         let tokens = Tokenizer::new(&file_name, data.clone()).run()?.tokens();
         let dump_dir = self.out_dir.join(".dpscript");
         let parent = file.parent().unwrap();
         let mut parts = Vec::new();
         let mut found = false;
 
-        parts.push(namespace.as_ref().into());
+        parts.push(namespace.clone());
 
         for part in parent {
             if part == "src" && !found {
@@ -362,7 +361,7 @@ impl Compiler {
 
         let ast = FullLexer::new(
             module,
-            namespace.as_ref().into(),
+            namespace,
             file_name.into(),
             data,
             keep,

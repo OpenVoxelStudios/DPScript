@@ -8,7 +8,7 @@ use crate::{
         lexer::{Result, err::LexerErr, parser::Lexer, util::LexerMethods},
         tokenizer::Token,
     },
-    util::AddSpan,
+    util::{AddSpan, Identifier},
 };
 
 impl Lexer {
@@ -18,6 +18,14 @@ impl Lexer {
         debug!("[{}] Attempting to read loop...", self.nesting);
 
         let mut span = self.start_parse(Token::For)?;
+
+        let block_id = format!(
+            "zzz/{}/funcs/{}/blocks/{}",
+            self.module,
+            self.func()?,
+            self.block()?
+        );
+
         let var = self.read_ident()?;
 
         self.expect(Token::In)?;
@@ -80,6 +88,10 @@ impl Lexer {
             condition,
             span,
             scope: None,
+            ident: Identifier {
+                namespace: self.namespace.clone(),
+                path: block_id.into(),
+            },
         }))
     }
 
@@ -89,6 +101,14 @@ impl Lexer {
         debug!("[{}] Attempting to read while loop...", self.nesting);
 
         let mut span = self.start_parse(Token::While)?;
+
+        let block_id = format!(
+            "zzz/{}/funcs/{}/blocks/{}",
+            self.module,
+            self.func()?,
+            self.block()?
+        );
+
         let cond = self.read_value()?;
 
         self.expect(Token::LeftBrace)?;
@@ -114,6 +134,10 @@ impl Lexer {
                 condition: Box::new(cond),
             },
             span,
+            ident: Identifier {
+                namespace: self.namespace.clone(),
+                path: block_id.into(),
+            },
         }))
     }
 }

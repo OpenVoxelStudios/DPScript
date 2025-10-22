@@ -22,7 +22,6 @@ clap-verbosity-flag = { version = "3.0.4", default-features = false, features = 
 colored = "3.0.0"
 concat-idents = "1.1.5"
 dpscript-macros = { version = "0.1.0", path = "crates/macros" }
-flexstr = { version = "0.9.2", path = "crates/flexstr", features = ["serde"] }
 indicatif = "0.18.0"
 itertools = "0.14.0"
 json5 = "0.4.1"

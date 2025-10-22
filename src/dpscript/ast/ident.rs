@@ -1,7 +1,6 @@
 use std::fmt;
 
 use dpscript_macros::HasSpan;
-use flexstr::SharedStr;
 use miette::SourceSpan;
 
 use crate::dpscript::{ast::ast::Scope, data::NodeInfo, ty::TypeRef};
@@ -11,7 +10,7 @@ use crate::dpscript::{ast::ast::Scope, data::NodeInfo, ty::TypeRef};
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
 pub struct IdentNode {
     pub span: SourceSpan,
-    pub ident: SharedStr,
+    pub ident: String,
 }
 
 impl NodeInfo for IdentNode {

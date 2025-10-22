@@ -1,5 +1,3 @@
-// commented out because i'm gonna leave the import parsing sorta unimplemented for now
-// (definitely not procrastination no way nuh uh)
 import std::gm::sqrt::sqrt;
 import std::selectors::tellraw;
 import std::selectors::all_players;
@@ -14,7 +12,11 @@ pub fn say_hi() {
     // this is syntactic sugar - this is really: new array, push(...), push(...)
     let text = [base, selector: "@s" + nbt: { color: "red" }, component: "!"];
 
-    tellraw(selector: "@s", text);
+    // declare a selector
+    let self = selector: "@s";
+
+    // tell them something!
+    self.tellraw(text);
 }
 
 // Every module can have one or more init blocks, which will be their own functions and added to the load tag.
@@ -25,13 +27,13 @@ init {
     const base: NBT = component: "The square root of 100 is: ";
     let msg = [base, data];
 
-    tellraw(all_players, [txt]);
-    tellraw(all_players, msg);
+    all_players.tellraw([txt]);
+    all_players.tellraw(msg);
 
     const calc_base: NBT = component: "1 + 2 is: ";
     let calc_msg = [base, 1 + 2];
 
-    tellraw(all_players, calc_msg);
+    all_players.tellraw(calc_msg);
 
     // execute as @a run ...
     for player in all_players {

@@ -1,6 +1,5 @@
 use std::{collections::BTreeMap, fmt};
 
-use flexstr::SharedStr;
 use miette::SourceSpan;
 
 use crate::dpscript::ast::{node::Node, util::serialize_snbt};
@@ -13,9 +12,9 @@ pub struct NbtValue {
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub enum NbtValueData {
-    Map(BTreeMap<SharedStr, NbtValue>),
+    Map(BTreeMap<String, NbtValue>),
     Array(Vec<NbtValue>),
-    String(SharedStr),
+    String(String),
     Float(f32),
     Double(f64),
     Int(i32),

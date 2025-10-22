@@ -34,7 +34,14 @@ impl PartialEq for TypeRef {
             },
 
             Self::BuiltIn(a) => match other {
-                Self::BuiltIn(b) => a == b,
+                Self::BuiltIn(b) => {
+                    a == b
+                        || (a.is_numeric() && b.is_numeric())
+                        || *b == BuiltInType::Any
+                        || (*b == BuiltInType::Identifier && *a == BuiltInType::String)
+                        || (*b == BuiltInType::Selector && *a == BuiltInType::String)
+                }
+
                 Self::TypedNBT(_) => matches!(a, BuiltInType::NBT),
                 _ => false,
             },
@@ -42,11 +49,15 @@ impl PartialEq for TypeRef {
             Self::Array(a) => match other {
                 Self::Array(b) => a == b,
                 Self::SizedArray(b, _) => a == b,
+                Self::BuiltIn(BuiltInType::Any) => true,
+                Self::BuiltIn(BuiltInType::NBT) => a.is_nbt(),
                 _ => false,
             },
 
             Self::SizedArray(a, _) => match other {
                 Self::SizedArray(b, _) => a == b,
+                Self::BuiltIn(BuiltInType::Any) => true,
+                Self::BuiltIn(BuiltInType::NBT) => a.is_nbt(),
                 _ => false,
             },
 
@@ -119,7 +130,7 @@ pub enum BuiltInType {
     Selector,
 
     /// A 3D world position.
-    #[strum(serialize = "Pos")]
+    #[strum(serialize = "Pos3")]
     Pos,
 
     /// The 'Any' type. Allows any value.
@@ -160,6 +171,16 @@ impl TypeRef {
         }
     }
 
+    pub fn is_truthy(&self) -> bool {
+        match self {
+            TypeRef::BuiltIn(
+                BuiltInType::Boolean | BuiltInType::Any | BuiltInType::Selector | BuiltInType::Int,
+            ) => true,
+
+            _ => false,
+        }
+    }
+
     pub fn is_any(&self) -> bool {
         match self {
             TypeRef::BuiltIn(BuiltInType::Any) => true,
@@ -169,7 +190,7 @@ impl TypeRef {
 
     pub fn is_nbt(&self) -> bool {
         match self {
-            TypeRef::BuiltIn(BuiltInType::NBT) => true,
+            TypeRef::BuiltIn(BuiltInType::NBT | BuiltInType::Selector) => true,
             TypeRef::TypedNBT(_) => true,
             _ => false,
         }
@@ -179,8 +200,9 @@ impl TypeRef {
         match self {
             TypeRef::Array(_)
             | TypeRef::SizedArray(_, _)
-            | TypeRef::BuiltIn(BuiltInType::Any)
-            | TypeRef::BuiltIn(BuiltInType::Objective) => true,
+            | TypeRef::BuiltIn(BuiltInType::Any | BuiltInType::Objective | BuiltInType::Selector) => {
+                true
+            }
             _ => false,
         }
     }

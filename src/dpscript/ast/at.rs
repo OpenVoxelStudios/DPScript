@@ -2,12 +2,15 @@ use std::fmt;
 
 use miette::SourceSpan;
 
-use crate::dpscript::{
-    ast::{
-        node::Node,
-        util::{Body, Indent},
+use crate::{
+    dpscript::{
+        ast::{
+            node::Node,
+            util::{Body, Indent},
+        },
+        data::NodeInfo,
     },
-    data::NodeInfo,
+    util::Identifier,
 };
 
 use super::ast::Scope;
@@ -18,6 +21,7 @@ pub struct AtNode {
     pub pos: Box<Node>,
     pub body: Vec<Node>,
     pub scope: Option<Scope>,
+    pub ident: Identifier,
 }
 
 impl NodeInfo for AtNode {

@@ -1,6 +1,5 @@
 use std::collections::BTreeMap;
 
-use flexstr::SharedStr;
 use miette::SourceSpan;
 
 use crate::{
@@ -43,7 +42,7 @@ impl Lexer {
         &mut self,
         mut span: SourceSpan,
         kind: BlockKind,
-        attrs: BTreeMap<SharedStr, AttrNode>,
+        attrs: BTreeMap<String, AttrNode>,
     ) -> Result<Node> {
         self.expect(Token::LeftBrace)?;
         self.push_func(kind.to_string().into());

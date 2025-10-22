@@ -1,5 +1,4 @@
 use crate::dpscript::{ast::ast::Scope, data::NodeInfo, ty::TypeRef};
-use flexstr::SharedStr;
 use miette::SourceSpan;
 use std::fmt;
 
@@ -8,7 +7,7 @@ pub struct ImportNode {
     pub span: SourceSpan,
 
     /// A list of paths to imports (each part separated by '::' is a different element in the sub-Vec).
-    pub imports: Vec<Vec<SharedStr>>,
+    pub imports: Vec<Vec<String>>,
 }
 
 impl NodeInfo for ImportNode {

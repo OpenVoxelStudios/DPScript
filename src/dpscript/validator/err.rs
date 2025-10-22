@@ -1,4 +1,3 @@
-use flexstr::SharedStr;
 use miette::{Diagnostic, NamedSource, SourceSpan};
 use thiserror::Error;
 
@@ -12,8 +11,16 @@ pub enum ValidatorErr {
     UnresolvedImport {
         #[label("here")]
         span: SourceSpan,
-        path: SharedStr,
-        module: SharedStr,
+        path: String,
+        module: String,
+    },
+
+    #[error("Unresolved reference: '{name}'")]
+    #[diagnostic(code(validator::unresolved_ref))]
+    UnresolvedRef {
+        #[label("here")]
+        span: SourceSpan,
+        name: String,
     },
 
     #[error("Duplicate import: '{name}")]
@@ -21,7 +28,7 @@ pub enum ValidatorErr {
     DuplicateImport {
         #[label("here")]
         span: SourceSpan,
-        name: SharedStr,
+        name: String,
     },
 
     #[error("Module not found: '{module}'")]
@@ -29,7 +36,7 @@ pub enum ValidatorErr {
     ModuleNotFound {
         #[label("here")]
         span: SourceSpan,
-        module: SharedStr,
+        module: String,
     },
 
     #[error("Cannot compute type for value!")]
@@ -42,6 +49,13 @@ pub enum ValidatorErr {
     #[error("Cannot index into a value that is not an array!")]
     #[diagnostic(code(validator::not_an_array))]
     NotAnArray {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("Cannot loop through a value that is not an array!")]
+    #[diagnostic(code(validator::loop_not_array))]
+    LoopNotArray {
         #[label("here")]
         span: SourceSpan,
     },
@@ -74,7 +88,7 @@ pub enum ValidatorErr {
     InvalidIdent {
         #[label("here")]
         span: SourceSpan,
-        id: SharedStr,
+        id: String,
     },
 
     #[error("Unexpected function body!")]
@@ -106,6 +120,90 @@ pub enum ValidatorErr {
         #[label("here")]
         span: SourceSpan,
     },
+
+    #[error("Cannot perform operation on a non-numerical value!")]
+    #[diagnostic(code(validator::unary_non_numeric))]
+    UnaryNonNumeric {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("Cannot negate a value that is not truthy!")]
+    #[diagnostic(code(validator::negate_non_bool))]
+    NegateNonBool {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("'at' position argument was not a position!")]
+    #[diagnostic(code(validator::at_not_pos))]
+    AtNotPos {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("Must return a value from a non-void function!")]
+    #[diagnostic(code(validator::must_return_value))]
+    MustReturnValue {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("Return type mismatch! Expected '{expected}', but got '{got}'")]
+    #[diagnostic(code(validator::return_type_mismatch))]
+    ReturnTypeMismatch {
+        #[label("here")]
+        span: SourceSpan,
+        expected: TypeRef,
+        got: TypeRef,
+    },
+
+    #[error("Argument type mismatch! Expected '{expected}', but got '{got}'")]
+    #[diagnostic(code(validator::arg_type_mismatch))]
+    ArgTypeMismatch {
+        #[label("here")]
+        span: SourceSpan,
+        expected: TypeRef,
+        got: TypeRef,
+    },
+
+    #[error("Function expected {expected} arguments but was called with {got}")]
+    #[diagnostic(code(validator::arg_count_mismatch))]
+    ArgCountMismatch {
+        #[label("here")]
+        span: SourceSpan,
+        expected: usize,
+        got: usize,
+    },
+
+    #[error("Functions can only have a maximum of one '#[this]' argument!")]
+    #[diagnostic(code(validator::multiple_this_arg))]
+    MultipleThisArg {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("Non-instance functions cannot have a '#[this]' argument!")]
+    #[diagnostic(code(validator::unexpected_this_arg))]
+    UnexpectedThisArg {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("A '#[this]' argument must be the first argument of a function!")]
+    #[diagnostic(code(validator::this_not_first))]
+    ThisNotFirst {
+        #[label("here")]
+        span: SourceSpan,
+    },
+
+    #[error("Position elements must be numbers! Got: '{got}'")]
+    #[diagnostic(code(validator::non_numeric_pos))]
+    NonNumericPos {
+        #[label("here")]
+        span: SourceSpan,
+        got: TypeRef,
+    },
 }
 
 /// An error occured during the validation step. This is ALWAYS a compiler bug.
@@ -118,9 +216,13 @@ pub enum ValidationErr {
         span: SourceSpan,
     },
 
-    #[error("Scope stack was empty!.")]
+    #[error("Scope stack was empty!")]
     #[diagnostic(code(compiler::no_scope))]
     NoScope,
+
+    #[error("Function stack was empty!")]
+    #[diagnostic(code(compiler::no_func))]
+    NoFunc,
 }
 
 #[derive(Debug, Error, Diagnostic)]
@@ -136,7 +238,7 @@ pub enum ValidatorWarn {
     /// *those who know.* \
     /// `This thing is my CAS project :P` \
     /// `- Redstone`
-    #[error("PTSD.")]
+    #[error("PTSD. Please don't trigger it, it hurts.")]
     #[diagnostic(code(compiler::ib_ptsd))]
     IbPtsd {
         #[label("here")]
@@ -149,7 +251,7 @@ pub enum ValidatorWarn {
 #[diagnostic()]
 pub struct AllErrors {
     #[source_code]
-    pub code: NamedSource<SharedStr>,
+    pub code: NamedSource<String>,
 
     #[related]
     pub errors: Vec<ValidatorErr>,

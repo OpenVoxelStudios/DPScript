@@ -16,7 +16,6 @@ use crate::{
 };
 use bitflags::bitflags;
 use dpscript_macros::HasSpan;
-use flexstr::SharedStr;
 use miette::SourceSpan;
 
 bitflags! {
@@ -64,14 +63,14 @@ impl fmt::Display for FuncFlags {
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct FunctionNode {
     pub span: SourceSpan,
-    pub name: SharedStr,
+    pub name: String,
     pub args: Vec<FunctionArg>,
     pub return_type: TypeRef,
     pub ident: Identifier,
     pub body: Vec<Node>,
     pub flags: FuncFlags,
     pub receiver: Option<TypeRef>,
-    pub attrs: BTreeMap<SharedStr, AttrNode>,
+    pub attrs: BTreeMap<String, AttrNode>,
     pub scope: Option<Scope>,
 
     /// Whether to exclude this node from dead code elimination.
@@ -81,12 +80,12 @@ pub struct FunctionNode {
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct FunctionArg {
     pub span: SourceSpan,
-    pub name: SharedStr,
+    pub name: String,
     pub ty: TypeRef,
     pub location: DataLocation,
     pub is_this: bool,
     pub is_ref: bool,
-    pub attrs: BTreeMap<SharedStr, AttrNode>,
+    pub attrs: BTreeMap<String, AttrNode>,
 }
 
 impl NodeInfo for FunctionNode {

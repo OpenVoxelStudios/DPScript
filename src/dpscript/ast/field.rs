@@ -1,5 +1,4 @@
 use crate::dpscript::{ast::ast::Scope, data::NodeInfo, ty::TypeRef};
-use flexstr::SharedStr;
 use miette::SourceSpan;
 use std::fmt;
 
@@ -15,7 +14,7 @@ pub struct FieldNode {
     pub owner: TypeRef,
 
     /// The name of the field.
-    pub name: SharedStr,
+    pub name: String,
 
     /// The type of the field.
     pub ty: TypeRef,

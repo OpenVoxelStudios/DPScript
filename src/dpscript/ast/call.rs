@@ -1,11 +1,10 @@
 use std::fmt;
 
 use dpscript_macros::HasSpan;
-use flexstr::SharedStr;
 use miette::SourceSpan;
 
 use crate::dpscript::{
-    ast::{ast::Scope, node::Node},
+    ast::{ast::Scope, func::FunctionNode, node::Node},
     data::NodeInfo,
     ty::TypeRef,
 };
@@ -16,21 +15,17 @@ pub struct CallNode {
 
     /// A reference to a node that is the receiver,
     /// like when calling an object instance function.
-    pub receiver: Vec<SharedStr>,
+    pub receiver: Vec<String>,
 
     /// The name of the function to call.
-    pub func: SharedStr,
+    pub func: String,
 
     /// The arguments the function was called with.
     pub args: Vec<Node>,
 }
 
-impl NodeInfo for CallNode {
-    fn is_const(&self, _scope: &Scope) -> bool {
-        false
-    }
-
-    fn returns(&self, scope: &Scope) -> Option<TypeRef> {
+impl CallNode {
+    pub fn target_fn<'a>(&self, scope: &'a Scope) -> Option<&'a FunctionNode> {
         match self.receiver.len() {
             1.. => {
                 let mut current = None;
@@ -43,13 +38,21 @@ impl NodeInfo for CallNode {
                     }
                 }
 
-                scope
-                    .lookup_inst_fn(&current?, &self.func)
-                    .map(|it| it.return_type.clone())
+                scope.lookup_inst_fn(&current?, &self.func)
             }
 
-            0 => scope.lookup_fn(&self.func).map(|it| it.return_type.clone()),
+            0 => scope.lookup_fn(&self.func),
         }
+    }
+}
+
+impl NodeInfo for CallNode {
+    fn is_const(&self, _scope: &Scope) -> bool {
+        false
+    }
+
+    fn returns(&self, scope: &Scope) -> Option<TypeRef> {
+        self.target_fn(scope).map(|it| it.return_type.clone())
     }
 }
 

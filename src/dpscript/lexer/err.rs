@@ -1,5 +1,4 @@
 use crate::dpscript::tokenizer::Token;
-use flexstr::SharedStr;
 use miette::{Diagnostic, NamedSource, SourceSpan};
 use thiserror::Error;
 
@@ -59,7 +58,7 @@ pub enum LexerErr {
     UnknownType {
         #[label("here")]
         span: SourceSpan,
-        ty: SharedStr,
+        ty: String,
     },
 
     // Exists so we can differentiate between this and the regular one.
@@ -125,7 +124,7 @@ pub enum LexerErr {
 #[diagnostic(code(dpscript::lexer))]
 pub struct LexerFullErr {
     #[source_code]
-    pub source_code: NamedSource<SharedStr>,
+    pub source_code: NamedSource<String>,
 
     #[related]
     pub err: Vec<LexerErr>,

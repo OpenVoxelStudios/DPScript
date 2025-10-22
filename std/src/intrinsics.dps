@@ -15,6 +15,9 @@ pub inline compiler fn clone(value: Any) -> Any;
 /// Converts any value to a string.
 pub inline compiler fn stringify(value: Any) -> str;
 
+/// Converts a string value to a float.
+pub inline compiler fn float_of(value: str) -> float;
+
 /// Set a string from a source to a target, slicing it.
 #[cmd("data modify {@source} set string {@target} {start} {end}")]
 inline facade fn set_string(

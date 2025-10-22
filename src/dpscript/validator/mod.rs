@@ -1,22 +1,29 @@
+pub mod at;
 pub mod binop;
 pub mod blocks;
+pub mod call;
 pub mod cond;
 pub mod consts;
 pub mod enums;
 pub mod err;
+pub mod field;
 pub mod funcs;
 pub mod idents;
 pub mod import;
+pub mod literal;
+pub mod loops;
 pub mod objective;
+pub mod ret;
+pub mod special;
 pub mod unop;
 pub mod vars;
 
 pub use err::Result;
-use flexstr::SharedStr;
 
 use crate::dpscript::{
     ast::{
         ast::{AST, ExportType, Scope},
+        func::FunctionNode,
         node::Node,
     },
     validator::err::{AllErrors, Err, VErr, Warn},
@@ -28,10 +35,10 @@ pub struct Validator {
     pub ast: AST,
 
     /// The resolved imports, for processing the module top-down.
-    pub imports: HashMap<SharedStr, ExportType>,
+    pub imports: HashMap<String, ExportType>,
 
     /// A map available modules.
-    pub modules: Arc<HashMap<SharedStr, AST>>,
+    pub modules: Arc<HashMap<String, AST>>,
 
     /// The errors generated during validation.
     pub errors: Vec<Err>,
@@ -42,12 +49,15 @@ pub struct Validator {
     /// The scope stack(TM).
     pub scopes: Vec<Scope>,
 
+    /// The function stack(TM).
+    pub funcs: Vec<FunctionNode>,
+
     /// The global scope.
     pub global_scope: Scope,
 }
 
 impl Validator {
-    pub fn new(ast: AST, modules: Arc<HashMap<SharedStr, AST>>) -> Self {
+    pub fn new(ast: AST, modules: Arc<HashMap<String, AST>>) -> Self {
         let mut me = Self {
             global_scope: Scope::new(ast.module.clone(), Vec::new()),
             ast,
@@ -56,6 +66,7 @@ impl Validator {
             errors: Vec::new(),
             warnings: Vec::new(),
             scopes: Vec::new(),
+            funcs: Vec::new(),
         };
 
         me.scopes.push(me.global_scope.clone());
@@ -83,13 +94,15 @@ impl Validator {
         self.scopes.last().ok_or(VErr::NoScope)
     }
 
+    pub fn func(&self) -> Result<&FunctionNode> {
+        self.funcs.last().ok_or(VErr::NoFunc)
+    }
+
     pub fn scope_mut(&mut self) -> Result<&mut Scope> {
         self.scopes.last_mut().ok_or(VErr::NoScope)
     }
 
     pub fn validate(&mut self, node: &mut Node) -> Result<()> {
-        // TODO: Everything
-
         match node {
             Node::Import(v) => self.validate_import(v)?,
             Node::Constant(v) => self.validate_constant(v)?,
@@ -99,8 +112,16 @@ impl Validator {
             Node::BinaryOp(v) => self.validate_binop(v)?,
             Node::Enum(v) => self.validate_enum(v)?,
             Node::Conditional(v) => self.validate_cond(v)?,
-
-            _ => {} // TODO
+            Node::UnaryOp(v) => self.validate_unop(v)?,
+            Node::Literal(v) => self.validate_literal(v)?,
+            Node::Call(v) => self.validate_call(v)?,
+            Node::Ident(v) => self.validate_ident_node(v)?,
+            Node::Loop(v) => self.validate_loop(v)?,
+            Node::Objective(v) => self.validate_objective(v)?,
+            Node::Return(v) => self.validate_return(v)?,
+            Node::Special(v) => self.validate_special(v)?,
+            Node::At(v) => self.validate_at(v)?,
+            Node::Field(v) => self.validate_field(v)?,
         }
 
         Ok(())

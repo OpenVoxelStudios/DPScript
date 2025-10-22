@@ -1,5 +1,4 @@
 use dpscript_macros::HasSpan;
-use flexstr::SharedStr;
 use miette::SourceSpan;
 use std::fmt;
 
@@ -17,7 +16,7 @@ pub struct LiteralNode {
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub enum LiteralData {
-    String(SharedStr),
+    String(String),
     Int(i64),
     Float(f32),
     Double(f64),
@@ -27,7 +26,7 @@ pub enum LiteralData {
 }
 
 impl LiteralNode {
-    pub fn as_string(self) -> Option<SharedStr> {
+    pub fn as_string(self) -> Option<String> {
         match self.data {
             LiteralData::String(it) => Some(it),
             _ => None,

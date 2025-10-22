@@ -1,22 +1,29 @@
 use std::collections::BTreeMap;
 
-use crate::dpscript::{
-    ast::{
-        ast::Scope,
-        func::{FuncFlags, FunctionNode},
+use crate::{
+    common::traits::HasSpan,
+    dpscript::{
+        ast::{
+            ast::Scope,
+            func::{FuncFlags, FunctionNode},
+        },
+        validator::{Result, Validator, err::Err},
     },
-    validator::{Result, Validator, err::Err},
 };
 
 impl Validator {
     pub fn validate_funcs(&mut self) -> Result<()> {
+        let fns = self.ast.scope.functions.clone();
         let mut out = BTreeMap::new();
+
+        self.scope_mut()?.functions.extend(fns);
 
         for (k, mut node) in self.ast.scope.functions.clone() {
             self.validate_func(&mut node)?;
             out.insert(k, node);
         }
 
+        self.scope_mut()?.functions.extend(out.clone());
         self.ast.scope.functions = out;
 
         Ok(())
@@ -42,14 +49,37 @@ impl Validator {
             self.scopes.clone(),
         ));
 
-        for arg in &node.args {
+        self.funcs.push(node.clone());
+
+        let mut found_this = false;
+
+        for (i, arg) in node.args.iter().enumerate() {
+            self.validate_ident((&arg.name, arg.span))?;
             self.scope_mut()?.add_local(arg.name.clone(), arg.to_var());
+
+            if arg.is_this {
+                if node.receiver.is_some() {
+                    if found_this {
+                        self.errors.push(Err::MultipleThisArg { span: arg.span() });
+                    } else {
+                        found_this = true;
+                    }
+                } else {
+                    self.errors
+                        .push(Err::UnexpectedThisArg { span: arg.span() });
+                }
+
+                if i != 0 {
+                    self.errors.push(Err::ThisNotFirst { span: arg.span() });
+                }
+            }
         }
 
         for item in &mut node.body {
             self.validate(item)?;
         }
 
+        self.funcs.pop();
         node.scope = self.scopes.pop();
 
         debug!("Popped scope!");

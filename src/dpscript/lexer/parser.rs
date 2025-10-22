@@ -8,7 +8,6 @@ use crate::{
     impl_lexer,
     util::Spanned,
 };
-use flexstr::SharedStr;
 use miette::{SourceOffset, SourceSpan};
 
 macro_rules! lexer {
@@ -91,22 +90,22 @@ macro_rules! lexer {
 pub struct Lexer {
     pub tokens: Vec<Spanned<Token>>,
     pub pos: usize,
-    pub namespace: SharedStr,
+    pub namespace: String,
     pub last_pos: SourceSpan,
     pub stack: Vec<usize>,
     pub last: Vec<Node>,
     pub nodes: Vec<Node>,
     pub nesting: usize,
-    pub function: Vec<SharedStr>,
+    pub function: Vec<String>,
     pub block: Vec<usize>,
-    pub module: SharedStr,
+    pub module: String,
     pub event_block: usize,
     pub keep: bool,
 }
 
 impl_lexer!(Lexer);
 
-pub fn fast_ident(inp: &str) -> SharedStr {
+pub fn fast_ident(inp: &str) -> String {
     let mut s = String::new();
 
     for ch in inp.chars() {
@@ -122,7 +121,7 @@ pub fn fast_ident(inp: &str) -> SharedStr {
 
 impl Lexer {
     pub fn new(
-        namespace: SharedStr,
+        namespace: String,
         module: String,
         keep: bool,
         tokens: Vec<Spanned<Token>>,
@@ -149,7 +148,7 @@ impl Lexer {
         }
     }
 
-    pub fn func(&self) -> Result<SharedStr> {
+    pub fn func(&self) -> Result<String> {
         self.function
             .last()
             .cloned()
@@ -159,7 +158,7 @@ impl Lexer {
             })
     }
 
-    pub fn push_func(&mut self, func: SharedStr) {
+    pub fn push_func(&mut self, func: String) {
         self.function.push(func);
         self.block.push(0);
     }

@@ -1,15 +1,17 @@
-use flexstr::SharedStr;
 
 use crate::{
-    dpscript::validator::{
-        Result, Validator,
-        err::{Err, Warn},
+    dpscript::{
+        ast::ident::IdentNode,
+        validator::{
+            Result, Validator,
+            err::{Err, Warn},
+        },
     },
     util::Spanned,
 };
 
 impl Validator {
-    pub fn validate_ident(&mut self, id: Spanned<&SharedStr>) -> Result<()> {
+    pub fn validate_ident(&mut self, id: Spanned<&String>) -> Result<()> {
         if id.0.to_lowercase() == "ib" {
             // :(
             self.warnings.push(Warn::IbPtsd { span: id.1 });
@@ -30,6 +32,17 @@ impl Validator {
             self.errors.push(Err::InvalidIdent {
                 span: id.1,
                 id: id.0.clone(),
+            });
+        }
+
+        Ok(())
+    }
+
+    pub fn validate_ident_node(&mut self, node: &mut IdentNode) -> Result<()> {
+        if self.scope()?.lookup(&node.ident).is_none() {
+            self.errors.push(Err::UnresolvedRef {
+                span: node.span,
+                name: node.ident.clone(),
             });
         }
 

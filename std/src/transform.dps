@@ -1,2 +1,2 @@
 pub field Selector::transformation = Transform;
-pub field Transform::translation = Pos;
+pub field Transform::translation = Pos3;
