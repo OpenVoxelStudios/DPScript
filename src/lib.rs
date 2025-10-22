@@ -18,5 +18,6 @@ pub mod lsp;
 pub mod macros;
 pub mod pack;
 pub mod util;
+pub mod mc;
 
 pub type Result<T, E = crate::error::Error> = core::result::Result<T, E>;
