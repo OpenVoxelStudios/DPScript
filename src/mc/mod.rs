@@ -8,6 +8,8 @@ pub struct Function {
 }
 
 cmd_enums! {
+    // ========== BASE ==========
+
     pub enum Literal {
         #[print = "{inner}"]
         Inline { inner: String },
@@ -15,6 +17,20 @@ cmd_enums! {
         #[print = "$({inner})"]
         Macro { inner: String },
     }
+
+    #[enum_doc = "If this literal has a value, it will print a space before the value."]
+    pub enum OptionLiteral {
+        #[print = " {inner}"]
+        Inline { inner: String },
+
+        #[print = " $({inner})"]
+        Macro { inner: String },
+
+        #[print = ""]
+        None {},
+    }
+
+    // ========== MAIN ==========
 
     #[enum_doc = "The main command enum, holds all commands."]
     pub enum Command {
@@ -27,6 +43,11 @@ cmd_enums! {
         #[print = "data {inner}"]
         Data { inner: DataCommand },
     }
+
+    // TODO: Scoreboard
+    // TODO: All the other commands lol
+
+    // ========== DATA ==========
 
     pub enum DataCommand {
         #[print = "get {source} {path} {scale}"]
@@ -42,11 +63,68 @@ cmd_enums! {
             nbt: Literal,
         },
 
-        // TODO: modify, remove
+        #[print = "remove {source} {path}"]
+        Remove {
+            source: DataSource,
+            path: Literal,
+        },
+
+        #[print = "modify {source} {target_path} {action}"]
+        Modify {
+            source: DataSource,
+            target_path: Literal,
+            action: DataModifyAction,
+        },
     }
 
-    // TODO: Scoreboard
-    // TODO: All the other commands lol
+    pub enum DataModifyAction {
+        #[print = "append {inner}"]
+        Append {
+            inner: DataModifyArg,
+        },
+
+        #[print = "insert {index} {inner}"]
+        Insert {
+            index: Literal,
+            inner: DataModifyArg,
+        },
+
+        #[print = "merge {inner}"]
+        Merge {
+            inner: DataModifyArg,
+        },
+
+        #[print = "prepend {inner}"]
+        Prepend {
+            inner: DataModifyArg,
+        },
+
+        #[print = "set {inner}"]
+        Set {
+            inner: DataModifyArg,
+        },
+    }
+
+    pub enum DataModifyArg {
+        #[print = "from {source}{source_path}"]
+        From {
+            source: DataSource,
+            source_path: OptionLiteral,
+        },
+
+        #[print = "string {source}{source_path}{start}{end}"]
+        String {
+            source: DataSource,
+            source_path: OptionLiteral,
+            start: OptionLiteral,
+            end: OptionLiteral,
+        },
+
+        #[print = "value {value}"]
+        Value {
+            value: Literal,
+        }
+    }
 
     pub enum DataSource {
         #[print = "block {pos}"]
@@ -64,6 +142,8 @@ cmd_enums! {
             target: Literal,
         },
     }
+
+    // ========== EXECUTE ==========
 
     pub enum ExecuteCommand {
         #[print = "if {condition} {action}"]
@@ -204,7 +284,9 @@ cmd_enums! {
         #[print = "bossbar {id} {op}"]
         Bossbar {
             id: Literal,
-            op: Literal, // `value | max`
+
+            #[doc = "value | max"]
+            op: Literal,
         },
 
         #[print = "entity {target} {path} {kind} {scale}"]
@@ -276,6 +358,8 @@ cmd_enums! {
         #[print = "storage {source} {path}"]
         Storage { source: Literal, path: Literal },
     }
+
+    // ========== STRUCTS ==========
 
     #[print = "{x} {y} {z}"]
     pub struct BlockPos {
