@@ -1,6 +1,5 @@
 use std::fmt;
 
-
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Identifier {
     pub namespace: String,
@@ -11,6 +10,15 @@ pub struct Identifier {
 pub struct DataLocation {
     pub storage: String,
     pub path: String,
+}
+
+impl Identifier {
+    pub fn new(ns: impl AsRef<str>, path: impl AsRef<str>) -> Self {
+        Self {
+            namespace: ns.as_ref().into(),
+            path: path.as_ref().into(),
+        }
+    }
 }
 
 impl fmt::Display for Identifier {

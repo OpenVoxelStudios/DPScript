@@ -1,4 +1,5 @@
 pub mod ast;
+pub mod compiler;
 pub mod data;
 pub mod lexer;
 pub mod tokenizer;

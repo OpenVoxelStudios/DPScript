@@ -1,10 +1,53 @@
 pub mod macros;
 
+use std::{fs, io, path::PathBuf};
+
+use itertools::Itertools;
+
 use crate::{cmd_enums, util::Identifier};
 
 pub struct Function {
     pub id: Identifier,
     pub commands: Vec<Command>,
+
+    /// Always write this function's file, even if the content is empty.
+    /// Defaults to true.
+    pub always_write: bool,
+}
+
+impl Function {
+    pub fn new(id: Identifier) -> Self {
+        Self {
+            id,
+            commands: Vec::new(),
+            always_write: true,
+        }
+    }
+
+    pub fn write(self, out_dir: &PathBuf) -> io::Result<()> {
+        if !self.always_write && self.commands.is_empty() {
+            return Ok(());
+        }
+
+        let path = format!("{}/{}.mcfunction", self.id.namespace, self.id.path);
+        let path = out_dir.join(path);
+        let parent = path.parent().unwrap();
+
+        if !parent.exists() {
+            fs::create_dir_all(parent)?;
+        }
+
+        let data = self
+            .commands
+            .into_iter()
+            .map(|it| format!("{it}"))
+            .collect_vec()
+            .join("\n");
+
+        fs::write(path, data)?;
+
+        Ok(())
+    }
 }
 
 cmd_enums! {
@@ -42,10 +85,128 @@ cmd_enums! {
 
         #[print = "data {inner}"]
         Data { inner: DataCommand },
+
+        #[print = "scoreboard {inner}"]
+        Scoreboard { inner: ScoreboardCommand },
+
+        #[print = "return {inner}"]
+        Return { inner: ReturnCommand },
+
+        #[doc = "A custom command, not in the command struct. This should only be used for user-defined commands via facade functions."]
+        #[print = "{inner}"]
+        Custom { inner: Literal },
     }
 
-    // TODO: Scoreboard
     // TODO: All the other commands lol
+
+    // ========== RETURN ==========
+
+    pub enum ReturnCommand {
+        #[print = "{value}"]
+        Value { value: Literal },
+
+        #[print = "fail"]
+        Fail {},
+
+        #[print = "run {command}"]
+        Run { command: Box<Command> },
+    }
+
+    // ========== SCOREBOARD ==========
+
+    pub enum ScoreboardCommand {
+        #[print = "objectives {inner}"]
+        Objectives {
+            inner: ScoreboardObjectivesCommand,
+        },
+
+        #[print = "players {inner}"]
+        Players {
+            inner: ScoreboardPlayersCommand,
+        },
+    }
+
+    pub enum ScoreboardObjectivesCommand {
+        #[print = "list"]
+        List {},
+
+        #[print = "add {objective} {criteria}{display_name}"]
+        Add {
+            objective: Literal,
+            criteria: Literal,
+            display_name: OptionLiteral,
+        },
+
+        #[print = "remove {objective}"]
+        Remove {
+            objective: Literal,
+        },
+
+        #[print = "setdisplay {slot} {objective}"]
+        SetDisplay {
+            slot: Literal,
+            objective: Literal,
+        },
+
+        // TODO: modify [...]
+    }
+
+    pub enum ScoreboardPlayersCommand {
+        #[print = "list {target}"]
+        List {
+            target: Literal,
+        },
+
+        #[print = "get {target} {objective}"]
+        Get {
+            target: Literal,
+            objective: Literal,
+        },
+
+        #[print = "set {targets} {objective} {score}"]
+        Set {
+            targets: Literal,
+            objective: Literal,
+            score: Literal,
+        },
+
+        #[print = "add {targets} {objective} {score}"]
+        Add {
+            targets: Literal,
+            objective: Literal,
+            score: Literal,
+        },
+
+        #[print = "remove {targets} {objective} {score}"]
+        Remove {
+            targets: Literal,
+            objective: Literal,
+            score: Literal,
+        },
+
+        #[print = "reset {targets}{objective}"]
+        Reset {
+            targets: Literal,
+            objective: OptionLiteral,
+        },
+
+        #[print = "enable {targets} {objective}"]
+        Enable {
+            targets: Literal,
+            objective: Literal,
+        },
+
+        #[print = "operation {targets} {target_objective} {operation} {source} {source_objective}"]
+        Operation {
+            targets: Literal,
+            target_objective: Literal,
+            operation: Literal,
+            source: Literal,
+            source_objective: Literal,
+        },
+
+        // TODO: display [...]
+    }
 
     // ========== DATA ==========
 

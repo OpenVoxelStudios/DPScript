@@ -17,7 +17,7 @@ pub struct ObjectiveNode {
     /// The actual ID of the scoreboard objective in Minecraft.
     pub id: String,
 
-    /// The objective trigger (/scoreboard objectives add [id] [trigger]).
+    /// The objective criteria (/scoreboard objectives add [id] [criteria]).
     pub kind: String,
 
     /// Whether this is publicly exported.

@@ -56,6 +56,12 @@ pub struct Validator {
     pub global_scope: Scope,
 }
 
+pub struct ValidationResult {
+    pub ast: AST,
+    pub imports: HashMap<String, ExportType>,
+    pub errors: AllErrors,
+}
+
 impl Validator {
     pub fn new(ast: AST, modules: Arc<HashMap<String, AST>>) -> Self {
         let mut me = Self {
@@ -73,21 +79,23 @@ impl Validator {
         me
     }
 
-    pub fn run(mut self) -> Result<(AllErrors, AST)> {
+    pub fn run(mut self) -> Result<ValidationResult> {
         self.validate_imports()?;
         self.validate_objectives()?;
         self.validate_constants()?;
         self.validate_funcs()?;
         self.validate_blocks()?;
 
-        Ok((
-            AllErrors {
+        Ok(ValidationResult {
+            errors: AllErrors {
                 code: self.ast.code.clone(),
                 errors: self.errors,
                 warnings: self.warnings,
             },
-            self.ast,
-        ))
+
+            ast: self.ast,
+            imports: self.imports,
+        })
     }
 
     pub fn scope(&self) -> Result<&Scope> {

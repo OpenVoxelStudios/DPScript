@@ -232,7 +232,7 @@ pub enum ValidationErr {
     NoFunc,
 }
 
-#[derive(Debug, Error, Diagnostic)]
+#[derive(Debug, Clone, Error, Diagnostic)]
 #[diagnostic(severity(Warning))]
 pub enum ValidatorWarn {
     #[error("Type inference on constants is discouraged.")]
