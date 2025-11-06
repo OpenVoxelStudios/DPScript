@@ -8,8 +8,23 @@ pub struct Identifier {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct DataLocation {
-    pub storage: String,
+    pub storage: Identifier,
     pub path: String,
+}
+
+impl DataLocation {
+    pub fn subpath(&self, path: impl AsRef<str>) -> DataLocation {
+        Self {
+            storage: self.storage.clone(),
+            path: if self.path.is_empty() {
+                path.as_ref().into()
+            } else if path.as_ref().starts_with("[") {
+                format!("{}{}", self.path, path.as_ref())
+            } else {
+                format!("{}.{}", self.path, path.as_ref())
+            },
+        }
+    }
 }
 
 impl Identifier {
@@ -29,6 +44,6 @@ impl fmt::Display for Identifier {
 
 impl fmt::Display for DataLocation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}:{}", self.storage, self.path)
+        write!(f, "{}#{}", self.storage, self.path)
     }
 }

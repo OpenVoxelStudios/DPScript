@@ -120,12 +120,7 @@ pub fn fast_ident(inp: &str) -> String {
 }
 
 impl Lexer {
-    pub fn new(
-        namespace: String,
-        module: String,
-        keep: bool,
-        tokens: Vec<Spanned<Token>>,
-    ) -> Self {
+    pub fn new(namespace: String, module: String, keep: bool, tokens: Vec<Spanned<Token>>) -> Self {
         let last = tokens
             .first()
             .map(|it| it.1.clone())

@@ -30,21 +30,28 @@ impl PartialEq for TypeRef {
         match self {
             Self::Local(a) => match other {
                 Self::Local(b) => a == b,
+                Self::BuiltIn(BuiltInType::Any) => true,
                 _ => false,
             },
 
-            Self::BuiltIn(a) => match other {
-                Self::BuiltIn(b) => {
-                    a == b
-                        || (a.is_numeric() && b.is_numeric())
-                        || *b == BuiltInType::Any
-                        || (*b == BuiltInType::Identifier && *a == BuiltInType::String)
-                        || (*b == BuiltInType::Selector && *a == BuiltInType::String)
+            Self::BuiltIn(a) => {
+                if *a == BuiltInType::Any {
+                    true
+                } else {
+                    match other {
+                        Self::BuiltIn(b) => {
+                            a == b
+                                || (a.is_numeric() && b.is_numeric())
+                                || *b == BuiltInType::Any
+                                || (*b == BuiltInType::Identifier && *a == BuiltInType::String)
+                                || (*b == BuiltInType::Selector && *a == BuiltInType::String)
+                        }
+
+                        Self::TypedNBT(_) => matches!(a, BuiltInType::NBT),
+                        _ => false,
+                    }
                 }
-
-                Self::TypedNBT(_) => matches!(a, BuiltInType::NBT),
-                _ => false,
-            },
+            }
 
             Self::Array(a) => match other {
                 Self::Array(b) => a == b,
@@ -65,7 +72,7 @@ impl PartialEq for TypeRef {
                 Self::TypedNBT(b) => a == b,
                 // We have to, it has to be reflexive because of Eq for a BTreeMap.
                 // TODO: Can we still do schema validation as long as it's on both sides?
-                Self::BuiltIn(BuiltInType::NBT) => true,
+                Self::BuiltIn(BuiltInType::NBT | BuiltInType::Any) => true,
                 _ => false,
             },
         }
@@ -196,13 +203,29 @@ impl TypeRef {
         }
     }
 
+    pub fn is_stringy(&self) -> bool {
+        match self {
+            TypeRef::BuiltIn(
+                BuiltInType::String
+                | BuiltInType::Int
+                | BuiltInType::Float
+                | BuiltInType::Boolean
+                | BuiltInType::Double,
+            ) => true,
+            _ => false,
+        }
+    }
+
     pub fn is_array(&self) -> bool {
         match self {
             TypeRef::Array(_)
             | TypeRef::SizedArray(_, _)
-            | TypeRef::BuiltIn(BuiltInType::Any | BuiltInType::Objective | BuiltInType::Selector) => {
-                true
-            }
+            | TypeRef::BuiltIn(
+                BuiltInType::Any
+                | BuiltInType::Objective
+                | BuiltInType::Selector
+                | BuiltInType::Pos,
+            ) => true,
             _ => false,
         }
     }

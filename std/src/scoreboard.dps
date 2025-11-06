@@ -7,8 +7,7 @@ pub inline instance facade fn Objective::index(#[this] obj: Objective, sel: Sele
 #[cmd("scoreboard players set {sel} {obj} {value}")]
 pub inline instance facade fn Objective::index_assign(#[this] obj: Objective, sel: Selector, value: int) -> int;
 
-// The `#op` syntax means it shouldn't escape the string.
-#[cmd("scoreboard players operation {sel_a} {obj_a} {#op} {sel_b} {obj_b}")]
+#[cmd("scoreboard players operation {sel_a} {obj_a} {op} {sel_b} {obj_b}")]
 pub inline facade fn operation(obj_a: Objective, sel_a: Selector, op: str, obj_b: Objective, sel_b: Selector) -> int;
 
 pub inline fn operation_self(obj: Objective, sel: Selector, op: str, value: int) -> int {

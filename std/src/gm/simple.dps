@@ -8,19 +8,22 @@ import std::transform::transformation;
 import std::transform::translation;
 import std::intrinsics::slice;
 
-pub fn add(x: float, y: float) -> float {
+pub fn gm_add(x: float, y: float) -> float {
     at pos: [~0, x, ~0] {
         math_entity.tp(pos: [29999999, ~y, 91665]);
     }
 
-    let result = math_entity.Pos[1];
+    // FIXME (compiler)
+    // Order of binary operation parsing is still broken.
+    let epos = math_entity.Pos;
+    let result = epos[1];
 
     math_entity.tp(pos: [29999999, 0, 91665]);
 
     return result;
 }
 
-pub fn subtract(x: float, y: float) -> float {
+pub fn gm_sub(x: float, y: float) -> float {
     let var2 = y;
     let tv2p = y.slice(0, 1);
     let v2p = "-";
@@ -36,40 +39,70 @@ pub fn subtract(x: float, y: float) -> float {
         math_entity.tp(pos: [29999999, float_of(v2p + v2s), 91665]); // "v2p + var2" is string concatenation
     }
 
-    let result = math_entity.Pos[1];
+    // FIXME (compiler)
+    // Order of binary operation parsing is still broken.
+    let epos = math_entity.Pos;
+    let result = epos[1];
 
     math_entity.tp(pos: [29999999, 0, 91665]);
 
     return result;
 }
 
-pub fn multiply(x: float, y: float) -> float {
+pub fn gm_mul(x: float, y: float) -> float {
     // yes those are floats, can i just put 0 and 1?
     let var1 = [0f,0f,0f,x,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,1f];
 
     // same lol
     math_entity.transformation = [0f,0f,0f,1f,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,y];
 
-    var1[-1] = math_entity.transformation.translation[0];
+    // FIXME (compiler):
+    // Order of binary operation parsing is still broken. This is ridiculous and ugly.
+    let tl = math_entity.transformation;
+    let tl2 = tl.translation;
+
+    var1[15] = tl2[0];
 
     math_entity.transformation = var1;
 
-    let result = math_entity.transformation.translation[0];
+    // FIXME (compiler):
+    // Order of binary operation parsing is still broken. This is ridiculous and ugly.
+    tl = math_entity.transformation;
+    tl2 = tl.translation;
+
+    let result = tl2[0];
 
     return result;
 }
 
-pub fn divide(x: float, y: float) -> float {
+pub fn gm_div(x: float, y: float) -> float {
     // don't you love when 0f
     math_entity.transformation = [0f,0f,0f,x,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,y];
     
-    let result = math_entity.transformation.translation[0]; // FIXME: is this math_entity or @s?
+    // FIXME (compiler):
+    // Order of binary operation parsing is still broken. This is ridiculous and ugly.
+    let tl = math_entity.transformation;
+    let tl2 = tl.translation;
+    let result = tl2[0]; // FIXME: is this math_entity or @s?
 
     return result;
 }
 
+pub fn gm_negate(x: float) -> float {
+    let var1 = stringify(x);
+    let tv2p = var1.slice(0, 1);
+    let v2p = "-";
+
+    if tv2p == "-" {
+        var1 = var1.slice(1);
+        v2p = "";
+    }
+
+    return float_of(v2p + var1);
+}
+
 // This... does not work. We gotta redo this.
-// pub fn modulo(x: float, y: float) -> float {
+// pub fn gm_mod(x: float, y: float) -> float {
 //     // i hate this already.
 //     if (y == 0) {
 //         panic! // FIXME: Need another panic thing

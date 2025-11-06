@@ -32,15 +32,24 @@ impl Validator {
                 };
 
                 if !xt.is_numeric() {
-                    self.errors.push(Err::NonNumericPos { span: x.span(), got: xt });
+                    self.errors.push(Err::NonNumericPos {
+                        span: x.span(),
+                        got: xt,
+                    });
                 }
 
                 if !yt.is_numeric() {
-                    self.errors.push(Err::NonNumericPos { span: y.span(), got: yt });
+                    self.errors.push(Err::NonNumericPos {
+                        span: y.span(),
+                        got: yt,
+                    });
                 }
 
                 if !zt.is_numeric() {
-                    self.errors.push(Err::NonNumericPos { span: z.span(), got: zt });
+                    self.errors.push(Err::NonNumericPos {
+                        span: z.span(),
+                        got: zt,
+                    });
                 }
             }
 

@@ -10,7 +10,7 @@ use crate::{
         data::NodeInfo,
         ty::TypeRef,
     },
-    util::DataLocation,
+    util::{DataLocation, Identifier},
 };
 use dpscript_macros::HasSpan;
 use miette::SourceSpan;
@@ -34,8 +34,14 @@ impl ConstantNode {
             name: self.name.clone(),
             ty: self.ty.clone(),
             value: Some(self.value.clone()),
+            is_arg: false,
+
             location: DataLocation {
-                storage: "dpscript:__internal".into(),
+                storage: Identifier {
+                    namespace: "dpscript".into(),
+                    path: "__internal".into(),
+                },
+
                 path: "__compiler_internal".into(), // Constants aren't available at runtime so this is a dummy location
             },
         }
@@ -43,6 +49,10 @@ impl ConstantNode {
 }
 
 impl VarInfo for ConstantNode {
+    fn as_node(&self) -> Node {
+        Node::Constant(self.clone())
+    }
+
     fn compute_ty(&self, _scope: &Scope) -> Option<TypeRef> {
         self.ty.clone()
     }

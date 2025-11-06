@@ -1,6 +1,6 @@
 use super::ast::Scope;
 use crate::dpscript::{
-    ast::var::VarInfo,
+    ast::{node::Node, var::VarInfo},
     data::NodeInfo,
     ty::{BuiltInType, TypeRef},
 };
@@ -35,6 +35,10 @@ impl NodeInfo for ObjectiveNode {
 }
 
 impl VarInfo for ObjectiveNode {
+    fn as_node(&self) -> Node {
+        Node::Objective(self.clone())
+    }
+
     fn compute_ty(&self, _scope: &Scope) -> Option<TypeRef> {
         Some(TypeRef::BuiltIn(BuiltInType::Objective))
     }

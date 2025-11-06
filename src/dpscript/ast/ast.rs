@@ -62,7 +62,7 @@ pub struct Scope {
     pub fields: BTreeMap<TypeRef, BTreeMap<String, FieldNode>>,
 
     /// All the symbols the module exports.
-    pub exports: BTreeMap<String, ExportType>,
+    pub exports: BTreeMap<String, Vec<ExportType>>,
 
     pub imports: Vec<ImportNode>,
     pub constants: BTreeMap<String, ConstantNode>,
@@ -223,46 +223,49 @@ impl Scope {
     }
 }
 
-pub fn collect_exports(nodes: &Vec<Node>) -> BTreeMap<String, ExportType> {
+pub fn collect_exports(nodes: &Vec<Node>) -> BTreeMap<String, Vec<ExportType>> {
     let mut map = BTreeMap::new();
 
     for node in nodes {
         match node {
             Node::Constant(var) => {
                 if var.is_public {
-                    map.insert(var.name.clone(), ExportType::Constant(var.clone()))
-                } else {
-                    None
+                    map.entry(var.name.clone())
+                        .or_insert(Vec::new())
+                        .push(ExportType::Constant(var.clone()));
                 }
             }
 
             Node::Objective(obj) => {
                 if obj.is_public {
-                    map.insert(obj.name.clone(), ExportType::Objective(obj.clone()))
-                } else {
-                    None
+                    map.entry(obj.name.clone())
+                        .or_insert(Vec::new())
+                        .push(ExportType::Objective(obj.clone()));
                 }
             }
 
             Node::Function(func) => {
                 if func.flags.contains(FuncFlags::Public) {
-                    map.insert(func.name.clone(), ExportType::Function(func.clone()))
-                } else {
-                    None
+                    map.entry(func.name.clone())
+                        .or_insert(Vec::new())
+                        .push(ExportType::Function(func.clone()));
                 }
             }
 
-            Node::Enum(en) => map.insert(en.name.clone(), ExportType::Enum(en.clone())),
+            Node::Enum(en) => map
+                .entry(en.name.clone())
+                .or_insert(Vec::new())
+                .push(ExportType::Enum(en.clone())),
 
             Node::Field(it) => {
                 if it.is_public {
-                    map.insert(it.name.clone(), ExportType::Field(it.clone()))
-                } else {
-                    None
+                    map.entry(it.name.clone())
+                        .or_insert(Vec::new())
+                        .push(ExportType::Field(it.clone()));
                 }
             }
 
-            _ => None,
+            _ => (),
         };
     }
 

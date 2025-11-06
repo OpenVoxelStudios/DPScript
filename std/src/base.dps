@@ -1,3 +1,5 @@
+objective compiler_support: dummy = "__dpscript__.compiler.support";
+
 #[cmd("summon {id}")]
 pub facade fn summon(#[id(entity_type)] id: Ident);
 

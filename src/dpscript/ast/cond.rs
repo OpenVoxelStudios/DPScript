@@ -3,14 +3,17 @@ use std::fmt;
 use dpscript_macros::HasSpan;
 use miette::SourceSpan;
 
-use crate::{dpscript::{
-    ast::{
-        node::Node,
-        util::{Body, Indent},
+use crate::{
+    dpscript::{
+        ast::{
+            node::Node,
+            util::{Body, Indent},
+        },
+        data::NodeInfo,
+        ty::TypeRef,
     },
-    data::NodeInfo,
-    ty::TypeRef,
-}, util::Identifier};
+    util::Identifier,
+};
 
 use super::ast::Scope;
 

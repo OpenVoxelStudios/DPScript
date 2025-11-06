@@ -163,6 +163,7 @@ impl FunctionArg {
             ty: Some(self.ty.clone()),
             value: None,
             location: self.location.clone(),
+            is_arg: true,
         }
     }
 }

@@ -2,14 +2,17 @@ use std::fmt;
 
 use miette::SourceSpan;
 
-use crate::{dpscript::{
-    ast::{
-        ident::IdentNode,
-        node::Node,
-        util::{Body, Indent},
+use crate::{
+    dpscript::{
+        ast::{
+            ident::IdentNode,
+            node::Node,
+            util::{Body, Indent},
+        },
+        data::NodeInfo,
     },
-    data::NodeInfo,
-}, util::Identifier};
+    util::Identifier,
+};
 
 use super::ast::Scope;
 

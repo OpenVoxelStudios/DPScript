@@ -1,13 +1,10 @@
-// #[enforce(in_storage)] means the compiler will make sure any variable or constant passed
-// as a value for the parameter is in data storage. Other values will error out.
-
 // `ref` means the value will not be cloned when passed to the function, and will instead
 // mutate the actual value directly.
 
-// The `{@value}` syntax in the `#[cmd]` attribute instructs the compiler to place the full
-// reference string (for /data commands) to the value in the command, for example
-// `storage [store] [path]` or `entity [entity] [path]`, instead of placing the value itself
-// there.
+// The `#[enforce(storage)]` attribute instructs the compiler to pass the full reference string
+// (for /data commands) as the argument, for example `storage [store] [path]` or
+// `entity [entity] [path]`, instead of placing the value there normally. If the value is a literal,
+// it will instead be placed in data.
 
 /// Clone the value given into a compiler-assigned temporary storage.
 pub inline compiler fn clone(value: Any) -> Any;
@@ -19,10 +16,10 @@ pub inline compiler fn stringify(value: Any) -> str;
 pub inline compiler fn float_of(value: str) -> float;
 
 /// Set a string from a source to a target, slicing it.
-#[cmd("data modify {@source} set string {@target} {start} {end}")]
+#[cmd("data modify {source} set string {target} {start} {end}")]
 inline facade fn set_string(
-    #[enforce(in_storage)] ref source: str,
-    #[enforce(in_storage)] ref target: str,
+    #[enforce(storage)] ref source: str,
+    #[enforce(storage)] ref target: str,
     start: int,
     end: int
 );
@@ -33,7 +30,7 @@ inline facade fn set_string(
 pub inline instance fn Any::slice(#[this] self: Any, start: int, end: int) -> str {
     let new = clone(self);
 
-    set_string(new, start, end);
+    set_string(self, new, start, end);
 
     return new;
 }

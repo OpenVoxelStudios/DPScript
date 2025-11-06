@@ -1,11 +1,11 @@
 pub mod macros;
-
-use std::{fs, io, path::PathBuf};
-
-use itertools::Itertools;
+pub mod util;
 
 use crate::{cmd_enums, util::Identifier};
+use itertools::Itertools;
+use std::{fmt, fs, io, path::PathBuf};
 
+#[derive(Debug, Clone)]
 pub struct Function {
     pub id: Identifier,
     pub commands: Vec<Command>,
@@ -40,13 +40,22 @@ impl Function {
         let data = self
             .commands
             .into_iter()
-            .map(|it| format!("{it}"))
+            .map(|it| format!("{}{it}", if it.needs_macro() { "$" } else { "" }))
             .collect_vec()
             .join("\n");
 
         fs::write(path, data)?;
 
         Ok(())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ConcatLiteral(pub Vec<Literal>);
+
+impl fmt::Display for ConcatLiteral {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0.iter().map(|it| format!("{it}")).join(""))
     }
 }
 
@@ -59,6 +68,9 @@ cmd_enums! {
 
         #[print = "$({inner})"]
         Macro { inner: String },
+
+        #[print = "{inner}"]
+        Concat { inner: ConcatLiteral },
     }
 
     #[enum_doc = "If this literal has a value, it will print a space before the value."]
@@ -95,6 +107,16 @@ cmd_enums! {
         #[doc = "A custom command, not in the command struct. This should only be used for user-defined commands via facade functions."]
         #[print = "{inner}"]
         Custom { inner: Literal },
+
+        #[print = "function {name}"]
+        Function { name: Literal },
+
+        #[print = "function {name} with {data}{path}"]
+        FunctionWith {
+            name: Literal,
+            data: DataSource,
+            path: OptionLiteral,
+        },
     }
 
     // TODO: All the other commands lol
@@ -267,10 +289,10 @@ cmd_enums! {
     }
 
     pub enum DataModifyArg {
-        #[print = "from {source}{source_path}"]
+        #[print = "from {source} {source_path}"]
         From {
             source: DataSource,
-            source_path: OptionLiteral,
+            source_path: Literal,
         },
 
         #[print = "string {source}{source_path}{start}{end}"]
@@ -423,6 +445,9 @@ cmd_enums! {
             entity: Literal,
             next: Box<ExecuteCommand>,
         },
+
+        #[print = ""]
+        None {},
     }
 
     pub enum Rotation {
@@ -510,14 +535,14 @@ cmd_enums! {
     }
 
     pub enum ExecuteIfData {
-        #[print = "block {pos} {path}"]
-        Block { pos: BlockPos, path: Literal },
+        #[print = "block {pos} {data}"]
+        Block { pos: BlockPos, data: Literal },
 
-        #[print = "entity {target} {path}"]
-        Entity { target: Literal, path: Literal },
+        #[print = "entity {target} {data}"]
+        Entity { target: Literal, data: Literal },
 
-        #[print = "storage {source} {path}"]
-        Storage { source: Literal, path: Literal },
+        #[print = "storage {source} {data}"]
+        Storage { source: Literal, data: Literal },
     }
 
     // ========== STRUCTS ==========

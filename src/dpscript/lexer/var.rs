@@ -4,7 +4,7 @@ use crate::{
         lexer::{Result, parser::Lexer, ty::TypeLexer, util::LexerMethods},
         tokenizer::Token,
     },
-    util::{AddSpan, DataLocation},
+    util::{AddSpan, DataLocation, Identifier},
 };
 
 impl Lexer {
@@ -39,14 +39,12 @@ impl Lexer {
             span,
             ty,
             value,
+            is_arg: false,
             location: DataLocation {
-                storage: format!(
-                    "{}:__dps/gen/funcs/{}/block/{}",
-                    self.namespace,
-                    self.func()?,
-                    self.block()?
-                )
-                .into(),
+                storage: Identifier {
+                    namespace: self.namespace.clone(),
+                    path: format!("__dps/gen/funcs/{}/block/{}", self.func()?, self.block()?),
+                },
                 path: name,
             },
         }))

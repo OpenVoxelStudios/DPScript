@@ -43,42 +43,44 @@ impl Validator {
             let module = item.join("::").into();
 
             if let Some(it) = self.modules.get(&module) {
-                if let Some(value) = it.scope.exports.get(&name) {
-                    self.imports.insert(name, value.clone());
+                if let Some(values) = it.scope.exports.get(&name) {
+                    for value in values.clone() {
+                        self.imports.insert(name.clone(), value.clone());
 
-                    match value.clone() {
-                        ExportType::Constant(node) => {
-                            self.scope_mut()?.constants.insert(node.name.clone(), node);
-                        }
+                        match value {
+                            ExportType::Constant(node) => {
+                                self.scope_mut()?.constants.insert(node.name.clone(), node);
+                            }
 
-                        ExportType::Objective(node) => {
-                            self.scope_mut()?.objectives.insert(node.name.clone(), node);
-                        }
+                            ExportType::Objective(node) => {
+                                self.scope_mut()?.objectives.insert(node.name.clone(), node);
+                            }
 
-                        ExportType::Function(node) => {
-                            if let Some(recv) = &node.receiver {
+                            ExportType::Function(node) => {
+                                if let Some(recv) = &node.receiver {
+                                    self.scope_mut()?
+                                        .instance_funcs
+                                        .entry(recv.clone())
+                                        .or_default()
+                                        .insert(node.name.clone(), node);
+                                } else {
+                                    self.scope_mut()?.functions.insert(node.name.clone(), node);
+                                }
+                            }
+
+                            ExportType::Enum(node) => {
+                                self.scope_mut()?.enums.insert(node.name.clone(), node);
+                            }
+
+                            ExportType::Field(node) => {
                                 self.scope_mut()?
-                                    .instance_funcs
-                                    .entry(recv.clone())
+                                    .fields
+                                    .entry(node.owner.clone())
                                     .or_default()
                                     .insert(node.name.clone(), node);
-                            } else {
-                                self.scope_mut()?.functions.insert(node.name.clone(), node);
                             }
-                        }
-
-                        ExportType::Enum(node) => {
-                            self.scope_mut()?.enums.insert(node.name.clone(), node);
-                        }
-
-                        ExportType::Field(node) => {
-                            self.scope_mut()?
-                                .fields
-                                .entry(node.owner.clone())
-                                .or_default()
-                                .insert(node.name.clone(), node);
-                        }
-                    };
+                        };
+                    }
                 } else {
                     self.errors.push(Err::UnresolvedImport {
                         span: node.span(),

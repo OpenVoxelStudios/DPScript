@@ -1,4 +1,3 @@
-
 use crate::{
     dpscript::{
         ast::{
@@ -65,7 +64,11 @@ impl Lexer {
         self.expect(Token::LeftParen)?;
 
         let mut args = Vec::new();
-        let storage: String = format!("{}:__dps/gen/funcs/{}/args", self.namespace, name).into();
+
+        let storage = Identifier {
+            namespace: self.namespace.clone(),
+            path: format!("__dps/gen/funcs/{}/args", name),
+        };
 
         loop {
             if self.if_next_and_eat(Token::RightParen) {

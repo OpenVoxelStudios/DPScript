@@ -82,7 +82,7 @@ impl Compiler {
             return Ok(());
         }
 
-        let validated = self.validate(&asts, &modules)?;
+        let (validated, modules) = self.validate(&asts, modules)?;
 
         self.generate(validated, &modules)?;
 

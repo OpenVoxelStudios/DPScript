@@ -66,7 +66,8 @@ impl Validator {
         }
 
         self.scope_mut()?
-            .add_local(node.name.clone(), node.as_var());
+            .constants
+            .insert(node.name.clone(), node.clone());
 
         Ok(())
     }

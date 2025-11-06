@@ -20,8 +20,8 @@ impl Compiler {
     pub fn validate(
         &self,
         asts: &Vec<AST>,
-        modules: &Arc<HashMap<String, AST>>,
-    ) -> Result<Vec<ValidationResult>> {
+        mut modules: Arc<HashMap<String, AST>>,
+    ) -> Result<(Vec<ValidationResult>, Arc<HashMap<String, AST>>)> {
         let mut warnings = 0;
         let mut pretty = BTreeMap::new();
 
@@ -70,7 +70,7 @@ impl Compiler {
                     }
                 }
 
-                let result = Validator::new(ast.clone(), Arc::clone(modules)).run()?;
+                let result = Validator::new(ast.clone(), Arc::clone(&modules)).run()?;
 
                 if !result.errors.errors.is_empty() {
                     errors.push(result.errors.into());
@@ -95,6 +95,10 @@ impl Compiler {
                     }
                 }
 
+                let mut modules_inner = Arc::into_inner(modules).unwrap();
+
+                modules_inner.insert(result.ast.module.clone(), result.ast.clone());
+                modules = Arc::new(modules_inner);
                 analyzed.push(result);
             }
 
@@ -113,6 +117,6 @@ impl Compiler {
 
         warn!("Generated {warnings} warnings.");
 
-        Ok(analyzed)
+        Ok((analyzed, modules))
     }
 }

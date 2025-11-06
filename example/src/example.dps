@@ -1,6 +1,7 @@
 import std::gm::sqrt::sqrt;
 import std::selectors::tellraw;
 import std::selectors::all_players;
+import std::math::add;
 
 // This is a basic function:
 pub fn say_hi() {

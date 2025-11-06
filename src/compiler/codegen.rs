@@ -37,6 +37,7 @@ impl Compiler {
             }
 
             let cg = CodeGenerator::new(
+                item.ast.code.clone(),
                 self.out_dir.clone(),
                 item.ast,
                 item.imports,

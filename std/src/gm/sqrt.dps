@@ -1,6 +1,7 @@
 import std::entity::tp;
 import std::gm::gm_std;
 import std::gm::math_entity;
+import std::math::sub;
 import std::selectors::Pos;
 import std::transform::transformation;
 import std::transform::translation;
@@ -27,12 +28,29 @@ fn sqrt_handling(var1: float, var2: float, ref temp: NBT) -> float {
         math_entity.tp(pos: [29999999, ~var2, 91665]);
     }
 
-    temp.var3[3] = math_entity.Pos[1];
+    // FIXME (compiler):
+    // Order of binary operation parsing is still broken. This is ridiculous and ugly.
+    let epos = math_entity.Pos;
+    let v3 = temp.var3;
+    let np = [v3[0], epos[1], v3[2]];
+
+    let tf = math_entity.transformation;
+    let tl = tf.translation;
+
+    temp.var3 = np;
     math_entity.transformation = temp.var3;
-    temp.var1 = math_entity.transformation.translation[0];
-    temp.var4[-1] = temp.var1;
+    temp.var1 = tl[0];
+
+    let arr = temp.var4;
+
+    arr[15] = temp.var1;
+    temp.var4 = arr;
     math_entity.transformation = temp.var4;
-    temp.var2 = math_entity.transformation.translation[0];
+
+    tf = math_entity.transformation;
+    tl = tf.translation;
+
+    temp.var2 = tl[0];
 
     gm_std[looper] += 1;
     positive_subtract(var2, temp);
@@ -60,10 +78,16 @@ fn sqrt_handling(var1: float, var2: float, ref temp: NBT) -> float {
 
 fn positive_subtract(var2: float, ref temp: NBT) {
     at pos: [~0, float_of(temp.var1), ~0] {
-        at pos: [~0, ~-0.000000001, ~0] {
+        at pos: [~0, ~0 - 0.000000001, ~0] {
             math_entity.tp(pos: [29999999, ~0 - var2, 91665]);
         }
     }
 
-    temp.v1m2p = math_entity.Pos[1].slice(0, 1);
+    // FIXME: Compiler bug - binary operations don't parse well, this has to be two variables
+    // This being two variables also creates an optimization problem
+
+    let epos = math_entity.Pos;
+    let y = epos[1];
+
+    temp.v1m2p = y.slice(0, 1);
 }

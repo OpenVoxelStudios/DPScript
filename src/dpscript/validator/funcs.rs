@@ -1,5 +1,3 @@
-use std::collections::BTreeMap;
-
 use crate::{
     common::traits::HasSpan,
     dpscript::{
@@ -13,18 +11,27 @@ use crate::{
 
 impl Validator {
     pub fn validate_funcs(&mut self) -> Result<()> {
-        let fns = self.ast.scope.functions.clone();
-        let mut out = BTreeMap::new();
+        let mut fns = self.ast.scope.functions.clone();
 
-        self.scope_mut()?.functions.extend(fns);
+        self.scope_mut()?.functions.extend(fns.clone());
 
-        for (k, mut node) in self.ast.scope.functions.clone() {
-            self.validate_func(&mut node)?;
-            out.insert(k, node);
+        for (_, node) in &mut fns {
+            self.validate_func(node)?;
         }
 
-        self.scope_mut()?.functions.extend(out.clone());
-        self.ast.scope.functions = out;
+        self.ast.scope.functions = fns;
+
+        let mut fns = self.ast.scope.instance_funcs.clone();
+
+        self.scope_mut()?.instance_funcs.extend(fns.clone());
+
+        for (_, map) in &mut fns {
+            for (_, node) in map {
+                self.validate_func(node)?;
+            }
+        }
+
+        self.ast.scope.instance_funcs = fns;
 
         Ok(())
     }

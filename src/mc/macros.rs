@@ -17,6 +17,7 @@ macro_rules! cmd_enum {
             $(,)?
         }
     } => {
+        #[derive(Debug, Clone)]
         $(#[doc = $doc])?
         pub enum $name {
             $(
@@ -58,6 +59,7 @@ macro_rules! cmd_struct {
             $(,)?
         }
     } => {
+        #[derive(Debug, Clone)]
         $(#[doc = $doc])?
         pub struct $name {
             $(

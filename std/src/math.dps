@@ -1,3 +1,6 @@
+import std::gm::simple::gm_add;
+import std::gm::simple::gm_negate;
+
 objective int_math: dummy = "int_math";
 const value: Selector = selector: "dpscript.std.int_math.value";
 
@@ -34,4 +37,19 @@ pub operator fn int::mod(#[this] #[enforce(clone)] x: int, y: int) -> int {
     int_math[value] %= y;
 
     return int_math[value];
+}
+
+pub operator fn int::negate(#[this] #[enforce(clone)] x: int) -> int {
+    int_math[value] = x;
+    int_math[value] *= -1;
+
+    return int_math[value];
+}
+
+pub operator fn float::add(#[this] #[enforce(clone)] x: float, y: float) -> float {
+    return gm_add(x, y);
+}
+
+pub operator fn float::negate(#[this] #[enforce(clone)] x: float) -> float {
+    return gm_negate(x);
 }

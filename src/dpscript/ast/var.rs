@@ -1,4 +1,4 @@
-use std::fmt;
+use std::fmt::{self, Display};
 
 use crate::{
     dpscript::{
@@ -17,14 +17,23 @@ pub struct VarNode {
     pub ty: Option<TypeRef>,
     pub value: Option<Box<Node>>,
     pub location: DataLocation,
+
+    /// Is this variable a function argument?
+    /// This shouldn't be set during lexing - only during validation (via [`super::func::FunctionArg::to_var`]).
+    pub is_arg: bool,
 }
 
-pub trait VarInfo: NodeInfo {
+pub trait VarInfo: NodeInfo + Display {
+    fn as_node(&self) -> Node;
     fn compute_ty(&self, scope: &Scope) -> Option<TypeRef>;
     fn is_const_var(&self) -> bool;
 }
 
 impl VarInfo for VarNode {
+    fn as_node(&self) -> Node {
+        Node::Variable(self.clone())
+    }
+
     fn compute_ty(&self, scope: &Scope) -> Option<TypeRef> {
         match &self.ty {
             Some(ty) => Some(ty.clone()),
