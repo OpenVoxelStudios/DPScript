@@ -1,13 +1,12 @@
-use dpscript::lsp::lsp::TreeSitterLs;
-use tokio::io::{stdin, stdout};
-use tower_lsp::{LspService, Server};
+use dpscript::lsp::Backend;
+use tower_lsp::Server;
 
 #[tokio::main]
 pub async fn main() {
     tracing_subscriber::fmt::init();
 
-    let (stdin, stdout) = (stdin(), stdout());
-    let (service, socket) = LspService::new(TreeSitterLs::new);
+    let (stdin, stdout) = (tokio::io::stdin(), tokio::io::stdout());
+    let (service, socket) = Backend::service();
 
     Server::new(stdin, stdout, socket).serve(service).await;
 }

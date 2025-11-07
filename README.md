@@ -71,4 +71,3 @@ error detection and validation possible. Don't worry anymore about strange issue
 
 - Created by @KodeurKubik and @RedstoneWizard08
 - Most floating-point arithmetic is done using @gibbsly's amazing [gm](https://github.com/gibbsly/gm) datapack, ported to DPScript
-- The language server is largely based on [treesitter-ls](https://github.com/atusy/treesitter-ls), which is licensed under the MIT license.

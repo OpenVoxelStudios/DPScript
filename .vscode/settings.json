@@ -14,6 +14,5 @@
     "rust-analyzer.cargo.buildScripts.enable": true,
     "rust-analyzer.inlayHints.bindingModeHints.enable": true,
     "rust-analyzer.inlayHints.chainingHints.enable": true,
-    "rust-analyzer.inlayHints.closureCaptureHints.enable": true,
-    "dpscript.server.trace": "verbose"
+    "rust-analyzer.inlayHints.closureCaptureHints.enable": true
 }

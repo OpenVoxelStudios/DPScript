@@ -4,7 +4,6 @@
     "displayName": "DPScript",
     "description": "Syntax highlighting & support for the DPScript language.",
     "version": "0.0.1",
-    "main": "./out/extension",
     "repository": {
         "type": "git",
         "url": "https://github.com/RedstoneWizard08/DPScript"
@@ -13,44 +12,12 @@
         "RedstoneWizard08"
     ],
     "engines": {
-        "vscode": "^1.100.0"
+        "vscode": "^1.90.0"
     },
     "categories": [
         "Programming Languages"
     ],
-    "activationEvents": [
-        "onLanguage:dpscript"
-    ],
     "contributes": {
-        "configuration": {
-            "type": "object",
-            "title": "DPScript Configuration",
-            "properties": {
-                "dpscript.server.maxProblems": {
-                    "scope": "resource",
-                    "type": "number",
-                    "default": 100,
-                    "description": "Controls the maximum number of problems produced by the server."
-                },
-                "dpscript.server.trace": {
-                    "scope": "window",
-                    "type": "string",
-                    "enum": [
-                        "off",
-                        "messages",
-                        "verbose"
-                    ],
-                    "default": "off",
-                    "description": "Traces the communication between VS Code and the language server."
-                },
-                "dpscript.server.path": {
-                    "scope": "resource",
-                    "type": "string",
-                    "default": "",
-                    "description": "A custom path to the 'dscls' binary."
-                }
-            }
-        },
         "languages": [
             {
                 "id": "dpscript",
@@ -70,38 +37,16 @@
                 "scopeName": "source.dpscript",
                 "path": "./syntaxes/dpscript.tmLanguage.json"
             }
-        ],
-        "commands": [
-            {
-                "command": "dpscript.server.start",
-                "title": "DPScript: Start server"
-            },
-            {
-                "command": "dpscript.server.restart",
-                "title": "DPScript: Restart server"
-            },
-            {
-                "command": "dpscript.server.stop",
-                "title": "DPScript: Stop server"
-            }
         ]
     },
     "devDependencies": {
-        "@types/node": "^22",
-        "@types/vscode": "^1.100.0",
-        "@vscode/test-electron": "^2.3.9",
+        "@vscode/test-cli": "^0.0.11",
+        "@vscode/test-web": "^0.0.70",
         "@vscode/vsce": "^3.5.0",
-        "prettier": "^3.5.3",
-        "typescript": "^5.9.2"
+        "prettier": "^3.5.3"
     },
     "scripts": {
         "fmt": "prettier --write .",
-        "pack": "vsce package",
-        "vscode:prepublish": "./build_lsp.sh && bun run compile",
-        "compile": "tsc -b",
-        "watch": "tsc -b -w"
-    },
-    "dependencies": {
-        "vscode-languageclient": "^9.0.1"
+        "pack": "vsce package"
     }
 }
