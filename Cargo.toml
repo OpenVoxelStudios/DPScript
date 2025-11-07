@@ -2,9 +2,9 @@
 name = "dpscript"
 version = "0.3.0"
 edition = "2024"
-description = "A transpiled programming language to aid in Minecraft datapack development."
+description = "A fast, easy, and convenient Minecraft datapack programming language."
 license = "MIT"
-repository = "https://github.com/RedstoneWizard08/DPScript"
+repository = "https://github.com/OpenVoxelStudios/DPScript"
 
 [[bin]]
 name = "dsc"
@@ -21,6 +21,7 @@ clap = { version = "4.5.49", features = ["derive"] }
 clap-verbosity-flag = { version = "3.0.4", default-features = false, features = ["tracing"] }
 colored = "3.0.0"
 concat-idents = "1.1.5"
+derivative = "2.2.0"
 dpscript-macros = { version = "0.1.0", path = "crates/macros" }
 indicatif = "0.18.0"
 itertools = "0.14.0"
@@ -37,6 +38,8 @@ toml = "0.9.8"
 tower-lsp = "0.20.0"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.20", features = ["ansi", "env-filter", "registry"] }
+tree-sitter-dpscript = { version = "0.1.0", path = "tree-sitter-dpscript" }
+tree-sitter-highlight = "0.25.10"
 uuid = { version = "1.18.1", features = ["v4"] }
 walkdir = "2.5.0"
 
@@ -46,7 +49,7 @@ pkg-fmt = "bin"
 
 [workspace]
 resolver = "2"
-members = [".", "crates/*"]
+members = [".", "crates/*", "tree-sitter-dpscript"]
 
 [features]
 default = []

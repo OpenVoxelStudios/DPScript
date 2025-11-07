@@ -1,3 +1,4 @@
+use derivative::Derivative;
 use serde_json::Value;
 use tower_lsp::{
     Client, ClientSocket, LanguageServer, LspService, async_trait,
@@ -12,19 +13,56 @@ use tower_lsp::{
         WorkspaceFoldersServerCapabilities, WorkspaceServerCapabilities,
     },
 };
+use tree_sitter_dpscript::LANGUAGE;
+use tree_sitter_highlight::{HighlightConfiguration, Highlighter};
 
-#[derive(Debug, Clone)]
+fn new_highlighter() -> (Highlighter, HighlightConfiguration) {
+    let highlighter = Highlighter::new();
+    let lang = LANGUAGE.into();
+
+    let config = HighlightConfiguration::new(
+        lang,
+        "dpscript",
+        tree_sitter_dpscript::HIGHLIGHTS_QUERY,
+        tree_sitter_dpscript::INJECTIONS_QUERY,
+        tree_sitter_dpscript::LOCALS_QUERY,
+    )
+    .unwrap();
+
+    (highlighter, config)
+}
+
+#[derive(Derivative)]
+#[derivative(Debug)]
 pub struct Backend {
     client: Client,
+
+    #[derivative(Debug = "ignore")]
+    highlighter: (Highlighter, HighlightConfiguration),
+}
+
+impl Clone for Backend {
+    fn clone(&self) -> Self {
+        Self {
+            client: self.client.clone(),
+            highlighter: new_highlighter(),
+        }
+    }
 }
 
 impl Backend {
     pub fn new(client: Client) -> Self {
-        Self { client }
+        Self {
+            client,
+            highlighter: new_highlighter(),
+        }
     }
 
     pub fn service() -> (LspService<Self>, ClientSocket) {
-        LspService::new(|client| Self { client })
+        LspService::new(|client| Self {
+            client,
+            highlighter: new_highlighter(),
+        })
     }
 }
 

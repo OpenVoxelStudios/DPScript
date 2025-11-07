@@ -1,0 +1,45 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "dpscript",
+      "camelcase": "dpscript",
+      "title": "DPScript",
+      "scope": "source.dpscript",
+      "file-types": [
+        "dps"
+      ],
+      "injection-regex": "dpscript",
+      "class-name": "TreeSitterDpscript",
+      "highlights": "queries/highlights.scm",
+      "locals": "queries/locals.scm",
+      "path": "."
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "A fast, easy, and convenient Minecraft datapack programming language.",
+    "authors": [
+      {
+        "name": "RedstoneWizard08",
+        "url": "https://github.com/RedstoneWizard08"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/OpenVoxelStudios/DPScript"
+    },
+    "namespace": "studio.openvoxel.dpscript.treesitter"
+  },
+  "bindings": {
+    "c": true,
+    "go": true,
+    "node": true,
+    "python": true,
+    "rust": true,
+    "swift": true,
+    "zig": true,
+    "java": true,
+    "kotlin": true
+  }
+}

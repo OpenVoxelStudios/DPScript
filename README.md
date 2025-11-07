@@ -1,6 +1,6 @@
 # DPScript
 
-DPScript is a transpiled programming language to aid in Datapack development, inspired by CBScript.
+A fast, easy, and convenient Minecraft datapack programming language.
 
 # Features
 

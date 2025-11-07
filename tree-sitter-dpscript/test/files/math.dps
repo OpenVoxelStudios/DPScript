@@ -1,0 +1,8 @@
+fn test(x: float) {
+    let a = (1 + 2) * 3 - 8 / 6;
+    let b = 3 ^ a;
+    let c = 9 + 10;
+    let d = c == 21;
+    
+    a.b.c(0, 1, 2);
+}
