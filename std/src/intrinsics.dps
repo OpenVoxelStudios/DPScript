@@ -34,3 +34,4 @@ pub inline instance fn Any::slice(#[this] self: Any, start: int, end: int) -> st
 
     return new;
 }
+

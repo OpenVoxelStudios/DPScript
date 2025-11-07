@@ -16,18 +16,23 @@ path = "src/bin/lsp.rs"
 
 [dependencies]
 anyhow = { version = "1.0.100", features = ["backtrace"] }
+arc-swap = "1.7.1"
 bitflags = { version = "2.9.4", features = ["serde", "std"] }
 clap = { version = "4.5.49", features = ["derive"] }
 clap-verbosity-flag = { version = "3.0.4", default-features = false, features = ["tracing"] }
 colored = "3.0.0"
 concat-idents = "1.1.5"
+dashmap = "6.1.0"
 derivative = "2.2.0"
 dpscript-macros = { version = "0.1.0", path = "crates/macros" }
 indicatif = "0.18.0"
 itertools = "0.14.0"
 json5 = "0.4.1"
+line-index = "0.1.2"
+lua-pattern = { version = "0.1.3", features = ["to-regex"] }
 miette = { version = "7.6.0", features = ["fancy", "serde", "syntect-highlighter"] }
 once_cell = "1.21.3"
+regex = "1.12.2"
 ron = "0.11.0"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
@@ -38,8 +43,9 @@ toml = "0.9.8"
 tower-lsp = "0.20.0"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.20", features = ["ansi", "env-filter", "registry"] }
+tree-sitter = "0.25.10"
 tree-sitter-dpscript = { version = "0.1.0", path = "tree-sitter-dpscript" }
-tree-sitter-highlight = "0.25.10"
+url = "2.5.7"
 uuid = { version = "1.18.1", features = ["v4"] }
 walkdir = "2.5.0"
 
@@ -57,6 +63,7 @@ print-clarity = []
 
 [dev-dependencies]
 criterion = { version = "0.7.0", features = ["html_reports"] }
+tree-sitter-rust = "0.24.0"
 
 [[bench]]
 name = "tokenizer"
