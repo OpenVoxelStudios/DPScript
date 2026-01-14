@@ -1,0 +1,867 @@
+AST(
+    namespace: "sqrt.dps",
+    module: "sqrt.dps",
+    nodes: [
+        Import(ImportNode(
+            span: SourceSpan(),
+            imports: [
+                (
+                    [
+                        "std",
+                        "entity",
+                        "tp",
+                    ],
+                    SourceSpan(),
+                ),
+                (
+                    [
+                        "std",
+                        "gm",
+                        "gm_std",
+                    ],
+                    SourceSpan(),
+                ),
+                (
+                    [
+                        "std",
+                        "gm",
+                        "math_entity",
+                    ],
+                    SourceSpan(),
+                ),
+                (
+                    [
+                        "std",
+                        "math",
+                        "sub",
+                    ],
+                    SourceSpan(),
+                ),
+                (
+                    [
+                        "std",
+                        "selectors",
+                        "Pos",
+                    ],
+                    SourceSpan(),
+                ),
+                (
+                    [
+                        "std",
+                        "transform",
+                        "transformation",
+                    ],
+                    SourceSpan(),
+                ),
+                (
+                    [
+                        "std",
+                        "transform",
+                        "translation",
+                    ],
+                    SourceSpan(),
+                ),
+                (
+                    [
+                        "std",
+                        "intrinsics",
+                        "slice",
+                    ],
+                    SourceSpan(),
+                ),
+                (
+                    [
+                        "std",
+                        "intrinsics",
+                        "float_of",
+                    ],
+                    SourceSpan(),
+                ),
+            ],
+        )),
+        Constant(ConstantNode(
+            is_public: false,
+            span: SourceSpan(),
+            name: (
+                "looper",
+                SourceSpan(),
+            ),
+            ty: Some((
+                "Selector",
+                SourceSpan(),
+            )),
+            value: Special(SpecialNode(
+                span: SourceSpan(),
+                data: Selector("__sqrt_loop"),
+            )),
+            keep: false,
+        )),
+        Function(FunctionNode(
+            span: SourceSpan(),
+            name: (
+                "sqrt",
+                SourceSpan(),
+            ),
+            args: [
+                FunctionArg(
+                    span: SourceSpan(),
+                    name: (
+                        "x",
+                        SourceSpan(),
+                    ),
+                    ty: (
+                        "float",
+                        SourceSpan(),
+                    ),
+                    is_this: false,
+                    is_ref: false,
+                    attrs: {},
+                ),
+            ],
+            return_type: Some((
+                "float",
+                SourceSpan(),
+            )),
+            body: [
+                BinaryOp(BinaryOpNode(
+                    span: SourceSpan(),
+                    op: (
+                        Assign,
+                        SourceSpan(),
+                    ),
+                    lhs: Ref(RefNode(
+                        span: SourceSpan(),
+                        lhs: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("gm_std"),
+                        )),
+                        data: ArrayIndex(Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("looper"),
+                        ))),
+                    )),
+                    rhs: Literal(LiteralNode(
+                        span: SourceSpan(),
+                        data: Double(0.0),
+                    )),
+                )),
+                Variable(VarNode(
+                    span: SourceSpan(),
+                    name: (
+                        "temp",
+                        SourceSpan(),
+                    ),
+                    ty: None,
+                    value: None,
+                    is_arg: false,
+                )),
+                Return(ReturnNode(
+                    span: SourceSpan(),
+                    value: Some(Call(CallNode(
+                        span: SourceSpan(),
+                        receiver: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("sqrt_handling"),
+                        )),
+                        args: [
+                            Literal(LiteralNode(
+                                span: SourceSpan(),
+                                data: Ident("x"),
+                            )),
+                            Literal(LiteralNode(
+                                span: SourceSpan(),
+                                data: Double(1.0),
+                            )),
+                            Literal(LiteralNode(
+                                span: SourceSpan(),
+                                data: Ident("temp"),
+                            )),
+                        ],
+                    ))),
+                )),
+            ],
+            flags: FuncFlags("Public"),
+            receiver: None,
+            attrs: {},
+        )),
+        Function(FunctionNode(
+            span: SourceSpan(),
+            name: (
+                "sqrt_handling",
+                SourceSpan(),
+            ),
+            args: [
+                FunctionArg(
+                    span: SourceSpan(),
+                    name: (
+                        "var1",
+                        SourceSpan(),
+                    ),
+                    ty: (
+                        "float",
+                        SourceSpan(),
+                    ),
+                    is_this: false,
+                    is_ref: false,
+                    attrs: {},
+                ),
+                FunctionArg(
+                    span: SourceSpan(),
+                    name: (
+                        "var2",
+                        SourceSpan(),
+                    ),
+                    ty: (
+                        "float",
+                        SourceSpan(),
+                    ),
+                    is_this: false,
+                    is_ref: false,
+                    attrs: {},
+                ),
+                FunctionArg(
+                    span: SourceSpan(),
+                    name: (
+                        "temp",
+                        SourceSpan(),
+                    ),
+                    ty: (
+                        "NBT",
+                        SourceSpan(),
+                    ),
+                    is_this: false,
+                    is_ref: true,
+                    attrs: {},
+                ),
+            ],
+            return_type: Some((
+                "float",
+                SourceSpan(),
+            )),
+            body: [
+                At(AtNode(
+                    span: SourceSpan(),
+                    pos: Special(SpecialNode(
+                        span: SourceSpan(),
+                        data: Pos(
+                            UnaryOp(UnaryOpNode(
+                                span: SourceSpan(),
+                                op: LocalOffset,
+                                value: Literal(LiteralNode(
+                                    span: SourceSpan(),
+                                    data: Double(0.0),
+                                )),
+                            )),
+                            Literal(LiteralNode(
+                                span: SourceSpan(),
+                                data: Ident("var1"),
+                            )),
+                            UnaryOp(UnaryOpNode(
+                                span: SourceSpan(),
+                                op: LocalOffset,
+                                value: Literal(LiteralNode(
+                                    span: SourceSpan(),
+                                    data: Double(0.0),
+                                )),
+                            )),
+                        ),
+                    )),
+                    body: [
+                        Call(CallNode(
+                            span: SourceSpan(),
+                            receiver: Call(CallNode(
+                                span: SourceSpan(),
+                                receiver: Ref(RefNode(
+                                    span: SourceSpan(),
+                                    lhs: Literal(LiteralNode(
+                                        span: SourceSpan(),
+                                        data: Ident("math_entity"),
+                                    )),
+                                    data: Ident("tp"),
+                                )),
+                                args: [
+                                    Special(SpecialNode(
+                                        span: SourceSpan(),
+                                        data: Pos(
+                                            Literal(LiteralNode(
+                                                span: SourceSpan(),
+                                                data: Double(29999999.0),
+                                            )),
+                                            UnaryOp(UnaryOpNode(
+                                                span: SourceSpan(),
+                                                op: LocalOffset,
+                                                value: Literal(LiteralNode(
+                                                    span: SourceSpan(),
+                                                    data: Ident("var2"),
+                                                )),
+                                            )),
+                                            Literal(LiteralNode(
+                                                span: SourceSpan(),
+                                                data: Double(91665.0),
+                                            )),
+                                        ),
+                                    )),
+                                ],
+                            )),
+                            args: [],
+                        )),
+                    ],
+                )),
+                BinaryOp(BinaryOpNode(
+                    span: SourceSpan(),
+                    op: (
+                        Assign,
+                        SourceSpan(),
+                    ),
+                    lhs: Ref(RefNode(
+                        span: SourceSpan(),
+                        lhs: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("temp"),
+                        )),
+                        data: Ident("var3"),
+                    )),
+                    rhs: Literal(LiteralNode(
+                        span: SourceSpan(),
+                        data: Array([
+                            Ref(RefNode(
+                                span: SourceSpan(),
+                                lhs: Literal(LiteralNode(
+                                    span: SourceSpan(),
+                                    data: Ident("temp"),
+                                )),
+                                data: Ident("var3"),
+                            )),
+                            Ref(RefNode(
+                                span: SourceSpan(),
+                                lhs: Literal(LiteralNode(
+                                    span: SourceSpan(),
+                                    data: Ident("math_entity"),
+                                )),
+                                data: Ident("Pos"),
+                            )),
+                            Ref(RefNode(
+                                span: SourceSpan(),
+                                lhs: Literal(LiteralNode(
+                                    span: SourceSpan(),
+                                    data: Ident("temp"),
+                                )),
+                                data: Ident("var3"),
+                            )),
+                        ]),
+                    )),
+                )),
+                BinaryOp(BinaryOpNode(
+                    span: SourceSpan(),
+                    op: (
+                        Assign,
+                        SourceSpan(),
+                    ),
+                    lhs: Ref(RefNode(
+                        span: SourceSpan(),
+                        lhs: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("math_entity"),
+                        )),
+                        data: Ident("transformation"),
+                    )),
+                    rhs: Ref(RefNode(
+                        span: SourceSpan(),
+                        lhs: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("temp"),
+                        )),
+                        data: Ident("var3"),
+                    )),
+                )),
+                BinaryOp(BinaryOpNode(
+                    span: SourceSpan(),
+                    op: (
+                        Assign,
+                        SourceSpan(),
+                    ),
+                    lhs: Ref(RefNode(
+                        span: SourceSpan(),
+                        lhs: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("temp"),
+                        )),
+                        data: Ident("var1"),
+                    )),
+                    rhs: Ref(RefNode(
+                        span: SourceSpan(),
+                        lhs: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("math_entity"),
+                        )),
+                        data: Ident("transformation"),
+                    )),
+                )),
+                BinaryOp(BinaryOpNode(
+                    span: SourceSpan(),
+                    op: (
+                        Assign,
+                        SourceSpan(),
+                    ),
+                    lhs: Ref(RefNode(
+                        span: SourceSpan(),
+                        lhs: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("temp"),
+                        )),
+                        data: Ident("var4"),
+                    )),
+                    rhs: Ref(RefNode(
+                        span: SourceSpan(),
+                        lhs: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("temp"),
+                        )),
+                        data: Ident("var1"),
+                    )),
+                )),
+                BinaryOp(BinaryOpNode(
+                    span: SourceSpan(),
+                    op: (
+                        Assign,
+                        SourceSpan(),
+                    ),
+                    lhs: Ref(RefNode(
+                        span: SourceSpan(),
+                        lhs: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("math_entity"),
+                        )),
+                        data: Ident("transformation"),
+                    )),
+                    rhs: Ref(RefNode(
+                        span: SourceSpan(),
+                        lhs: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("temp"),
+                        )),
+                        data: Ident("var4"),
+                    )),
+                )),
+                BinaryOp(BinaryOpNode(
+                    span: SourceSpan(),
+                    op: (
+                        Assign,
+                        SourceSpan(),
+                    ),
+                    lhs: Ref(RefNode(
+                        span: SourceSpan(),
+                        lhs: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("temp"),
+                        )),
+                        data: Ident("var2"),
+                    )),
+                    rhs: Ref(RefNode(
+                        span: SourceSpan(),
+                        lhs: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("math_entity"),
+                        )),
+                        data: Ident("transformation"),
+                    )),
+                )),
+                BinaryOp(BinaryOpNode(
+                    span: SourceSpan(),
+                    op: (
+                        AddAssign,
+                        SourceSpan(),
+                    ),
+                    lhs: Ref(RefNode(
+                        span: SourceSpan(),
+                        lhs: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("gm_std"),
+                        )),
+                        data: ArrayIndex(Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("looper"),
+                        ))),
+                    )),
+                    rhs: Literal(LiteralNode(
+                        span: SourceSpan(),
+                        data: Double(1.0),
+                    )),
+                )),
+                Call(CallNode(
+                    span: SourceSpan(),
+                    receiver: Call(CallNode(
+                        span: SourceSpan(),
+                        receiver: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("positive_subtract"),
+                        )),
+                        args: [
+                            Literal(LiteralNode(
+                                span: SourceSpan(),
+                                data: Ident("var2"),
+                            )),
+                            Literal(LiteralNode(
+                                span: SourceSpan(),
+                                data: Ident("temp"),
+                            )),
+                        ],
+                    )),
+                    args: [],
+                )),
+                Conditional(ConditionalNode(
+                    span: SourceSpan(),
+                    condition: BinaryOp(BinaryOpNode(
+                        span: SourceSpan(),
+                        op: (
+                            CondAnd,
+                            SourceSpan(),
+                        ),
+                        lhs: BinaryOp(BinaryOpNode(
+                            span: SourceSpan(),
+                            op: (
+                                CondLt,
+                                SourceSpan(),
+                            ),
+                            lhs: Ref(RefNode(
+                                span: SourceSpan(),
+                                lhs: Literal(LiteralNode(
+                                    span: SourceSpan(),
+                                    data: Ident("gm_std"),
+                                )),
+                                data: ArrayIndex(Literal(LiteralNode(
+                                    span: SourceSpan(),
+                                    data: Ident("looper"),
+                                ))),
+                            )),
+                            rhs: Literal(LiteralNode(
+                                span: SourceSpan(),
+                                data: Double(20.0),
+                            )),
+                        )),
+                        rhs: BinaryOp(BinaryOpNode(
+                            span: SourceSpan(),
+                            op: (
+                                CondNeq,
+                                SourceSpan(),
+                            ),
+                            lhs: Ref(RefNode(
+                                span: SourceSpan(),
+                                lhs: Literal(LiteralNode(
+                                    span: SourceSpan(),
+                                    data: Ident("temp"),
+                                )),
+                                data: Ident("v1m2p"),
+                            )),
+                            rhs: Literal(LiteralNode(
+                                span: SourceSpan(),
+                                data: String("-"),
+                            )),
+                        )),
+                    )),
+                    body: [
+                        Call(CallNode(
+                            span: SourceSpan(),
+                            receiver: Call(CallNode(
+                                span: SourceSpan(),
+                                receiver: Literal(LiteralNode(
+                                    span: SourceSpan(),
+                                    data: Ident("sqrt_handling"),
+                                )),
+                                args: [
+                                    Ref(RefNode(
+                                        span: SourceSpan(),
+                                        lhs: Literal(LiteralNode(
+                                            span: SourceSpan(),
+                                            data: Ident("temp"),
+                                        )),
+                                        data: Ident("var1"),
+                                    )),
+                                    Ref(RefNode(
+                                        span: SourceSpan(),
+                                        lhs: Literal(LiteralNode(
+                                            span: SourceSpan(),
+                                            data: Ident("temp"),
+                                        )),
+                                        data: Ident("var2"),
+                                    )),
+                                    Literal(LiteralNode(
+                                        span: SourceSpan(),
+                                        data: Ident("temp"),
+                                    )),
+                                ],
+                            )),
+                            args: [],
+                        )),
+                    ],
+                    else_ifs: [],
+                    else_body: [],
+                )),
+                Call(CallNode(
+                    span: SourceSpan(),
+                    receiver: Call(CallNode(
+                        span: SourceSpan(),
+                        receiver: Ref(RefNode(
+                            span: SourceSpan(),
+                            lhs: Literal(LiteralNode(
+                                span: SourceSpan(),
+                                data: Ident("math_entity"),
+                            )),
+                            data: Ident("tp"),
+                        )),
+                        args: [
+                            Special(SpecialNode(
+                                span: SourceSpan(),
+                                data: Pos(
+                                    Literal(LiteralNode(
+                                        span: SourceSpan(),
+                                        data: Double(29999999.0),
+                                    )),
+                                    Literal(LiteralNode(
+                                        span: SourceSpan(),
+                                        data: Double(0.0),
+                                    )),
+                                    Literal(LiteralNode(
+                                        span: SourceSpan(),
+                                        data: Double(91665.0),
+                                    )),
+                                ),
+                            )),
+                        ],
+                    )),
+                    args: [],
+                )),
+                Return(ReturnNode(
+                    span: SourceSpan(),
+                    value: Some(Ref(RefNode(
+                        span: SourceSpan(),
+                        lhs: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("temp"),
+                        )),
+                        data: Ident("var1"),
+                    ))),
+                )),
+            ],
+            flags: FuncFlags(""),
+            receiver: None,
+            attrs: {},
+        )),
+        Function(FunctionNode(
+            span: SourceSpan(),
+            name: (
+                "positive_subtract",
+                SourceSpan(),
+            ),
+            args: [
+                FunctionArg(
+                    span: SourceSpan(),
+                    name: (
+                        "var2",
+                        SourceSpan(),
+                    ),
+                    ty: (
+                        "float",
+                        SourceSpan(),
+                    ),
+                    is_this: false,
+                    is_ref: false,
+                    attrs: {},
+                ),
+                FunctionArg(
+                    span: SourceSpan(),
+                    name: (
+                        "temp",
+                        SourceSpan(),
+                    ),
+                    ty: (
+                        "NBT",
+                        SourceSpan(),
+                    ),
+                    is_this: false,
+                    is_ref: true,
+                    attrs: {},
+                ),
+            ],
+            return_type: None,
+            body: [
+                At(AtNode(
+                    span: SourceSpan(),
+                    pos: Special(SpecialNode(
+                        span: SourceSpan(),
+                        data: Pos(
+                            UnaryOp(UnaryOpNode(
+                                span: SourceSpan(),
+                                op: LocalOffset,
+                                value: Literal(LiteralNode(
+                                    span: SourceSpan(),
+                                    data: Double(0.0),
+                                )),
+                            )),
+                            Call(CallNode(
+                                span: SourceSpan(),
+                                receiver: Literal(LiteralNode(
+                                    span: SourceSpan(),
+                                    data: Ident("float_of"),
+                                )),
+                                args: [
+                                    Ref(RefNode(
+                                        span: SourceSpan(),
+                                        lhs: Literal(LiteralNode(
+                                            span: SourceSpan(),
+                                            data: Ident("temp"),
+                                        )),
+                                        data: Ident("var1"),
+                                    )),
+                                ],
+                            )),
+                            UnaryOp(UnaryOpNode(
+                                span: SourceSpan(),
+                                op: LocalOffset,
+                                value: Literal(LiteralNode(
+                                    span: SourceSpan(),
+                                    data: Double(0.0),
+                                )),
+                            )),
+                        ),
+                    )),
+                    body: [
+                        At(AtNode(
+                            span: SourceSpan(),
+                            pos: Special(SpecialNode(
+                                span: SourceSpan(),
+                                data: Pos(
+                                    UnaryOp(UnaryOpNode(
+                                        span: SourceSpan(),
+                                        op: LocalOffset,
+                                        value: Literal(LiteralNode(
+                                            span: SourceSpan(),
+                                            data: Double(0.0),
+                                        )),
+                                    )),
+                                    UnaryOp(UnaryOpNode(
+                                        span: SourceSpan(),
+                                        op: LocalOffset,
+                                        value: BinaryOp(BinaryOpNode(
+                                            span: SourceSpan(),
+                                            op: (
+                                                Sub,
+                                                SourceSpan(),
+                                            ),
+                                            lhs: Literal(LiteralNode(
+                                                span: SourceSpan(),
+                                                data: Double(0.0),
+                                            )),
+                                            rhs: Literal(LiteralNode(
+                                                span: SourceSpan(),
+                                                data: Double(0.000000001),
+                                            )),
+                                        )),
+                                    )),
+                                    UnaryOp(UnaryOpNode(
+                                        span: SourceSpan(),
+                                        op: LocalOffset,
+                                        value: Literal(LiteralNode(
+                                            span: SourceSpan(),
+                                            data: Double(0.0),
+                                        )),
+                                    )),
+                                ),
+                            )),
+                            body: [
+                                Call(CallNode(
+                                    span: SourceSpan(),
+                                    receiver: Call(CallNode(
+                                        span: SourceSpan(),
+                                        receiver: Ref(RefNode(
+                                            span: SourceSpan(),
+                                            lhs: Literal(LiteralNode(
+                                                span: SourceSpan(),
+                                                data: Ident("math_entity"),
+                                            )),
+                                            data: Ident("tp"),
+                                        )),
+                                        args: [
+                                            Special(SpecialNode(
+                                                span: SourceSpan(),
+                                                data: Pos(
+                                                    Literal(LiteralNode(
+                                                        span: SourceSpan(),
+                                                        data: Double(29999999.0),
+                                                    )),
+                                                    UnaryOp(UnaryOpNode(
+                                                        span: SourceSpan(),
+                                                        op: LocalOffset,
+                                                        value: BinaryOp(BinaryOpNode(
+                                                            span: SourceSpan(),
+                                                            op: (
+                                                                Sub,
+                                                                SourceSpan(),
+                                                            ),
+                                                            lhs: Literal(LiteralNode(
+                                                                span: SourceSpan(),
+                                                                data: Double(0.0),
+                                                            )),
+                                                            rhs: Literal(LiteralNode(
+                                                                span: SourceSpan(),
+                                                                data: Ident("var2"),
+                                                            )),
+                                                        )),
+                                                    )),
+                                                    Literal(LiteralNode(
+                                                        span: SourceSpan(),
+                                                        data: Double(91665.0),
+                                                    )),
+                                                ),
+                                            )),
+                                        ],
+                                    )),
+                                    args: [],
+                                )),
+                            ],
+                        )),
+                    ],
+                )),
+                BinaryOp(BinaryOpNode(
+                    span: SourceSpan(),
+                    op: (
+                        Assign,
+                        SourceSpan(),
+                    ),
+                    lhs: Ref(RefNode(
+                        span: SourceSpan(),
+                        lhs: Literal(LiteralNode(
+                            span: SourceSpan(),
+                            data: Ident("temp"),
+                        )),
+                        data: Ident("v1m2p"),
+                    )),
+                    rhs: Call(CallNode(
+                        span: SourceSpan(),
+                        receiver: Ref(RefNode(
+                            span: SourceSpan(),
+                            lhs: Literal(LiteralNode(
+                                span: SourceSpan(),
+                                data: Ident("math_entity"),
+                            )),
+                            data: Ident("Pos"),
+                        )),
+                        args: [
+                            Literal(LiteralNode(
+                                span: SourceSpan(),
+                                data: Double(0.0),
+                            )),
+                            Literal(LiteralNode(
+                                span: SourceSpan(),
+                                data: Double(1.0),
+                            )),
+                        ],
+                    )),
+                )),
+            ],
+            flags: FuncFlags(""),
+            receiver: None,
+            attrs: {},
+        )),
+    ],
+)

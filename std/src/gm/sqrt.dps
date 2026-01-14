@@ -1,12 +1,11 @@
-import std::entity::tp;
-import std::gm::gm_std;
-import std::gm::math_entity;
-import std::math::sub;
-import std::selectors::Pos;
-import std::transform::transformation;
-import std::transform::translation;
-import std::intrinsics::slice;
-import std::intrinsics::float_of;
+import std::{
+    entity::tp,
+    gm::{gm_std, math_entity},
+    math::sub,
+    selectors::Pos,
+    transform::{transformation, translation},
+    intrinsics::{slice, float_of},
+};
 
 const looper: Selector = selector: "__sqrt_loop";
 
@@ -28,46 +27,18 @@ fn sqrt_handling(var1: float, var2: float, ref temp: NBT) -> float {
         math_entity.tp(pos: [29999999, ~var2, 91665]);
     }
 
-    // FIXME (compiler):
-    // Order of binary operation parsing is still broken. This is ridiculous and ugly.
-    let epos = math_entity.Pos;
-    let v3 = temp.var3;
-    let np = [v3[0], epos[1], v3[2]];
-
-    let tf = math_entity.transformation;
-    let tl = tf.translation;
-
-    temp.var3 = np;
+    temp.var3 = [temp.var3[0], math_entity.Pos[1], temp.var3[2]];
     math_entity.transformation = temp.var3;
-    temp.var1 = tl[0];
+    temp.var1 = math_entity.transformation.translation[0];
 
-    let arr = temp.var4;
-
-    arr[15] = temp.var1;
-    temp.var4 = arr;
+    temp.var4[15] = temp.var1;
     math_entity.transformation = temp.var4;
-
-    tf = math_entity.transformation;
-    tl = tf.translation;
-
-    temp.var2 = tl[0];
+    temp.var2 = math_entity.transformation.translation[0];
 
     gm_std[looper] += 1;
     positive_subtract(var2, temp);
 
-    // FIXME: Compiler bug - binary operations don't parse well, this has to be two variables
-    // This being two variables also creates an optimization problem
-
-    let a = gm_std[looper] < 20;
-    let b = temp.v1m2p != "-";
-
-    // if gm_std[looper] < 20 && temp.v1m2p != "-" {
-    // ^^^ This should work, but the compiler parses it as
-    // gm_std[looper] < ((20 && temp.v1m2p) != "-") (or something in the same vein)
-    // which doesn't make any sense.
-    // FIXME!! PLEASE!!
-
-    if a && b {
+    if (gm_std[looper] < 20) && temp.v1m2p != "-" {
         sqrt_handling(temp.var1, temp.var2, temp);
     }
 
@@ -83,11 +54,5 @@ fn positive_subtract(var2: float, ref temp: NBT) {
         }
     }
 
-    // FIXME: Compiler bug - binary operations don't parse well, this has to be two variables
-    // This being two variables also creates an optimization problem
-
-    let epos = math_entity.Pos;
-    let y = epos[1];
-
-    temp.v1m2p = y.slice(0, 1);
+    temp.v1m2p = math_entity.Pos[1].slice(0, 1);
 }

@@ -40,6 +40,9 @@ tracing-subscriber = { version = "0.3.20", features = ["ansi", "env-filter", "re
 uuid = { version = "1.18.1", features = ["v4"] }
 walkdir = "2.5.0"
 
+ast = { path = "./crates/ast" }
+parser-v2 = { path = "./crates/parser-v2" }
+
 [package.metadata.binstall]
 pkg-url = "{ repo }/releases/download/v{ version }/dsc-{ target }"
 pkg-fmt = "bin"
@@ -62,3 +65,6 @@ harness = false
 [[bench]]
 name = "lexer"
 harness = false
+
+[profile.bench]
+debug = true

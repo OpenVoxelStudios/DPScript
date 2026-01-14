@@ -1,0 +1,17 @@
+[package]
+name = "parser-v2"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.100"
+ariadne = { version = "0.6.0", features = ["auto-color"] }
+ast = { version = "0.1.0", path = "../ast" }
+backtrace = { version = "0.3.76", features = ["libunwind"] }
+itertools = "0.14.0"
+miette = { version = "7.6.0", features = ["fancy"] }
+owo-colors = "4.2.3"
+pest = { version = "2.8.5", features = ["miette-error"] }
+pest_derive = { version = "2.8.5", features = ["grammar-extras"] }
+ron = "0.12.0"
+thiserror = "2.0.17"

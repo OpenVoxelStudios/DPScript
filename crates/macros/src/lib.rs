@@ -34,14 +34,14 @@ pub fn derive_has_span(stream: TokenStream) -> TokenStream {
             }
 
             quote! {
-                impl crate::common::traits::HasSpan for #name {
-                    fn span(&self) -> miette::SourceSpan {
+                impl<'a> crate::common::traits::HasSpan for #name<'a> {
+                    fn span(&self) -> crate::common::SourceSpan {
                         match self {
                             #(#matchers)*
                         }
                     }
 
-                    fn into_span(self) -> miette::SourceSpan {
+                    fn into_span(self) -> crate::common::SourceSpan {
                         match self {
                             #(#matchers_consume)*
                         }
@@ -70,12 +70,12 @@ pub fn derive_has_span(stream: TokenStream) -> TokenStream {
                 let name = input.ident.clone();
 
                 quote! {
-                    impl crate::common::traits::HasSpan for #name {
-                        fn span(&self) -> miette::SourceSpan {
+                    impl<'a> crate::common::traits::HasSpan for #name<'a> {
+                        fn span(&self) -> crate::common::SourceSpan {
                             self.span.clone()
                         }
 
-                        fn into_span(self) -> miette::SourceSpan {
+                        fn into_span(self) -> crate::common::SourceSpan {
                             self.span
                         }
                     }
@@ -118,14 +118,14 @@ pub fn derive_has_span_group(stream: TokenStream) -> TokenStream {
             }
 
             quote! {
-                impl crate::common::traits::HasSpan for #name {
-                    fn span(&self) -> miette::SourceSpan {
+                impl<'a> crate::common::traits::HasSpan for #name<'a> {
+                    fn span(&self) -> crate::common::SourceSpan {
                         match self {
                             #(#matchers)*
                         }
                     }
 
-                    fn into_span(self) -> miette::SourceSpan {
+                    fn into_span(self) -> crate::common::SourceSpan {
                         match self {
                             #(#matchers_consume)*
                         }

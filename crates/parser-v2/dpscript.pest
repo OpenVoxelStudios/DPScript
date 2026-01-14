@@ -1,0 +1,170 @@
+// ------------- main -------------
+
+body = { SOI ~ _top_stmt* ~ EOI }
+
+// ------------- base -------------
+
+_ident = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+
+// ------------- attributes -------------
+
+_attr_eq = { _ident ~ "=" ~ _raw }
+_attr_param_arg = { _attr_eq | _raw }
+_attr_param_args = { (_attr_param_arg ~ ",")* ~ _attr_param_arg? ~ ","? }
+_attr_param = { _ident ~ "(" ~ _attr_param_args ~ ")" }
+_attr_body = { _attr_param | _attr_eq | _ident }
+_attr = { "#" ~ "[" ~ _attr_body ~ "]" }
+
+// ------------- numbers -------------
+
+_decimal_left = _{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT* }
+_decimal_right = _{ ASCII_DIGIT* ~ "." ~ ASCII_DIGIT+ }
+_decimal_base = _{ _decimal_left | _decimal_right | _int }
+_double = @{ _decimal_base ~ "d"? }
+_float = @{ _decimal_base ~ "f" }
+_decimal = _{ _float | _double }
+
+_int = { ASCII_DIGIT+ }
+_num = _{ _decimal | _int }
+
+// ------------- literals -------------
+
+_char = _{ !("\"" | "\\") ~ ANY | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t") }
+_str_int = { _char* }
+_str = { PUSH("\"") ~ _str_int ~ POP }
+_true = { "true" }
+_false = { "false" }
+_bool = { _true | _false }
+
+// ------------- complex literals -------------
+
+_arr = { "[" ~ (_expr ~ ",")* ~ _expr? ~ (",")? ~ "]" }
+_selector = { "selector" ~ ":" ~ _str }
+_component = { ("c" | "component") ~ ":" ~ _str }
+_pos = { "pos" ~ ":" ~ "[" ~ _expr ~ "," ~ _expr ~ "," ~ _expr ~ ","? ~ "]" }
+_range = { _int ~ ".." ~ _int }
+
+_nbt_arr = { "[" ~ (_nbt_val ~ ",")* ~ _nbt_val? ~ (",")? ~ "]" }
+_nbt_obj = { "{" ~ (_nbt_kv ~ ",")* ~ _nbt_kv? ~ ","? ~ "}" }
+_nbt_val = _{ _nbt_arr | _nbt_obj | _expr }
+_nbt_kv = { (_ident | _str) ~ ":" ~ _nbt_val }
+_nbt = { "nbt" ~ ":" ~ _nbt_val }
+
+_raw = _{ _num | _str | _bool | _ident }
+_special = _{ _nbt | _selector | _component | _range | _pos }
+_literal = _{ _num | _str | _special | _bool | _ident | _arr | _paren }
+
+// ------------- math -------------
+
+_bl_op_and = { "&&" }
+_bl_op_or = { "||" }
+_bl_op_eq = { "==" }
+_bl_op_ne = { "!=" }
+_bl_op_lt = { "<" }
+_bl_op_gt = { ">" }
+_bl_op_le = { "<=" }
+_bl_op_ge = { ">=" }
+
+_boolop_sym = _{ _bl_op_and | _bl_op_or | _bl_op_eq | _bl_op_ne | _bl_op_lt | _bl_op_gt | _bl_op_le | _bl_op_ge }
+
+_bn_op_mul = { "*" }
+_bn_op_div = { "/" }
+_bn_op_add = { "+" }
+_bn_op_sub = { "-" }
+_bn_op_mod = { "%" }
+
+_binop_sym = _{ _bn_op_mul | _bn_op_div | _bn_op_add | _bn_op_sub | _bn_op_mod | _boolop_sym }
+
+_binop = { _expr_n ~ _binop_sym ~ _expr }
+_paren = _{ "(" ~ _expr ~ ")" }
+_math = _{ _paren | _binop }
+
+// ------------- types -------------
+
+_arr_ty = { "[" ~ _ident ~ "]" }
+_arr_ty_sized = { "[" ~ _ident ~ ";" ~ _int ~ "]" }
+_type = { _ident | _arr_ty_sized | _arr_ty }
+
+// ------------- expressions -------------
+
+_un_op_neg = { "-" }
+_un_op_pos = { "+" }
+_un_op_not = { "!" }
+_un_op_rel = { "~" }
+
+_unary_op = _{ _un_op_neg | _un_op_pos | _un_op_not | _un_op_rel }
+
+_ref = { _expr_b ~ &("." | "[") ~ (_ref_index | ("." ~ _ident))* }
+_ref_index = { "[" ~ _expr ~ "]" }
+
+_call_args = _{ (_expr ~ ",")* ~ _expr? ~ ","? }
+_call_expr = { (_ref | _ident) ~ "(" ~ _call_args ~ ")" }
+
+_expr_b = _{ ("(" ~ _expr ~ ")") | _literal }
+_expr_n = _{ _unary_op? ~ (_call_expr | _ref | _literal) }
+_expr = { (_unary_op? ~ _binop) | _expr_n }
+
+// ------------- declarations -------------
+
+_pub = { "pub" }
+
+_obj = { _pub? ~ "objective" ~ _ident ~ ":" ~ _ident ~ "=" ~ _str ~ ";" }
+_var = { "let" ~ _ident ~ (":" ~ _type)? ~ ("=" ~ _expr)? ~ ";" }
+_field = { _pub? ~ "field" ~ _type ~ "::" ~ _ident ~ "=" ~ _type ~ ";" }
+
+_facade = { "facade" }
+_inline = { "inline" }
+_compiler = { "compiler" }
+_operator = { "operator" }
+_instance = { "instance" }
+
+_ref_kw = { "ref" }
+
+_fn_mod = _{ _pub | _facade | _inline | _compiler | _operator | _instance }
+_fn_arg = { _ref_kw? ~ _attr* ~ _ident ~ ":" ~ _type }
+_fn_args = { (_fn_arg ~ ",")* ~ _fn_arg? ~ ","? }
+_fn = { _fn_mod* ~ "fn" ~ (_type ~ "::")? ~ _ident ~ "(" ~ _fn_args ~ ")" ~ ("->" ~ _type)? ~ (";" | _block) }
+
+_top_const = { _pub? ~ _inner_const }
+_inner_const = { "const" ~ _ident ~ (":" ~ _type)? ~ "=" ~ _expr ~ ";" }
+
+// ------------- blocks -------------
+
+_block = { "{" ~ _inner_stmt* ~ "}" }
+_init_block = { "init" ~ _block }
+_tick_block = { "tick" ~ _block }
+_special_block = _{ _init_block | _tick_block }
+
+// ------------- statements -------------
+
+_import_path = { _ident ~ ("::" ~ _import_item)? }
+_import_obj = { "{" ~ (_import_item ~ ",")* ~ _import_item? ~ ","? ~ "}" }
+_import_item = _{ _import_path | _import_obj }
+_import = { "import" ~ _import_item ~ ";" }
+
+_assign_eq = { "=" }
+_assign_sub_eq = { "-=" }
+_assign_add_eq = { "+=" }
+_assign_div_eq = { "/=" }
+_assign_mul_eq = { "*=" }
+_assign_mod_eq = { "%=" }
+
+_assign_op = _{ _assign_eq | _assign_sub_eq | _assign_add_eq | _assign_div_eq | _assign_mul_eq | _assign_mod_eq }
+
+_if = { "if" ~ _expr ~ _block }
+_at = { "at" ~ _expr ~ _block }
+_assign = { _expr ~ _assign_op ~ _expr ~ ";" }
+_call = { _call_expr ~ ";" }
+_return = { "return" ~ _expr? ~ ";" }
+
+_top_stmt_in = _{ _import | _obj | _top_const | _special_block | _fn | _field }
+_top_stmt = _{ _attr* ~ _top_stmt_in }
+_inner_stmt = _{ _var | _inner_const | _if | _at | _assign | _return | _call }
+
+// ------------- extra -------------
+
+_line_comment = { "//" ~ (!"\n" ~ ANY)* }
+_block_comment = { "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+
+WHITESPACE = _{ " " | "\n" | "\t" | "\r" }
+COMMENT = _{ _line_comment | _block_comment }

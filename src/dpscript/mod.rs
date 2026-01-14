@@ -1,4 +1,3 @@
-pub mod ast;
 pub mod compiler;
 pub mod data;
 pub mod lexer;
