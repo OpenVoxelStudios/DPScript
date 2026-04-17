@@ -2,6 +2,7 @@ use std::fmt;
 
 use crate::{
     data::{SourceSpan, Spanned},
+    loc::DataLocation,
     node::Node,
 };
 
@@ -11,6 +12,7 @@ pub struct VarNode<'a> {
     pub name: Spanned<&'a str>,
     pub ty: Option<Spanned<&'a str>>,
     pub value: Option<Box<Node<'a>>>,
+    pub location: DataLocation<'a>,
 
     /// Is this variable a function argument?
     /// This shouldn't be set during lexing - only during validation (via [`super::func::FunctionArg::to_var`]).

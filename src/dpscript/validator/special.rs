@@ -1,56 +1,62 @@
-use crate::{
-    common::traits::HasSpan,
-    dpscript::{
-        ast::special::{SpecialData, SpecialNode},
-        data::NodeInfo,
-        validator::{Result, Validator, err::Err},
-    },
-};
+use crate::dpscript::validator::{Result, Validator};
+use ast::special::{SpecialData, SpecialNode};
 
-impl Validator {
-    pub fn validate_special(&mut self, node: &mut SpecialNode) -> Result<()> {
+impl<'a> Validator<'a> {
+    pub fn validate_special(&mut self, node: &mut SpecialNode<'a>) -> Result<()> {
         match &node.data {
             SpecialData::Selector(_) => {} // TODO: add uuid validation & selector checking?
 
             SpecialData::Pos(x, y, z) => {
-                let Some(xt) = x.returns(self.scope()?) else {
-                    self.errors.push(Err::CannotComputeType { span: x.span() });
+                let _ = x;
+                let _ = y;
+                let _ = z;
 
-                    return Ok(());
-                };
+                // TODO: Type checking
 
-                let Some(yt) = y.returns(self.scope()?) else {
-                    self.errors.push(Err::CannotComputeType { span: y.span() });
+                // let Some(xt) = x.returns(self.scope()?) else {
+                //     self.errors.push(Err::CannotComputeType {
+                //         span: x.span().into(),
+                //     });
 
-                    return Ok(());
-                };
+                //     return Ok(());
+                // };
 
-                let Some(zt) = z.returns(self.scope()?) else {
-                    self.errors.push(Err::CannotComputeType { span: z.span() });
+                // let Some(yt) = y.returns(self.scope()?) else {
+                //     self.errors.push(Err::CannotComputeType {
+                //         span: y.span().into(),
+                //     });
 
-                    return Ok(());
-                };
+                //     return Ok(());
+                // };
 
-                if !xt.is_numeric() {
-                    self.errors.push(Err::NonNumericPos {
-                        span: x.span(),
-                        got: xt,
-                    });
-                }
+                // let Some(zt) = z.returns(self.scope()?) else {
+                //     self.errors.push(Err::CannotComputeType {
+                //         span: z.span().into(),
+                //     });
 
-                if !yt.is_numeric() {
-                    self.errors.push(Err::NonNumericPos {
-                        span: y.span(),
-                        got: yt,
-                    });
-                }
+                //     return Ok(());
+                // };
 
-                if !zt.is_numeric() {
-                    self.errors.push(Err::NonNumericPos {
-                        span: z.span(),
-                        got: zt,
-                    });
-                }
+                // if !xt.is_numeric() {
+                //     self.errors.push(Err::NonNumericPos {
+                //         span: x.span().into(),
+                //         got: xt,
+                //     });
+                // }
+
+                // if !yt.is_numeric() {
+                //     self.errors.push(Err::NonNumericPos {
+                //         span: y.span().into(),
+                //         got: yt,
+                //     });
+                // }
+
+                // if !zt.is_numeric() {
+                //     self.errors.push(Err::NonNumericPos {
+                //         span: z.span().into(),
+                //         got: zt,
+                //     });
+                // }
             }
 
             SpecialData::Component(_nbt) => {} // TODO: Validate the schema

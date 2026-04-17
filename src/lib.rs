@@ -6,8 +6,8 @@ extern crate serde;
 #[macro_use]
 extern crate tracing;
 
-#[macro_use]
-extern crate dpscript_macros;
+// #[macro_use]
+// extern crate dpscript_macros;
 
 pub mod cli;
 pub mod common;

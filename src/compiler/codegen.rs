@@ -1,19 +1,18 @@
-use std::{collections::HashMap, sync::Arc};
-
-use colored::Colorize;
-use indicatif::{MultiProgress, ProgressBar};
-
 use crate::{
     Result,
     compiler::{Compiler, STYLE},
-    dpscript::{ast::ast::AST, compiler::CodeGenerator, validator::ValidationResult},
+    dpscript::{compiler::CodeGenerator, validator::ValidationResult},
 };
+use ast::ast::AST;
+use colored::Colorize;
+use indicatif::{MultiProgress, ProgressBar};
+use std::{cell::RefCell, collections::HashMap, rc::Rc, sync::Arc};
 
 impl Compiler {
-    pub fn generate(
-        &self,
-        validated: Vec<ValidationResult>,
-        modules: &Arc<HashMap<String, AST>>,
+    pub fn generate<'a>(
+        &'a self,
+        validated: Vec<ValidationResult<'a>>,
+        modules: &Arc<HashMap<&'a str, Rc<RefCell<AST<'a>>>>>,
     ) -> Result<()> {
         let pb = if self.quiet {
             None
@@ -32,12 +31,14 @@ impl Compiler {
                 master.println(format!(
                     "   {} {}",
                     "Compiling".green().bold(),
-                    item.ast.module.cyan().bold(),
+                    item.ast.borrow().module.cyan().bold(),
                 ));
             }
 
+            let code = item.ast.borrow().code.clone().into();
+
             let cg = CodeGenerator::new(
-                item.ast.code.clone(),
+                code,
                 self.out_dir.clone(),
                 item.ast,
                 item.imports,

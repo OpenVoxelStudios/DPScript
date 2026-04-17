@@ -1,9 +1,17 @@
-use std::fmt;
-use crate::{data::SourceSpan, node::Node, util::{Body, Indent}};
+use crate::{
+    data::SourceSpan,
+    loc::Identifier,
+    node::Node,
+    scope::Scope,
+    util::{Body, Indent},
+};
+use std::{cell::RefCell, fmt, rc::Rc};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct ConditionalNode<'a> {
     pub span: SourceSpan,
+    pub ident: Identifier<'a>,
+    pub else_ident: Option<Identifier<'a>>,
 
     /// The condition for this 'if' node.
     pub condition: Box<Node<'a>>,
@@ -24,6 +32,12 @@ pub struct ConditionalNode<'a> {
     /// If this is not defined by the user, this vec will be empty.
     /// If this block is empty, it should be optimized out.
     pub else_body: Vec<Node<'a>>,
+
+    #[serde(skip)]
+    pub scope: Option<Rc<RefCell<Scope<'a>>>>,
+
+    #[serde(skip)]
+    pub else_scope: Option<Rc<RefCell<Scope<'a>>>>,
 }
 
 /// This should never be used on its own, only as part of a [`ConditionalNode`],
@@ -33,6 +47,10 @@ pub struct ElseIfNode<'a> {
     pub span: SourceSpan,
     pub condition: Node<'a>,
     pub body: Vec<Node<'a>>,
+    pub ident: Identifier<'a>,
+
+    #[serde(skip)]
+    pub scope: Option<Rc<RefCell<Scope<'a>>>>,
 }
 
 impl<'a> fmt::Display for ConditionalNode<'a> {

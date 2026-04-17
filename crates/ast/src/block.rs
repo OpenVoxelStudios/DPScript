@@ -1,10 +1,7 @@
 use crate::{
-    attr::AttrNode,
-    data::{SourceSpan, Spanned},
-    node::Node,
-    util::{Body, Indent},
+    attr::AttrNode, data::{SourceSpan, Spanned}, loc::Identifier, node::Node, scope::Scope, util::{Body, Indent}
 };
-use std::{collections::BTreeMap, fmt::Display};
+use std::{cell::RefCell, collections::BTreeMap, fmt::Display, rc::Rc};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct BlockNode<'a> {
@@ -12,6 +9,10 @@ pub struct BlockNode<'a> {
     pub body: Vec<Node<'a>>,
     pub kind: BlockKind,
     pub attrs: BTreeMap<Spanned<&'a str>, AttrNode<'a>>,
+    pub ident: Identifier<'a>,
+
+    #[serde(skip)]
+    pub scope: Option<Rc<RefCell<Scope<'a>>>>,
 
     /// Whether to exclude this node from dead code elimination.
     pub keep: bool,

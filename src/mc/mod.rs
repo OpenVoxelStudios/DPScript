@@ -1,13 +1,14 @@
 pub mod macros;
 pub mod util;
 
-use crate::{cmd_enums, util::Identifier};
+use crate::cmd_enums;
+use ast::loc::Identifier;
 use itertools::Itertools;
 use std::{fmt, fs, io, path::PathBuf};
 
 #[derive(Debug, Clone)]
-pub struct Function {
-    pub id: Identifier,
+pub struct Function<'a> {
+    pub id: Identifier<'a>,
     pub commands: Vec<Command>,
 
     /// Always write this function's file, even if the content is empty.
@@ -15,8 +16,8 @@ pub struct Function {
     pub always_write: bool,
 }
 
-impl Function {
-    pub fn new(id: Identifier) -> Self {
+impl<'a> Function<'a> {
+    pub fn new(id: Identifier<'a>) -> Self {
         Self {
             id,
             commands: Vec::new(),

@@ -8,7 +8,20 @@ use crate::{
     util::{ParserUtil, next_or_die, only_one},
 };
 use ast::{
-    at::AtNode, block::{BlockKind, BlockNode}, call::CallNode, cond::ConditionalNode, constant::ConstantNode, data::{SourceSpan, SpanUtil}, literal::{LiteralData, LiteralNode}, nbt::{NbtValue, NbtValueData}, node::Node, refs::{RefData, RefNode}, ret::ReturnNode, special::{SpecialData, SpecialNode}, unop::{UnaryOpNode, UnaryOperation}, var::VarNode
+    at::AtNode,
+    block::{BlockKind, BlockNode},
+    call::CallNode,
+    cond::ConditionalNode,
+    constant::ConstantNode,
+    data::{SourceSpan, SpanUtil},
+    literal::{LiteralData, LiteralNode},
+    nbt::{NbtValue, NbtValueData},
+    node::Node,
+    refs::{RefData, RefNode},
+    ret::ReturnNode,
+    special::{SpecialData, SpecialNode},
+    unop::{UnaryOpNode, UnaryOperation},
+    var::VarNode,
 };
 use miette::{IntoDiagnostic, Result, Severity};
 use pest::iterators::Pairs;
@@ -107,12 +120,17 @@ pub fn parse_at_block<'a>(
     inner: &mut Pairs<'a, Rule>,
 ) -> Result<AtNode<'a>> {
     let pos = inner.parse_one_next(cx)?;
+    let ident = cx.start_block();
     let body = inner.parse_next(cx)?;
+
+    cx.end_block();
 
     Ok(AtNode {
         span,
         pos: Box::new(pos),
         body,
+        scope: None,
+        ident,
     })
 }
 
@@ -141,14 +159,21 @@ pub fn parse_init_block<'a>(
     span: SourceSpan,
     inner: &mut Pairs<'a, Rule>,
 ) -> Result<BlockNode<'a>> {
+    let ident = cx.start_block();
+    let body = parse_block(cx, span, inner)?;
+
+    cx.end_block();
+
     Ok(BlockNode {
         span,
-        body: parse_block(cx, span, inner)?,
+        body,
         kind: BlockKind::Init,
 
         // TODO: Attributes
         attrs: BTreeMap::new(),
         keep: false,
+        scope: None,
+        ident,
     })
 }
 
@@ -157,14 +182,21 @@ pub fn parse_tick_block<'a>(
     span: SourceSpan,
     inner: &mut Pairs<'a, Rule>,
 ) -> Result<BlockNode<'a>> {
+    let ident = cx.start_block();
+    let body = parse_block(cx, span, inner)?;
+
+    cx.end_block();
+
     Ok(BlockNode {
         span,
-        body: parse_block(cx, span, inner)?,
+        body,
         kind: BlockKind::Tick,
 
         // TODO: Attributes
         attrs: BTreeMap::new(),
         keep: false,
+        scope: None,
+        ident,
     })
 }
 
@@ -243,7 +275,7 @@ pub fn parse_double<'a>(
 ) -> Result<LiteralNode<'a>> {
     Ok(LiteralNode {
         span,
-        data: LiteralData::Double(s.parse().into_diagnostic()?),
+        data: LiteralData::Double(s.trim_suffix("d").trim().parse().into_diagnostic()?),
     })
 }
 
@@ -254,7 +286,7 @@ pub fn parse_float<'a>(
 ) -> Result<LiteralNode<'a>> {
     Ok(LiteralNode {
         span,
-        data: LiteralData::Float(s.parse().into_diagnostic()?),
+        data: LiteralData::Float(s.trim_suffix("f").trim().parse().into_diagnostic()?),
     })
 }
 
@@ -292,6 +324,7 @@ pub fn parse_var<'a>(
     let name = inner.next_ident(cx)?;
     let ty = inner.next_type(cx).ok();
     let value = inner.parse_one_next(cx).ok().map(Box::new);
+    let location = cx.local_var();
 
     Ok(VarNode {
         span,
@@ -299,6 +332,7 @@ pub fn parse_var<'a>(
         name,
         ty,
         value,
+        location,
     })
 }
 
@@ -344,7 +378,26 @@ pub fn parse_if<'a>(
     inner: &mut Pairs<'a, Rule>,
 ) -> Result<ConditionalNode<'a>> {
     let recv = inner.parse_one_next(cx)?;
+    let ident = cx.start_block();
     let body = parse_block(cx, span, inner)?;
+
+    cx.end_block();
+
+    let mut else_ident = None;
+    let mut else_body = Vec::new();
+
+    if inner.peek().is_some_and(|it| it.as_rule() == Rule::_else) {
+        let rule = inner.next().unwrap();
+        let span = rule.as_span();
+        let mut block = rule.into_inner();
+
+        block.next();
+
+        else_ident = Some(cx.start_block());
+        else_body = parse_block(cx, span.into(), &mut block)?;
+
+        cx.end_block();
+    }
 
     // TODO: Else ifs
 
@@ -352,10 +405,15 @@ pub fn parse_if<'a>(
         span,
         condition: Box::new(recv),
         body,
+        ident,
+        else_ident,
+        else_body,
 
-        // TODO: else & else if
-        else_body: vec![],
+        // TODO: else if
         else_ifs: vec![],
+
+        scope: None,
+        else_scope: None,
     })
 }
 

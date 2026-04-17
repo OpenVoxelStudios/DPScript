@@ -1,15 +1,17 @@
 use crate::{
-    data::SourceSpan,
-    node::Node,
-    util::{Body, Indent},
+    data::SourceSpan, loc::Identifier, node::Node, scope::Scope, util::{Body, Indent}
 };
-use std::fmt;
+use std::{cell::RefCell, fmt, rc::Rc};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct AtNode<'a> {
     pub span: SourceSpan,
     pub pos: Box<Node<'a>>,
     pub body: Vec<Node<'a>>,
+    pub ident: Identifier<'a>,
+
+    #[serde(skip)]
+    pub scope: Option<Rc<RefCell<Scope<'a>>>>,
 }
 
 impl<'a> fmt::Display for AtNode<'a> {

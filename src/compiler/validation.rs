@@ -1,32 +1,36 @@
-use std::{
-    collections::{BTreeMap, HashMap},
-    sync::Arc,
-};
-
-use colored::Colorize;
-use indicatif::{MultiProgress, ProgressBar};
-
 use crate::{
     Result,
     compiler::{Compiler, STYLE},
-    dpscript::{
-        ast::ast::AST,
-        validator::{ValidationResult, Validator},
-    },
+    dpscript::validator::{ValidationResult, Validator},
     error::CompleteValidationErrors,
+};
+use ast::ast::AST;
+use colored::Colorize;
+use indicatif::{MultiProgress, ProgressBar};
+use std::{
+    cell::RefCell,
+    collections::{BTreeMap, HashMap},
+    rc::Rc,
+    sync::Arc,
 };
 
 impl Compiler {
-    pub fn validate(
+    pub fn validate<'a>(
         &self,
-        asts: &Vec<AST>,
-        mut modules: Arc<HashMap<String, AST>>,
-    ) -> Result<(Vec<ValidationResult>, Arc<HashMap<String, AST>>)> {
+        asts: &Vec<Rc<RefCell<AST<'a>>>>,
+        mut modules: Arc<HashMap<&'a str, Rc<RefCell<AST<'a>>>>>,
+    ) -> Result<(
+        Vec<ValidationResult<'a>>,
+        Arc<HashMap<&'a str, Rc<RefCell<AST<'a>>>>>,
+    )> {
         let mut warnings = 0;
         let mut pretty = BTreeMap::new();
 
         for ast in asts {
-            pretty.entry(&ast.namespace).or_insert(Vec::new()).push(ast);
+            pretty
+                .entry(ast.borrow().namespace)
+                .or_insert(Vec::new())
+                .push(ast);
         }
 
         let mut analyzed = Vec::new();
@@ -65,15 +69,15 @@ impl Compiler {
                         mpb.println(format!(
                             "      + {} {}",
                             "Analyzing".purple().bold(),
-                            ast.module.blue().bold()
+                            ast.borrow().module.blue().bold()
                         ));
                     }
                 }
 
-                let result = Validator::new(ast.clone(), Arc::clone(&modules)).run()?;
+                let result = Validator::new(Rc::clone(ast), Arc::clone(&modules)).run()?;
 
                 if !result.errors.errors.is_empty() {
-                    errors.push(result.errors.into());
+                    errors.push(result.errors);
                     continue;
                 }
 
@@ -97,7 +101,7 @@ impl Compiler {
 
                 let mut modules_inner = Arc::into_inner(modules).unwrap();
 
-                modules_inner.insert(result.ast.module.clone(), result.ast.clone());
+                modules_inner.insert(result.ast.borrow().module.clone(), result.ast.clone());
                 modules = Arc::new(modules_inner);
                 analyzed.push(result);
             }

@@ -1,6 +1,5 @@
-use miette::{Diagnostic, NamedSource, SourceSpan};
+use miette::{Diagnostic, SourceSpan};
 use thiserror::Error;
-
 use crate::dpscript::ty::TypeRef;
 
 /// This is a code error on the user's end.
@@ -258,7 +257,7 @@ pub enum ValidatorWarn {
 #[diagnostic()]
 pub struct AllErrors {
     #[source_code]
-    pub code: NamedSource<String>,
+    pub code: miette::NamedSource<String>,
 
     #[related]
     pub errors: Vec<ValidatorErr>,

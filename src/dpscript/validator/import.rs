@@ -1,97 +1,106 @@
-use crate::{
-    common::traits::HasSpan,
-    dpscript::{
-        ast::{ast::ExportType, import::ImportNode},
-        validator::{
-            Result, Validator,
-            err::{Err, VErr},
-        },
-    },
-};
+use std::rc::Rc;
 
-impl Validator {
+use crate::dpscript::validator::{
+    Result, Validator,
+    err::{Err, VErr},
+};
+use ast::{data::HasSpan, import::ImportNode, scope::ExportType};
+
+impl<'a> Validator<'a> {
     pub fn validate_imports(&mut self) -> Result<()> {
         let mut out = Vec::new();
+        let imps = self.ast.borrow().scope.borrow().imports.clone();
 
-        for mut node in self.ast.scope.imports.clone() {
+        for mut node in imps {
             self.validate_import(&mut node)?;
             out.push(node);
         }
 
-        self.ast.scope.imports = out;
+        self.ast.borrow().scope.borrow_mut().imports = out;
 
         Ok(())
     }
 
-    pub fn validate_import(&mut self, node: &mut ImportNode) -> Result<()> {
-        for item in &node.imports {
+    pub fn validate_import(&mut self, node: &mut ImportNode<'a>) -> Result<()> {
+        for (item, _span) in &node.imports {
             let mut item = item.clone();
 
-            let name = item
-                .pop()
-                .ok_or(VErr::EmptyImportPath { span: node.span() })?;
+            let name = item.pop().ok_or(VErr::EmptyImportPath {
+                span: node.span().into(),
+            })?;
 
             if self.imports.contains_key(&name) {
                 self.errors.push(Err::DuplicateImport {
-                    span: node.span(),
-                    name,
+                    span: node.span().into(),
+                    name: name.into(),
                 });
 
                 continue;
             }
 
-            let module = item.join("::").into();
+            let module = item.join("::");
 
-            if let Some(it) = self.modules.get(&module) {
-                if let Some(values) = it.scope.exports.get(&name) {
+            if let Some(it) = self.modules.get(module.as_str()) {
+                if let Some(values) = it.borrow().scope.borrow().exports.get(&name) {
                     for value in values.clone() {
-                        self.imports.insert(name.clone(), value.clone());
+                        self.imports.insert(name, value.clone());
 
                         match value {
                             ExportType::Constant(node) => {
-                                self.scope_mut()?.constants.insert(node.name.clone(), node);
+                                self.scope()?
+                                    .borrow_mut()
+                                    .constants
+                                    .insert(node.name.0, Rc::new(node));
                             }
 
                             ExportType::Objective(node) => {
-                                self.scope_mut()?.objectives.insert(node.name.clone(), node);
+                                self.scope()?
+                                    .borrow_mut()
+                                    .objectives
+                                    .insert(node.name.0, Rc::new(node));
                             }
 
                             ExportType::Function(node) => {
                                 if let Some(recv) = &node.receiver {
-                                    self.scope_mut()?
+                                    self.scope()?
+                                        .borrow_mut()
                                         .instance_funcs
-                                        .entry(recv.clone())
+                                        .entry(recv.0)
                                         .or_default()
-                                        .insert(node.name.clone(), node);
+                                        .insert(node.name.0, Rc::new(node));
                                 } else {
-                                    self.scope_mut()?.functions.insert(node.name.clone(), node);
+                                    self.scope()?
+                                        .borrow_mut()
+                                        .functions
+                                        .insert(node.name.0, Rc::new(node));
                                 }
                             }
 
                             ExportType::Enum(node) => {
-                                self.scope_mut()?.enums.insert(node.name.clone(), node);
+                                self.scope()?.borrow_mut().enums.insert(node.name.0, node);
                             }
 
                             ExportType::Field(node) => {
-                                self.scope_mut()?
+                                self.scope()?
+                                    .borrow_mut()
                                     .fields
-                                    .entry(node.owner.clone())
+                                    .entry(node.owner.0)
                                     .or_default()
-                                    .insert(node.name.clone(), node);
+                                    .insert(node.name.0, Rc::new(node));
                             }
                         };
                     }
                 } else {
                     self.errors.push(Err::UnresolvedImport {
-                        span: node.span(),
-                        path: name,
+                        span: node.span().into(),
+                        path: name.into(),
                         module,
                     });
                 }
             } else {
                 self.errors.push(Err::ModuleNotFound {
                     module: module,
-                    span: node.span(),
+                    span: node.span().into(),
                 });
             }
         }

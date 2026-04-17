@@ -1,39 +1,37 @@
-use crate::{
-    common::traits::HasSpan,
-    dpscript::{
-        ast::ret::ReturnNode,
-        data::NodeInfo,
-        ty::{BuiltInType, TypeRef},
-        validator::{Result, Validator, err::Err},
-    },
-};
+use ast::ret::ReturnNode;
+use crate::dpscript::validator::{Result, Validator};
 
-impl Validator {
-    pub fn validate_return(&mut self, node: &mut ReturnNode) -> Result<()> {
-        let func = self.func()?;
+impl<'a> Validator<'a> {
+    pub fn validate_return(&mut self, _node: &mut ReturnNode<'a>) -> Result<()> {
+        // TODO: Type checking
 
-        let Some(value) = &node.value else {
-            if func.return_type != TypeRef::BuiltIn(BuiltInType::Void) {
-                self.errors.push(Err::MustReturnValue { span: node.span() });
-            }
+        // let func = self.func()?;
 
-            return Ok(());
-        };
+        // let Some(value) = &node.value else {
+        //     if func.return_type != TypeRef::BuiltIn(BuiltInType::Void) {
+        //         self.errors.push(Err::MustReturnValue {
+        //             span: node.span().into(),
+        //         });
+        //     }
 
-        let Some(ty) = value.returns(self.scope()?) else {
-            self.errors
-                .push(Err::CannotComputeType { span: value.span() });
+        //     return Ok(());
+        // };
 
-            return Ok(());
-        };
+        // let Some(ty) = value.returns(self.scope()?) else {
+        //     self.errors.push(Err::CannotComputeType {
+        //         span: value.span().into(),
+        //     });
 
-        if ty != func.return_type {
-            self.errors.push(Err::ReturnTypeMismatch {
-                span: value.span(),
-                expected: func.return_type.clone(),
-                got: ty,
-            });
-        }
+        //     return Ok(());
+        // };
+
+        // if ty != func.return_type {
+        //     self.errors.push(Err::ReturnTypeMismatch {
+        //         span: value.span().into(),
+        //         expected: func.return_type,
+        //         got: ty,
+        //     });
+        // }
 
         Ok(())
     }

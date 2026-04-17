@@ -1,9 +1,5 @@
-use super::{HasSpan, bits::HasBits};
-use crate::{
-    Result,
-    error::{TokenizerError, UnnamedTokenizerError},
-    util::{FromBits, Spanned},
-};
+use super::bits::HasBits;
+use crate::util::{FromBits, Spanned};
 use miette::{NamedSource, SourceOffset, SourceSpan};
 
 #[derive(Debug, Clone)]
@@ -186,42 +182,6 @@ impl<T: HasBits + Clone + FromIterator<T::Bit>, M> Cursor<T, M> {
 impl<T: HasBits + Clone> Cursor<T, String> {
     pub fn source(&self) -> String {
         self.meta.clone()
-    }
-}
-
-impl<B: Clone + HasSpan, T: HasBits<Bit = B> + Clone> Cursor<T, String> {
-    pub fn next_or_die(&mut self) -> Result<T::Bit> {
-        self.pos += 1;
-
-        match self.inner.get(self.pos - 1).cloned() {
-            Some(v) => Ok(v),
-            None => Err(UnnamedTokenizerError {
-                src: self.source(),
-                at: self.inner.get(self.pos - 2).clone().unwrap().get_span(),
-                err: "Unexpected end of file!".into(),
-            }
-            .into()),
-        }
-    }
-}
-
-impl<T: HasBits + Clone> Cursor<T, NamedSource<String>> {
-    pub fn source(&self) -> NamedSource<String> {
-        self.meta.clone()
-    }
-
-    pub fn next_or_die(&mut self, span: SourceSpan) -> Result<T::Bit> {
-        self.pos += 1;
-
-        match self.inner.get(self.pos - 1).cloned() {
-            Some(v) => Ok(v),
-            None => Err(TokenizerError {
-                src: self.source(),
-                at: span,
-                err: "Unexpected end of file!".into(),
-            }
-            .into()),
-        }
     }
 }
 

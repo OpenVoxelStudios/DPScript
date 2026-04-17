@@ -1,20 +1,25 @@
 use crate::{
     Result,
     compiler::{Compiler, STYLE},
-    dpscript::{ast::ast::AST, lexer::FullLexer, tokenizer::Tokenizer},
+    error::Error,
     pack::{PackageInfo, get_pack_source_files},
 };
+use ast::ast::AST;
 use colored::Colorize;
 use indicatif::{MultiProgress, ProgressBar};
+use parser_v2::FileParser;
 use ron::ser::PrettyConfig;
-use std::{collections::HashMap, fs, path::PathBuf, sync::Arc};
+use std::{cell::RefCell, collections::HashMap, fs, path::PathBuf, rc::Rc, sync::Arc};
 
 impl Compiler {
-    pub fn analyze(
-        &self,
-        pkgs: &Vec<PackageInfo>,
-    ) -> Result<(Vec<AST>, Arc<HashMap<String, AST>>)> {
-        let mut asts: Vec<AST> = Vec::new();
+    pub fn analyze<'a>(
+        &'a self,
+        pkgs: &'a Vec<PackageInfo>,
+    ) -> Result<(
+        Vec<Rc<RefCell<AST<'a>>>>,
+        Arc<HashMap<&'a str, Rc<RefCell<AST<'a>>>>>,
+    )> {
+        let mut asts = Vec::new();
 
         let pb = if self.quiet {
             None
@@ -40,7 +45,7 @@ impl Compiler {
             }
 
             let files = get_pack_source_files(&pkg.src_path);
-            let ns: String = pkg.pack.pack.name.clone().into();
+            let ns = &pkg.pack.pack.name;
 
             let fpb = pb
                 .as_ref()
@@ -62,16 +67,9 @@ impl Compiler {
                     }
                 }
 
-                let path = path.trim_end_matches(".dps");
-                let module = path.replace("\\", "::").replace("/", "::");
-                let module = format!("{}::{}", pkg.pack.pack.name, module);
+                let ast = self.create_ast(ns, file, pkg.keep || self.allow_dead_code)?;
 
-                asts.push(self.create_ast(
-                    module.into(),
-                    ns.clone(),
-                    &file,
-                    pkg.keep || self.allow_dead_code,
-                )?);
+                asts.push((ast.module, Rc::new(RefCell::new(ast))));
             }
 
             if let Some(fpb) = fpb {
@@ -83,32 +81,33 @@ impl Compiler {
             master.finish_and_clear();
         }
 
-        let modules = Arc::new(
-            asts.clone()
-                .into_iter()
-                .map(|it| (it.module.clone(), it))
-                .collect::<HashMap<_, _>>(),
-        );
+        let modules = Arc::new(asts.clone().into_iter().collect::<HashMap<_, _>>());
 
-        Ok((asts, modules))
+        Ok((asts.into_iter().map(|it| it.1).collect(), modules))
     }
 
-    fn create_ast(
-        &self,
-        module: String,
-        namespace: String,
-        file: &PathBuf,
-        keep: bool,
-    ) -> Result<AST> {
-        let file_name = file.to_str().unwrap();
-        let data: String = fs::read_to_string(&file)?.into();
-        let tokens = Tokenizer::new(&file_name, data.clone()).run()?.tokens();
+    fn create_ast<'a>(&'a self, namespace: &'a str, file: PathBuf, _keep: bool) -> Result<AST<'a>> {
+        let file_name = self.file_names.get(&file).ok_or(Error::Basic(format!(
+            "Failed to find name for file: {}",
+            file.display()
+        )))?;
+
+        let module = self.modules.get(&file).ok_or(Error::Basic(format!(
+            "Failed to find module name for file: {}",
+            file.display()
+        )))?;
+
+        let data = self.files.get(&file).ok_or(Error::Basic(format!(
+            "Failed to read file: {}",
+            file.display()
+        )))?;
+
         let dump_dir = self.out_dir.join(".dpscript");
         let parent = file.parent().unwrap();
         let mut parts = Vec::new();
         let mut found = false;
 
-        parts.push(namespace.clone());
+        parts.push(namespace.into());
 
         for part in parent {
             if part == "src" && !found {
@@ -123,36 +122,11 @@ impl Compiler {
 
         let dump_dir = dump_dir.join(parts.join("/"));
 
-        if !dump_dir.exists() {
+        if !dump_dir.exists() && self.dump_ast {
             fs::create_dir_all(&dump_dir)?;
         }
 
-        if self.dump_tokens {
-            let dump_file =
-                dump_dir.join(file.with_extension("dps.tokens.ron").file_name().unwrap());
-
-            let dump_str_file = dump_dir.join(
-                file.with_extension("dps.str_tokens.dps")
-                    .file_name()
-                    .unwrap(),
-            );
-
-            fs::write(
-                dump_file,
-                ron::ser::to_string_pretty(&tokens, PrettyConfig::new())?,
-            )?;
-
-            fs::write(
-                dump_str_file,
-                tokens
-                    .iter()
-                    .map(|it| format!("{}", it.0))
-                    .collect::<Vec<_>>()
-                    .join(" "),
-            )?;
-        }
-
-        let ast = FullLexer::new(module, namespace, file_name.into(), data, keep, tokens).run()?;
+        let ast = FileParser::parse(file_name, module, namespace, &data)?;
 
         if self.dump_ast {
             let dump_file =

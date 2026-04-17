@@ -1,10 +1,9 @@
-use crate::dpscript::{
-    ast::literal::{LiteralData, LiteralNode},
-    validator::{Result, Validator},
-};
+use ast::literal::{LiteralData, LiteralNode};
 
-impl Validator {
-    pub fn validate_literal(&mut self, node: &mut LiteralNode) -> Result<()> {
+use crate::dpscript::validator::{Result, Validator};
+
+impl<'a> Validator<'a> {
+    pub fn validate_literal(&mut self, node: &mut LiteralNode<'a>) -> Result<()> {
         match &mut node.data {
             LiteralData::String(_)
             | LiteralData::Int(_)
@@ -21,6 +20,7 @@ impl Validator {
                 }
             }
 
+            LiteralData::Ident(it) => self.validate_ident_literal((*it, node.span))?,
             LiteralData::Nbt(_nbt_value) => {} // TODO: Validate the schema?
         }
 

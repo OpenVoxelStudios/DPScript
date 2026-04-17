@@ -1,37 +1,33 @@
-use crate::{
-    common::traits::HasSpan,
-    dpscript::{
-        ast::{ast::Scope, cond::ConditionalNode},
-        data::NodeInfo,
-        ty::{BuiltInType, TypeRef},
-        validator::{Result, Validator, err::Err},
-    },
-};
+use crate::dpscript::validator::{Result, Validator};
+use ast::{cond::ConditionalNode, scope::Scope};
+use std::{cell::RefCell, rc::Rc};
 
-impl Validator {
-    pub fn validate_cond(&mut self, node: &mut ConditionalNode) -> Result<()> {
+impl<'a> Validator<'a> {
+    pub fn validate_cond(&mut self, node: &mut ConditionalNode<'a>) -> Result<()> {
         self.validate(&mut node.condition)?;
 
-        let Some(cond_ty) = node.condition.returns(self.scope()?) else {
-            self.errors.push(Err::CannotComputeType {
-                span: node.condition.span(),
-            });
+        // TODO: Type checking
 
-            return Ok(());
-        };
+        // let Some(cond_ty) = node.condition.returns(self.scope()?) else {
+        //     self.errors.push(Err::CannotComputeType {
+        //         span: node.condition.span().into(),
+        //     });
 
-        if cond_ty != TypeRef::BuiltIn(BuiltInType::Boolean) {
-            self.errors.push(Err::CondNotBool {
-                span: node.condition.span(),
-            });
-        }
+        //     return Ok(());
+        // };
+
+        // if cond_ty != TypeRef::BuiltIn(BuiltInType::Boolean) {
+        //     self.errors.push(Err::CondNotBool {
+        //         span: node.condition.span().into(),
+        //     });
+        // }
 
         debug!("Pushing scope (cond): {}", node.ident);
 
-        self.scopes.push(Scope::new(
-            format!("{}", node.ident).into(),
+        self.scopes.push(Rc::new(RefCell::new(Scope::new(
+            node.ident.path,
             self.scopes.clone(),
-        ));
+        ))));
 
         for node in &mut node.body {
             self.validate(node)?;
@@ -44,26 +40,28 @@ impl Validator {
         for node in &mut node.else_ifs {
             self.validate(&mut node.condition)?;
 
-            let Some(cond_ty) = node.condition.returns(self.scope()?) else {
-                self.errors.push(Err::CannotComputeType {
-                    span: node.condition.span(),
-                });
+            // TODO: Type checking
 
-                return Ok(());
-            };
+            // let Some(cond_ty) = node.condition.returns(self.scope()?) else {
+            //     self.errors.push(Err::CannotComputeType {
+            //         span: node.condition.span().into(),
+            //     });
 
-            if cond_ty != TypeRef::BuiltIn(BuiltInType::Boolean) {
-                self.errors.push(Err::CondNotBool {
-                    span: node.condition.span(),
-                });
-            }
+            //     return Ok(());
+            // };
+
+            // if cond_ty != TypeRef::BuiltIn(BuiltInType::Boolean) {
+            //     self.errors.push(Err::CondNotBool {
+            //         span: node.condition.span().into(),
+            //     });
+            // }
 
             debug!("Pushing scope (cond/elseif): {}", node.ident);
 
-            self.scopes.push(Scope::new(
-                format!("{}", node.ident).into(),
+            self.scopes.push(Rc::new(RefCell::new(Scope::new(
+                &node.ident.path,
                 self.scopes.clone(),
-            ));
+            ))));
 
             for node in &mut node.body {
                 self.validate(node)?;
@@ -76,10 +74,10 @@ impl Validator {
 
         debug!("Pushing scope (cond/else): {}", node.ident);
 
-        self.scopes.push(Scope::new(
-            format!("{}", node.ident).into(),
+        self.scopes.push(Rc::new(RefCell::new(Scope::new(
+            &node.ident.path,
             self.scopes.clone(),
-        ));
+        ))));
 
         for node in &mut node.else_body {
             self.validate(node)?;

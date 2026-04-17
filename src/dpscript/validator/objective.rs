@@ -1,34 +1,48 @@
-use crate::dpscript::{
-    ast::objective::ObjectiveNode,
-    validator::{Result, Validator},
-};
-use std::collections::BTreeMap;
+use ast::objective::ObjectiveNode;
 
-impl Validator {
+use crate::dpscript::validator::{Result, Validator};
+use std::{collections::BTreeMap, rc::Rc};
+
+impl<'a> Validator<'a> {
     pub fn validate_objectives(&mut self) -> Result<()> {
         let mut out = BTreeMap::new();
+        let obj = self.ast.borrow().scope.borrow().objectives.clone();
 
-        for (k, mut node) in self.ast.scope.objectives.clone() {
-            self.validate_objective(&mut node)?;
+        for (k, mut node) in obj {
+            self.validate_objective_ref(&mut node)?;
             out.insert(k, node);
         }
 
-        for (k, mut node) in self.scope()?.objectives.clone() {
-            self.validate_objective(&mut node)?;
+        let obj = self.scope()?.borrow().objectives.clone();
+
+        for (k, mut node) in obj {
+            self.validate_objective_ref(&mut node)?;
             out.insert(k, node);
         }
 
-        self.scope_mut()?.objectives = out;
+        self.scope()?.borrow_mut().objectives = out;
 
         Ok(())
     }
 
-    pub fn validate_objective(&mut self, node: &mut ObjectiveNode) -> Result<()> {
-        self.validate_ident((&node.name, node.span))?; // TODO: Better span so it's actually the name
+    pub fn validate_objective(&mut self, node: &mut ObjectiveNode<'a>) -> Result<()> {
+        self.validate_ident(node.name)?; // TODO: Better span so it's actually the name
 
-        self.scope_mut()?
+        self.scope()?
+            .borrow_mut()
             .objectives
-            .insert(node.name.clone(), node.clone());
+            .insert(node.name.0, Rc::new(node.clone()));
+
+        Ok(())
+    }
+
+    pub fn validate_objective_ref(&mut self, node: &mut Rc<ObjectiveNode<'a>>) -> Result<()> {
+        self.validate_ident(node.name)?; // TODO: Better span so it's actually the name
+
+        self.scope()?
+            .borrow_mut()
+            .objectives
+            .insert(node.name.0, Rc::clone(node));
 
         Ok(())
     }

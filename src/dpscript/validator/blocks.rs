@@ -1,36 +1,40 @@
-use crate::dpscript::{
-    ast::{
-        ast::Scope,
-        block::{BlockKind, BlockNode},
-    },
-    validator::{Result, Validator, err::Err},
+use std::{cell::RefCell, rc::Rc};
+
+use ast::{
+    block::{BlockKind, BlockNode},
+    scope::Scope,
 };
 
-impl Validator {
+use crate::dpscript::validator::{Result, Validator, err::Err};
+
+impl<'a> Validator<'a> {
     pub fn validate_blocks(&mut self) -> Result<()> {
         let mut out = Vec::new();
+        let blk = self.ast.borrow().scope.borrow().blocks.clone();
 
-        for mut node in self.ast.scope.blocks.clone() {
+        for mut node in blk {
             self.validate_block(&mut node)?;
             out.push(node);
         }
 
-        self.ast.scope.blocks = out;
+        self.ast.borrow().scope.borrow_mut().blocks = out;
 
         Ok(())
     }
 
-    pub fn validate_block(&mut self, node: &mut BlockNode) -> Result<()> {
+    pub fn validate_block(&mut self, node: &mut BlockNode<'a>) -> Result<()> {
         if node.kind == BlockKind::None {
-            self.errors.push(Err::UntypedBlock { span: node.span });
+            self.errors.push(Err::UntypedBlock {
+                span: node.span.into(),
+            });
         }
 
         debug!("Pushing scope (block): {}", node.ident);
 
-        self.scopes.push(Scope::new(
-            format!("{}", node.ident).into(),
+        self.scopes.push(Rc::new(RefCell::new(Scope::new(
+            &node.ident.path,
             self.scopes.clone(),
-        ));
+        ))));
 
         for item in &mut node.body {
             self.validate(item)?;

@@ -1,4 +1,4 @@
-use crate::data::SourceSpan;
+use crate::data::{SourceSpan, Spanned};
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HasSpan)]
@@ -6,13 +6,13 @@ pub struct ObjectiveNode<'a> {
     pub span: SourceSpan,
 
     /// The name of the objective (for reference in DPScript).
-    pub name: &'a str,
+    pub name: Spanned<&'a str>,
 
     /// The actual ID of the scoreboard objective in Minecraft.
     pub id: &'a str,
 
     /// The objective criteria (/scoreboard objectives add [id] [criteria]).
-    pub kind: &'a str,
+    pub kind: Spanned<&'a str>,
 
     /// Whether this is publicly exported.
     pub is_public: bool,
@@ -29,7 +29,7 @@ impl<'a> fmt::Display for ObjectiveNode<'a> {
         write!(
             f,
             "{keep}objective {public}{} @ [{}] [kind: {}];",
-            self.name, self.id, self.kind
+            self.name.0, self.id, self.kind.0
         )
     }
 }

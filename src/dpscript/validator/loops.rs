@@ -1,71 +1,67 @@
-use crate::{
-    common::traits::HasSpan,
-    dpscript::{
-        ast::{
-            ast::Scope,
-            loops::{LoopCondition, LoopNode},
-        },
-        data::NodeInfo,
-        validator::{Result, Validator, err::Err},
-    },
+use std::{cell::RefCell, rc::Rc};
+
+use ast::{
+    loops::{LoopCondition, LoopNode},
+    scope::Scope,
 };
 
-impl Validator {
-    pub fn validate_loop(&mut self, node: &mut LoopNode) -> Result<()> {
+use crate::dpscript::validator::{Result, Validator};
+
+impl<'a> Validator<'a> {
+    #[allow(unused_labels)]
+    pub fn validate_loop(&mut self, node: &mut LoopNode<'a>) -> Result<()> {
         'cond: {
             match &mut node.condition {
-                LoopCondition::Range {
-                    span: _,
-                    var,
-                    min: _,
-                    max: _,
-                } => self.validate_ident((&var.ident, var.span))?,
+                LoopCondition::Range { var, .. } => self.validate_ident(*var)?,
 
-                LoopCondition::Iter {
-                    span: _,
-                    var,
-                    array,
-                } => {
-                    self.validate_ident((&var.ident, var.span))?;
+                LoopCondition::Iter { var, .. } => {
+                    self.validate_ident(*var)?;
 
-                    let Some(ty) = array.returns(self.scope()?) else {
-                        self.errors
-                            .push(Err::CannotComputeType { span: array.span() });
+                    // TODO: Type checking
 
-                        break 'cond;
-                    };
+                    // let Some(ty) = array.returns(self.scope()?) else {
+                    //     self.errors.push(Err::CannotComputeType {
+                    //         span: array.1.into(),
+                    //     });
 
-                    if !ty.is_array() {
-                        self.errors.push(Err::LoopNotArray { span: array.span() });
-                    }
+                    //     break 'cond;
+                    // };
+
+                    // if !ty.is_array() {
+                    //     self.errors.push(Err::LoopNotArray {
+                    //         span: array.1.into(),
+                    //     });
+                    // }
                 }
 
                 LoopCondition::While { span: _, condition } => {
                     self.validate(condition)?;
 
-                    let Some(ty) = condition.returns(self.scope()?) else {
-                        self.errors.push(Err::CannotComputeType {
-                            span: condition.span(),
-                        });
+                    // TODO: Type checking
 
-                        break 'cond;
-                    };
+                    // let Some(ty) = condition.returns(self.scope()?) else {
+                    //     self.errors.push(Err::CannotComputeType {
+                    //         span: condition.span().into(),
+                    //     });
 
-                    if !ty.is_truthy() {
-                        self.errors.push(Err::CondNotBool {
-                            span: condition.span(),
-                        });
-                    }
+                    //     break 'cond;
+                    // };
+
+                    // if !ty.is_truthy() {
+                    //     self.errors.push(Err::CondNotBool {
+                    //         span: condition.span().into(),
+                    //     });
+                    // }
                 }
             };
         };
 
         debug!("Pushing scope (loop): {}", node.ident);
 
-        self.scopes.push(Scope::new(
-            format!("{}", node.ident).into(),
+        self.scopes.push(Rc::new(RefCell::new(Scope::new(
+            node.ident.path,
             self.scopes.clone(),
-        ));
+        ))));
 
         for node in &mut node.body {
             self.validate(node)?;

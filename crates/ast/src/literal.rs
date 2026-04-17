@@ -1,5 +1,5 @@
-use std::fmt;
 use crate::{data::SourceSpan, nbt::NbtValue, node::Node};
+use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
 pub struct LiteralNode<'a> {
@@ -17,6 +17,26 @@ pub enum LiteralData<'a> {
     Array(Vec<Node<'a>>),
     Nbt(NbtValue<'a>),
     Ident(&'a str),
+}
+
+impl<'a> LiteralData<'a> {
+    pub fn as_string(self) -> Option<&'a str> {
+        match self {
+            LiteralData::String(it) => Some(it),
+            _ => None,
+        }
+    }
+
+    pub fn as_ident(self) -> Option<&'a str> {
+        match self {
+            LiteralData::Ident(it) => Some(it),
+            _ => None,
+        }
+    }
+
+    pub fn is_ident(&self) -> bool {
+        matches!(self, LiteralData::Ident(_))
+    }
 }
 
 impl<'a> fmt::Display for LiteralNode<'a> {

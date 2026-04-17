@@ -1,17 +1,11 @@
-use crate::{
-    common::traits::HasSpan,
-    dpscript::{
-        ast::call::CallNode,
-        data::NodeInfo,
-        validator::{Result, Validator, err::Err},
-    },
-};
+use crate::dpscript::validator::{Result, Validator, err::Err};
+use ast::{call::CallNode, data::HasSpan};
 
-impl Validator {
-    pub fn validate_call(&mut self, node: &mut CallNode) -> Result<()> {
+impl<'a> Validator<'a> {
+    pub fn validate_call(&mut self, node: &mut CallNode<'a>) -> Result<()> {
         let Some(target) = node.target_fn(self.scope()?) else {
             self.errors.push(Err::UnresolvedRef {
-                span: node.span(),
+                span: node.span().into(),
                 name: node.func.clone(),
             });
 
@@ -22,7 +16,7 @@ impl Validator {
             && (target.args.len() != node.args.len() + 1 && target.receiver.is_some())
         {
             self.errors.push(Err::ArgCountMismatch {
-                span: node.span(),
+                span: node.span().into(),
                 expected: if target.receiver.is_some() {
                     target.args.len() - 1
                 } else {
@@ -40,22 +34,25 @@ impl Validator {
         for (i, arg) in node.args.iter_mut().enumerate() {
             self.validate(arg)?;
 
-            let Some(ty) = arg.returns(self.scope()?) else {
-                self.errors
-                    .push(Err::CannotComputeType { span: arg.span() });
+            // TODO: Type checking
 
-                return Ok(());
-            };
+            // let Some(ty) = arg.returns(self.scope()?) else {
+            //     self.errors.push(Err::CannotComputeType {
+            //         span: arg.span().into(),
+            //     });
 
-            let real = &real_args[i + offset];
+            //     return Ok(());
+            // };
 
-            if ty != real.ty {
-                self.errors.push(Err::ArgTypeMismatch {
-                    span: arg.span(),
-                    expected: real.ty.clone(),
-                    got: ty,
-                });
-            }
+            // let real = &real_args[i + offset];
+
+            // if ty != real.ty {
+            //     self.errors.push(Err::ArgTypeMismatch {
+            //         span: arg.span().into(),
+            //         expected: real.ty.clone(),
+            //         got: ty,
+            //     });
+            // }
         }
 
         Ok(())

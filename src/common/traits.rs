@@ -1,14 +1,15 @@
-use miette::SourceSpan;
+use ast::{
+    data::{SourceSpan, Spanned},
+    scope::Scope,
+};
 
-use crate::{dpscript::ast::ast::Scope, util::Spanned};
-
-pub trait Validated {
+pub trait Validated<'a> {
     /// Validate this node.
     fn validate(
         &self,
-        scope: &Scope,
-        warnings: &mut Vec<Spanned<String>>,
-        errors: &mut Vec<Spanned<String>>,
+        scope: &Scope<'a>,
+        warnings: &mut Vec<Spanned<&'a str>>,
+        errors: &mut Vec<Spanned<&'a str>>,
     ) -> Result<(), ()>;
 }
 

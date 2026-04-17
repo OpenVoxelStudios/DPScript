@@ -1,5 +1,6 @@
 use crate::{ParseCx, easy::parse_block, inner::Rule, parse_err, util::ParserUtil};
 use ast::{
+    attr::AttrNode,
     data::{SourceSpan, SpanUtil},
     func::{FuncFlags, FunctionArg, FunctionNode},
 };
@@ -31,6 +32,7 @@ pub fn parse_fn<'a>(
 
     let receiver = inner.next_type(cx).ok();
     let name = inner.next_ident(cx)?;
+    let ident = cx.start_block();
 
     // Some functions can have zero arguments, and then pest omits the rule
     let args = if let Some(args) = inner.next_checked(cx) {
@@ -77,6 +79,25 @@ pub fn parse_fn<'a>(
     }
     .unwrap_or_default();
 
+    cx.end_block();
+
+    // TODO: Attributes
+    let attrs = BTreeMap::new();
+
+    let id = attrs
+        .get("name")
+        .map(|it: &AttrNode<'a>| {
+            it.values
+                .first()
+                .map(|it| it.as_literal().map(|it| it.data.as_string()))
+        })
+        .flatten()
+        .flatten()
+        .flatten()
+        .unwrap_or(ident.path);
+
+    let ident = cx.ident(id);
+
     Ok(FunctionNode {
         span,
         name,
@@ -85,9 +106,9 @@ pub fn parse_fn<'a>(
         body,
         flags,
         receiver,
-
-        // TODO: Attributes
-        attrs: BTreeMap::new(),
+        ident,
+        attrs,
+        scope: None,
     })
 }
 
@@ -127,6 +148,7 @@ pub fn parse_fn_arg<'a>(
     let is_ref = inner.check_next(cx, Rule::_ref_kw).is_ok();
     let name = inner.next_ident(cx)?;
     let ty = inner.next_type(cx)?;
+    let location = cx.local_var();
 
     Ok(FunctionArg {
         span,
@@ -137,5 +159,6 @@ pub fn parse_fn_arg<'a>(
         // TODO: Attributes
         is_this: false,
         attrs: BTreeMap::new(),
+        location,
     })
 }

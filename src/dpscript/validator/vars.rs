@@ -1,15 +1,9 @@
-use crate::{
-    common::traits::HasSpan,
-    dpscript::{
-        ast::var::VarNode,
-        data::NodeInfo,
-        validator::{Result, Validator, err::Err},
-    },
-};
+use ast::var::VarNode;
+use crate::dpscript::validator::{Result, Validator};
 
-impl Validator {
-    pub fn validate_variable(&mut self, node: &mut VarNode) -> Result<()> {
-        self.validate_ident((&node.name, node.span))?; // TODO: Improve the span so it's actually just the name
+impl<'a> Validator<'a> {
+    pub fn validate_variable(&mut self, node: &mut VarNode<'a>) -> Result<()> {
+        self.validate_ident(node.name)?; // TODO: Improve the span so it's actually just the name
 
         // types should be automatically validated during AST building
         // TODO: Move that here? Should we just have a string in the AST
@@ -19,34 +13,41 @@ impl Validator {
             self.validate(val)?;
         }
 
-        if let Some(ty) = &node.ty {
-            if let Some(val) = &node.value {
-                let ret = val.returns(self.scope()?);
+        // TODO: Type checking
 
-                if let Some(ret) = ret {
-                    if ret != *ty {
-                        self.errors.push(Err::TypeMismatch {
-                            span: node.span(),
-                            expected: ty.clone(),
-                            got: ret,
-                        });
-                    }
-                } else {
-                    // We're not just gonna blindly trust it :P
-                    self.errors
-                        .push(Err::CannotComputeType { span: val.span() });
-                }
-            }
-        } else if let Some(val) = &node.value {
-            let ret = val.returns(self.scope()?);
+        // if let Some(ty) = &node.ty {
+        //     if let Some(val) = &node.value {
+        //         let ret = val.returns(self.scope()?);
 
-            if ret.is_none() {
-                // Can't infer it!
-                self.errors.push(Err::CannotInferType { span: val.span() });
-            }
-        }
+        //         if let Some(ret) = ret {
+        //             if ret != *ty {
+        //                 self.errors.push(Err::TypeMismatch {
+        //                     span: node.span().into(),
+        //                     expected: ty.0,
+        //                     got: ret,
+        //                 });
+        //             }
+        //         } else {
+        //             // We're not just gonna blindly trust it :P
+        //             self.errors.push(Err::CannotComputeType {
+        //                 span: val.span().into(),
+        //             });
+        //         }
+        //     }
+        // } else if let Some(val) = &node.value {
+        //     let ret = val.returns(self.scope()?);
 
-        self.scope_mut()?.add_local(node.name.clone(), node.clone());
+        //     if ret.is_none() {
+        //         // Can't infer it!
+        //         self.errors.push(Err::CannotInferType {
+        //             span: val.span().into(),
+        //         });
+        //     }
+        // }
+
+        self.scope()?
+            .borrow_mut()
+            .add_local(node.name.0, node.clone());
 
         Ok(())
     }

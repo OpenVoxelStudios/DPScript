@@ -1,11 +1,8 @@
 use bitflags::bitflags;
-use std::{collections::BTreeMap, fmt};
+use std::{cell::RefCell, collections::BTreeMap, fmt, rc::Rc};
 
 use crate::{
-    attr::AttrNode,
-    data::{SourceSpan, Spanned},
-    node::Node,
-    util::{Body, Indent},
+    attr::AttrNode, data::{SourceSpan, Spanned}, loc::{DataLocation, Identifier}, node::Node, scope::Scope, util::{Body, Indent}
 };
 
 bitflags! {
@@ -59,7 +56,11 @@ pub struct FunctionNode<'a> {
     pub body: Vec<Node<'a>>,
     pub flags: FuncFlags,
     pub receiver: Option<Spanned<&'a str>>,
-    pub attrs: BTreeMap<Spanned<&'a str>, AttrNode<'a>>,
+    pub attrs: BTreeMap<&'a str, AttrNode<'a>>,
+    pub ident: Identifier<'a>,
+
+    #[serde(skip)]
+    pub scope: Option<Rc<RefCell<Scope<'a>>>>,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
@@ -67,6 +68,7 @@ pub struct FunctionArg<'a> {
     pub span: SourceSpan,
     pub name: Spanned<&'a str>,
     pub ty: Spanned<&'a str>,
+    pub location: DataLocation<'a>,
     pub is_this: bool,
     pub is_ref: bool,
     pub attrs: BTreeMap<Spanned<&'a str>, AttrNode<'a>>,

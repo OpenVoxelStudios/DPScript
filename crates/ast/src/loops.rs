@@ -1,8 +1,10 @@
-use std::fmt;
+use std::{cell::RefCell, fmt, rc::Rc};
 
 use crate::{
     data::{SourceSpan, Spanned},
+    loc::{DataLocation, Identifier},
     node::Node,
+    scope::Scope,
     util::{Body, Indent},
 };
 
@@ -11,6 +13,10 @@ pub struct LoopNode<'a> {
     pub span: SourceSpan,
     pub condition: LoopCondition<'a>,
     pub body: Vec<Node<'a>>,
+    pub ident: Identifier<'a>,
+
+    #[serde(skip)]
+    pub scope: Option<Rc<RefCell<Scope<'a>>>>,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, HasSpan)]
@@ -19,6 +25,7 @@ pub enum LoopCondition<'a> {
         span: SourceSpan,
         /// The variable to put the current value in.
         var: Spanned<&'a str>,
+        var_loc: DataLocation<'a>,
         // Use i32 here because Minecraft scoreboards have the same min/max integer limits
         min: i32,
         max: i32,
@@ -29,6 +36,7 @@ pub enum LoopCondition<'a> {
 
         /// The variable to store the element.
         var: Spanned<&'a str>,
+        var_loc: DataLocation<'a>,
 
         /// The variable to loop through.
         array: Spanned<&'a str>,
@@ -46,23 +54,9 @@ pub enum LoopCondition<'a> {
 impl<'a> fmt::Display for LoopNode<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let ty = match &self.condition {
-            LoopCondition::Range {
-                span: _,
-                var: _,
-                min: _,
-                max: _,
-            } => "range",
-
-            LoopCondition::Iter {
-                span: _,
-                var: _,
-                array: _,
-            } => "iter",
-
-            LoopCondition::While {
-                span: _,
-                condition: _,
-            } => "while",
+            LoopCondition::Range { .. } => "range",
+            LoopCondition::Iter { .. } => "iter",
+            LoopCondition::While { .. } => "while",
         };
 
         write!(
@@ -84,16 +78,16 @@ impl<'a> fmt::Display for LoopCondition<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Range {
-                span: _,
                 var: (var, _),
                 min,
                 max,
+                ..
             } => write!(f, "{var} = [{min} to {max}]"),
 
             Self::Iter {
-                span: _,
                 var: (var, _),
                 array: (array, _),
+                ..
             } => write!(f, "{var} = {array}"),
 
             Self::While { span: _, condition } => write!(f, "{condition}"),

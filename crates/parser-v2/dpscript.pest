@@ -151,7 +151,8 @@ _assign_mod_eq = { "%=" }
 
 _assign_op = _{ _assign_eq | _assign_sub_eq | _assign_add_eq | _assign_div_eq | _assign_mul_eq | _assign_mod_eq }
 
-_if = { "if" ~ _expr ~ _block }
+_else = { "else" ~ _block }
+_if = { "if" ~ _expr ~ _block ~ _else? }
 _at = { "at" ~ _expr ~ _block }
 _assign = { _expr ~ _assign_op ~ _expr ~ ";" }
 _call = { _call_expr ~ ";" }

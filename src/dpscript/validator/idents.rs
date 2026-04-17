@@ -1,19 +1,15 @@
-use crate::{
-    dpscript::{
-        ast::ident::IdentNode,
-        validator::{
-            Result, Validator,
-            err::{Err, Warn},
-        },
-    },
-    util::Spanned,
+use ast::data::Spanned;
+
+use crate::dpscript::validator::{
+    Result, Validator,
+    err::{Err, Warn},
 };
 
-impl Validator {
-    pub fn validate_ident(&mut self, id: Spanned<&String>) -> Result<()> {
+impl<'a> Validator<'a> {
+    pub fn validate_ident(&mut self, id: Spanned<&'a str>) -> Result<()> {
         if id.0.to_lowercase() == "ib" {
             // :(
-            self.warnings.push(Warn::IbPtsd { span: id.1 });
+            self.warnings.push(Warn::IbPtsd { span: id.1.into() });
         }
 
         // A regex was the original impl, but this is pretty slow compared to other things
@@ -29,19 +25,19 @@ impl Validator {
 
         if !valid {
             self.errors.push(Err::InvalidIdent {
-                span: id.1,
-                id: id.0.clone(),
+                span: id.1.into(),
+                id: id.0.into(),
             });
         }
 
         Ok(())
     }
 
-    pub fn validate_ident_node(&mut self, node: &mut IdentNode) -> Result<()> {
-        if self.scope()?.lookup(&node.ident).is_none() {
+    pub fn validate_ident_literal(&mut self, id: Spanned<&'a str>) -> Result<()> {
+        if self.scope()?.borrow().lookup(id.0).is_none() {
             self.errors.push(Err::UnresolvedRef {
-                span: node.span,
-                name: node.ident.clone(),
+                name: id.0.into(),
+                span: id.1.into(),
             });
         }
 

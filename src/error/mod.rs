@@ -1,22 +1,15 @@
 mod compiler;
 mod dep;
-mod lexer;
 mod lowerer;
-mod tokenizer;
 
 pub use compiler::*;
 pub use dep::*;
-pub use lexer::*;
 pub use lowerer::*;
-pub use tokenizer::*;
 
 use miette::Diagnostic;
 use thiserror::Error;
 
-use crate::dpscript::{
-    lexer::err::{LexerErr, LexerFullErr},
-    validator::err::{AllErrors, ValidationErr},
-};
+use crate::dpscript::validator::err::{AllErrors, ValidationErr};
 
 #[derive(Debug, Error, Diagnostic)]
 #[error("Validation failed:")]
@@ -31,21 +24,9 @@ pub enum Error {
     #[diagnostic(code(dpscript::error::basic), url(docsrs))]
     Basic(#[help] String),
 
-    #[error(transparent)]
+    #[error("An error occured!")]
     #[diagnostic(transparent)]
-    Tokenizer(#[from] TokenizerError),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    UnnamedTokenizer(#[from] UnnamedTokenizerError),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    Lexer(#[from] LexerErr),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    FullLexer(#[from] LexerFullErr),
+    Miette(miette::Report),
 
     #[error(transparent)]
     #[diagnostic(transparent)]
@@ -59,18 +40,17 @@ pub enum Error {
     #[diagnostic(transparent)]
     Validator(#[from] ValidationErr),
 
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    Compiler(#[from] CompilerError),
+    // #[error(transparent)]
+    // #[diagnostic(transparent)]
+    // Compiler(#[from] CompilerError),
 
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    UnnamedCompiler(#[from] UnnamedCompilerError),
+    // #[error(transparent)]
+    // #[diagnostic(transparent)]
+    // UnnamedCompiler(#[from] UnnamedCompilerError),
 
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    UnsourcedCompiler(#[from] UnsourcedCompilerError),
-
+    // #[error(transparent)]
+    // #[diagnostic(transparent)]
+    // UnsourcedCompiler(#[from] UnsourcedCompilerError),
     #[error(transparent)]
     #[diagnostic(transparent)]
     Dependency(#[from] DependencyError),
@@ -83,10 +63,15 @@ pub enum Error {
 
     #[error(transparent)]
     Toml(#[from] toml::de::Error),
+    // #[error(transparent)]
+    // Json5(#[from] json5::Error),
 
-    #[error(transparent)]
-    Json5(#[from] json5::Error),
+    // #[error(transparent)]
+    // Json(#[from] serde_json::Error),
+}
 
-    #[error(transparent)]
-    Json(#[from] serde_json::Error),
+impl From<miette::Report> for Error {
+    fn from(value: miette::Report) -> Self {
+        Error::Miette(value)
+    }
 }

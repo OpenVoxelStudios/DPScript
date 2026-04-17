@@ -1,44 +1,43 @@
-use miette::{Error, LabeledSpan, MietteDiagnostic, NamedSource, SourceOffset, SourceSpan};
+use ast::{
+    ast::AST,
+    at::AtNode,
+    binop::{BinaryOpNode, BinaryOperation},
+    block::BlockNode,
+    call::CallNode,
+    cond::{ConditionalNode, ElseIfNode},
+    data::{HasSpan, SourceSpan},
+    func::{FuncFlags, FunctionNode},
+    literal::{LiteralData, LiteralNode},
+    loc::{DataLocation, Identifier},
+    loops::{LoopCondition, LoopNode},
+    nbt::{NbtValue, NbtValueData},
+    node::Node,
+    ret::ReturnNode,
+    scope::{ExportType, Scope},
+    special::{SpecialData, SpecialNode},
+    unop::{UnaryOpNode, UnaryOperation},
+    var::VarNode,
+};
+use miette::{Error, LabeledSpan, MietteDiagnostic, NamedSource};
 use std::{
+    cell::RefCell,
     collections::{HashMap, VecDeque},
     path::PathBuf,
+    rc::Rc,
     sync::Arc,
 };
 
 use crate::{
     Result,
-    common::traits::HasSpan,
-    dpscript::{
-        ast::{
-            ast::{AST, ExportType, Scope},
-            at::AtNode,
-            binop::{BinaryOpNode, BinaryOperation},
-            block::BlockNode,
-            call::CallNode,
-            cond::{ConditionalNode, ElseIfNode},
-            func::{FuncFlags, FunctionNode},
-            literal::LiteralNode,
-            loops::LoopNode,
-            nbt::NbtValue,
-            node::Node,
-            ret::ReturnNode,
-            special::{SpecialData, SpecialNode},
-            unop::{UnaryOpNode, UnaryOperation},
-            var::VarNode,
-        },
-        data::NodeInfo,
-        ty::{BuiltInType, TypeRef},
-    },
+    dpscript::{data::NodeInfo, ty::TypeRef},
     mc::{
         Command, ConcatLiteral, DataCommand, DataModifyAction, DataModifyArg, DataSource,
         ExecuteCommand, ExecuteIf, ExecuteStore, Function, Literal, OptionLiteral, ReturnCommand,
         ScoreboardCommand, ScoreboardObjectivesCommand,
         util::{call_func, exec},
     },
-    util::{Cursor, DataLocation, Identifier},
+    util::Cursor,
 };
-
-use super::ast::{literal::LiteralData, loops::LoopCondition, nbt::NbtValueData};
 
 macro_rules! cg_todo {
     (L; $($name: tt)*) => {{
@@ -69,27 +68,27 @@ macro_rules! cg_todo {
     }};
 }
 
-pub struct CodeGenerator {
+pub struct CodeGenerator<'a> {
     pub code: NamedSource<String>,
     pub out_dir: PathBuf,
 
     /// The current AST we are compiling.
-    pub ast: AST,
+    pub ast: Rc<RefCell<AST<'a>>>,
 
     /// The resolved imports.
-    pub imports: HashMap<String, ExportType>,
+    pub imports: HashMap<&'a str, ExportType<'a>>,
 
     /// A map available modules.
-    pub modules: Arc<HashMap<String, AST>>,
+    pub modules: Arc<HashMap<&'a str, Rc<RefCell<AST<'a>>>>>,
 }
 
-impl CodeGenerator {
+impl<'a> CodeGenerator<'a> {
     pub fn new(
         code: NamedSource<String>,
         out_dir: PathBuf,
-        ast: AST,
-        imports: HashMap<String, ExportType>,
-        modules: Arc<HashMap<String, AST>>,
+        ast: Rc<RefCell<AST<'a>>>,
+        imports: HashMap<&'a str, ExportType<'a>>,
+        modules: Arc<HashMap<&'a str, Rc<RefCell<AST<'a>>>>>,
     ) -> Self {
         Self {
             code,
@@ -104,23 +103,27 @@ impl CodeGenerator {
         let mut cx = CodegenCx::new(self.code);
 
         cx.begin_function(&Identifier::new(
-            &self.ast.namespace,
-            format!(
-                "zzz/{}/funcs/_dps_global_init",
-                self.ast.module.replace("::", "/")
+            &self.ast.borrow().namespace,
+            // FIXME: Should we do this? The data should live until codegen is done, so... /shrug
+            Box::leak(
+                format!(
+                    "zzz/{}/funcs/_dps_global_init",
+                    self.ast.borrow().module.replace("::", "/")
+                )
+                .into_boxed_str(),
             ),
         ));
 
-        for (_, item) in &self.ast.scope.objectives {
+        for (_, item) in &self.ast.borrow().scope.borrow().objectives {
             cx.command(Command::Scoreboard {
                 inner: ScoreboardCommand::Objectives {
                     inner: ScoreboardObjectivesCommand::Add {
                         objective: Literal::Inline {
-                            inner: item.id.clone(),
+                            inner: item.id.into(),
                         },
 
                         criteria: Literal::Inline {
-                            inner: item.kind.clone(),
+                            inner: item.kind.0.into(),
                         },
 
                         display_name: OptionLiteral::None {},
@@ -136,15 +139,15 @@ impl CodeGenerator {
         // We have to do it this way because `self.ast.nodes` doesn't get updated
         // with scopes during validation, only the `.scope.*` fields.
 
-        for node in &self.ast.scope.blocks {
+        for node in &self.ast.borrow().scope.borrow().blocks {
             codegen_block(node, &mut cx);
         }
 
-        for (_, node) in &self.ast.scope.functions {
+        for (_, node) in &self.ast.borrow().scope.borrow().functions {
             codegen_func(node, &mut cx);
         }
 
-        for (_, funcs) in &self.ast.scope.instance_funcs {
+        for (_, funcs) in &self.ast.borrow().scope.borrow().instance_funcs {
             for (_, node) in funcs {
                 codegen_func(node, &mut cx);
             }
@@ -164,19 +167,19 @@ impl CodeGenerator {
     }
 }
 
-pub struct CGStackEntry {
-    pub function: Identifier,
+pub struct CGStackEntry<'a> {
+    pub function: Identifier<'a>,
     pub commands: Vec<Command>,
 }
 
 const COMPILER_SUPPORT_SCOREBOARD: &str = "__dpscript__.compiler.support";
 
-pub struct CodegenCx {
+pub struct CodegenCx<'a> {
     pub code: NamedSource<String>,
-    pub stack: Vec<CGStackEntry>,
-    pub generated: HashMap<Identifier, Vec<Command>>,
+    pub stack: Vec<CGStackEntry<'a>>,
+    pub generated: HashMap<Identifier<'a>, Vec<Command>>,
     pub item_idx: usize,
-    pub scopes: Vec<Scope>,
+    pub scopes: Vec<Rc<RefCell<Scope<'a>>>>,
 
     /// The number of embedded functions that have been created.
     /// These are mainly created when macros are necessary.
@@ -189,7 +192,7 @@ pub struct CodegenCx {
     pub scores: usize,
 }
 
-impl CodegenCx {
+impl<'a> CodegenCx<'a> {
     pub fn new(code: NamedSource<String>) -> Self {
         Self {
             code,
@@ -203,7 +206,7 @@ impl CodegenCx {
         }
     }
 
-    pub fn begin_function(&mut self, id: &Identifier) -> Identifier {
+    pub fn begin_function(&mut self, id: &Identifier<'a>) -> Identifier<'a> {
         self.stack.push(CGStackEntry {
             function: id.clone(),
             commands: Vec::new(),
@@ -212,11 +215,11 @@ impl CodegenCx {
         id.clone()
     }
 
-    pub fn func(&self) -> &Identifier {
+    pub fn func(&self) -> &Identifier<'a> {
         &self.stack.last().unwrap().function
     }
 
-    pub fn func_mut(&mut self) -> &CGStackEntry {
+    pub fn func_mut(&mut self) -> &CGStackEntry<'a> {
         self.stack.last_mut().unwrap()
     }
 
@@ -230,14 +233,14 @@ impl CodegenCx {
         self.stack.last_mut().unwrap().commands.push(cmd.into());
     }
 
-    pub fn func_store(&self, func: &Identifier) -> DataLocation {
+    pub fn func_store(&self, func: &Identifier<'a>) -> DataLocation<'a> {
         DataLocation {
             storage: func.clone(),
             path: "".into(),
         }
     }
 
-    pub fn alloc_temp(&mut self) -> DataLocation {
+    pub fn alloc_temp(&mut self) -> DataLocation<'a> {
         self.item_idx += 1;
 
         DataLocation {
@@ -245,7 +248,9 @@ impl CodegenCx {
                 namespace: "dpscript".into(),
                 path: "temp".into(),
             },
-            path: format!("temp{}", self.item_idx - 1),
+
+            // FIXME: Should we do this? The data should live until codegen is done, so... /shrug
+            path: Box::leak(format!("temp{}", self.item_idx - 1).into_boxed_str()),
         }
     }
 
@@ -255,15 +260,11 @@ impl CodegenCx {
         format!("temp{}", self.scores - 1)
     }
 
-    pub fn scope(&self) -> &Scope {
-        self.scopes.last().unwrap()
+    pub fn scope(&self) -> Rc<RefCell<Scope<'a>>> {
+        Rc::clone(self.scopes.last().unwrap())
     }
 
-    pub fn scope_mut(&mut self) -> &mut Scope {
-        self.scopes.last_mut().unwrap()
-    }
-
-    pub fn push_scope(&mut self, scope: Scope) {
+    pub fn push_scope(&mut self, scope: Rc<RefCell<Scope<'a>>>) {
         self.scopes.push(scope);
     }
 
@@ -271,10 +272,11 @@ impl CodegenCx {
         self.scopes.pop().unwrap();
     }
 
-    pub fn begin_macro(&mut self, parent: &Identifier) -> Identifier {
+    pub fn begin_macro(&mut self, parent: &Identifier<'a>) -> Identifier<'a> {
         self.macros += 1;
 
-        let id = format!("{}/__macro/{}", parent.path, self.macros - 1);
+        // FIXME: Should we do this? The data should live until codegen is done, so... /shrug
+        let id = Box::leak(format!("{}/__macro/{}", parent.path, self.macros - 1).into_boxed_str());
 
         let id = Identifier {
             namespace: parent.namespace.clone(),
@@ -370,24 +372,25 @@ impl CodegenCx {
         });
     }
 
-    pub fn alloc_local(&mut self) -> (String, DataLocation) {
+    pub fn alloc_local(&mut self) -> (&'a str, DataLocation<'a>) {
         self.locals += 1;
 
         let func = self.func();
-        let name = format!("local{}", self.locals - 1);
+        // FIXME: Should we do this? The data should live until codegen is done, so... /shrug
+        let name = Box::leak(format!("local{}", self.locals - 1).into_boxed_str());
         let loc = self.func_store(&func).subpath("locals").subpath(&name);
 
         (name, loc)
     }
 
-    pub fn synthetic_local(&mut self, value: &Node) -> String {
+    pub fn synthetic_local(&mut self, value: &Node<'a>) -> &'a str {
         let (local, loc) = self.alloc_local();
         let ty = value.returns(&self.scope());
 
         let var = VarNode {
             is_arg: false,
             location: loc,
-            name: local.clone(),
+            name: (local, value.span()),
             span: value.span(),
             ty,
             value: Some(Box::new(value.clone())),
@@ -395,14 +398,14 @@ impl CodegenCx {
 
         codegen_var(&var, self);
 
-        self.scope_mut().locals.insert(local.clone(), var);
+        self.scope().borrow_mut().locals.insert(local, Rc::new(var));
 
         local
     }
 
     pub fn declare_local(
         &mut self,
-        name: impl AsRef<str>,
+        name: &'a str,
         ty: TypeRef,
         value: DataModifyArg,
     ) -> DataLocation {
@@ -412,15 +415,15 @@ impl CodegenCx {
         let var = VarNode {
             is_arg: false,
             location: loc.clone(),
-            name: name.as_ref().into(),
-            span: SourceSpan::new(SourceOffset::from(0), 0),
+            name: (name, SourceSpan::new(0, 0)),
+            span: SourceSpan::new(0, 0),
             ty: Some(ty),
             value: None,
         };
 
         codegen_var(&var, self);
 
-        self.scope_mut().locals.insert(name.as_ref().into(), var);
+        self.scope().borrow_mut().locals.insert(name, Rc::new(var));
         self.set_data(&loc, value);
 
         loc
@@ -437,7 +440,7 @@ impl CodegenCx {
     }
 }
 
-pub fn codegen(node: &Node, cx: &mut CodegenCx) {
+pub fn codegen<'a>(node: &Node<'a>, cx: &mut CodegenCx<'a>) {
     match node {
         Node::Constant(_) | Node::Enum(_) | Node::Field(_) | Node::Import(_) => {}
 
@@ -462,21 +465,16 @@ pub fn codegen(node: &Node, cx: &mut CodegenCx) {
     }
 }
 
-pub fn codegen_loop(node: &LoopNode, cx: &mut CodegenCx) {
+pub fn codegen_loop<'a>(node: &LoopNode<'a>, cx: &mut CodegenCx<'a>) {
     match &node.condition {
         LoopCondition::Range {
-            span: _,
-            var,
+            var: _,
+            var_loc,
             min,
             max,
+            ..
         } => {
             let func = cx.begin_function(&node.ident);
-
-            let index = cx.declare_local(
-                &var.ident,
-                TypeRef::BuiltIn(BuiltInType::Int),
-                DataModifyArg::Value { value: "0".into() },
-            );
 
             for item in &node.body {
                 codegen(item, cx);
@@ -485,22 +483,22 @@ pub fn codegen_loop(node: &LoopNode, cx: &mut CodegenCx) {
             cx.end_function();
 
             for i in *min..*max {
-                cx.set_data_value(&index, i.to_string());
+                cx.set_data_value(&var_loc, i.to_string());
                 cx.call(&func);
             }
         }
 
-        LoopCondition::Iter { span, var, array } => cg_todo!(LoopCondition::Iter),
-        LoopCondition::While { span, condition } => cg_todo!(LoopCondition::While),
+        LoopCondition::Iter { .. } => cg_todo!(LoopCondition::Iter),
+        LoopCondition::While { .. } => cg_todo!(LoopCondition::While),
     }
 }
 
-pub fn codegen_branch(
-    cond: &Node,
+pub fn codegen_branch<'a>(
+    cond: &Node<'a>,
     ident: &Identifier,
-    body: &Vec<Node>,
-    next: &mut VecDeque<ElseIfNode>,
-    cx: &mut CodegenCx,
+    body: &Vec<Node<'a>>,
+    next: &mut VecDeque<ElseIfNode<'a>>,
+    cx: &mut CodegenCx<'a>,
 ) -> ExecuteIf {
     let temp = cx.alloc_temp();
     let cond = codegen_data(&cond, cx);
@@ -571,7 +569,7 @@ pub fn codegen_branch(
     cond_true
 }
 
-pub fn codegen_cond(node: &ConditionalNode, cx: &mut CodegenCx) {
+pub fn codegen_cond<'a>(node: &ConditionalNode<'a>, cx: &mut CodegenCx<'a>) {
     let cond_true = codegen_branch(
         &node.condition,
         &node.ident,
@@ -582,24 +580,26 @@ pub fn codegen_cond(node: &ConditionalNode, cx: &mut CodegenCx) {
 
     // Generate the overall 'else' branch
 
-    let false_branch = cx.begin_function(&node.else_ident);
+    if let Some(id) = node.else_ident {
+        let false_branch = cx.begin_function(&id);
 
-    for node in &node.else_body {
-        codegen(node, cx);
+        for node in &node.else_body {
+            codegen(node, cx);
+        }
+
+        cx.end_function();
+
+        cx.command(ExecuteCommand::Unless {
+            condition: cond_true.clone(),
+            action: Box::new(exec().run(Command::Function {
+                name: false_branch.into(),
+            })),
+        });
     }
-
-    cx.end_function();
-
-    cx.command(ExecuteCommand::Unless {
-        condition: cond_true.clone(),
-        action: Box::new(exec().run(Command::Function {
-            name: false_branch.into(),
-        })),
-    });
 }
 
-pub fn codegen_binop(node: &BinaryOpNode, cx: &mut CodegenCx) {
-    match node.op {
+pub fn codegen_binop<'a>(node: &BinaryOpNode<'a>, cx: &mut CodegenCx<'a>) {
+    match node.op.0 {
         BinaryOperation::Assign => match &*node.lhs {
             Node::BinaryOp(_) => {
                 // FIXME [!! IMPORTANT !!]
@@ -628,11 +628,14 @@ pub fn codegen_binop(node: &BinaryOpNode, cx: &mut CodegenCx) {
                 }
             }
 
-            Node::Ident(it) => {
-                let target = cx.scope().lookup(&it.ident).unwrap().as_node();
+            Node::Literal(LiteralNode {
+                data: LiteralData::Ident(it),
+                span,
+            }) => {
+                let target = cx.scope().borrow().lookup(&it).unwrap().as_node();
 
                 let Some(target) = target.as_variable() else {
-                    cx.bail(it.span(), "Invalid target for assignment operation!");
+                    cx.bail(*span, "Invalid target for assignment operation!");
                 };
 
                 let value = codegen_data(&node.rhs, cx);
@@ -655,22 +658,25 @@ pub fn codegen_binop(node: &BinaryOpNode, cx: &mut CodegenCx) {
         | BinaryOperation::BitXorAssign => codegen_binop(
             &BinaryOpNode {
                 lhs: node.lhs.clone(),
-                op: BinaryOperation::Assign,
+                op: (BinaryOperation::Assign, node.op.1),
                 span: node.span,
 
                 rhs: Box::new(Node::BinaryOp(BinaryOpNode {
                     lhs: node.lhs.clone(),
-                    op: match node.op {
-                        BinaryOperation::AddAssign => BinaryOperation::Add,
-                        BinaryOperation::SubAssign => BinaryOperation::Sub,
-                        BinaryOperation::MulAssign => BinaryOperation::Mul,
-                        BinaryOperation::DivAssign => BinaryOperation::Div,
-                        BinaryOperation::ModAssign => BinaryOperation::Mod,
-                        BinaryOperation::BitAndAssign => BinaryOperation::BitAnd,
-                        BinaryOperation::BitOrAssign => BinaryOperation::BitOr,
-                        BinaryOperation::BitXorAssign => BinaryOperation::BitXor,
-                        _ => unreachable!(),
-                    },
+                    op: (
+                        match node.op.0 {
+                            BinaryOperation::AddAssign => BinaryOperation::Add,
+                            BinaryOperation::SubAssign => BinaryOperation::Sub,
+                            BinaryOperation::MulAssign => BinaryOperation::Mul,
+                            BinaryOperation::DivAssign => BinaryOperation::Div,
+                            BinaryOperation::ModAssign => BinaryOperation::Mod,
+                            BinaryOperation::BitAndAssign => BinaryOperation::BitAnd,
+                            BinaryOperation::BitOrAssign => BinaryOperation::BitOr,
+                            BinaryOperation::BitXorAssign => BinaryOperation::BitXor,
+                            _ => unreachable!(),
+                        },
+                        node.op.1,
+                    ),
                     rhs: node.rhs.clone(),
                     span: node.span,
                 })),
@@ -682,8 +688,8 @@ pub fn codegen_binop(node: &BinaryOpNode, cx: &mut CodegenCx) {
     };
 }
 
-pub fn codegen_binop_data(node: &BinaryOpNode, cx: &mut CodegenCx) -> DataModifyArg {
-    match node.op {
+pub fn codegen_binop_data<'a>(node: &BinaryOpNode<'a>, cx: &mut CodegenCx<'a>) -> DataModifyArg {
+    match node.op.0 {
         BinaryOperation::Add => {
             let lhs_ty = node.lhs.returns(cx.scope()).unwrap();
             let rhs_ty = node.rhs.returns(cx.scope()).unwrap();
@@ -727,11 +733,24 @@ pub fn codegen_binop_data(node: &BinaryOpNode, cx: &mut CodegenCx) -> DataModify
                 cx.call_with(&inner, &temp);
                 cx.from_data(&res)
             } else {
+                let span = node.span();
+
                 let call = CallNode {
-                    receiver: vec![cx.synthetic_local(&node.lhs)],
+                    receiver: Box::new(Node::BinaryOp(BinaryOpNode {
+                        lhs: Box::new(Node::Literal(LiteralNode {
+                            data: LiteralData::Ident(cx.synthetic_local(&node.lhs)),
+                            span,
+                        })),
+                        rhs: Box::new(Node::Literal(LiteralNode {
+                            data: LiteralData::Ident("add"),
+                            span,
+                        })),
+                        op: (BinaryOperation::Field, span),
+                        span,
+                    })),
+
                     args: vec![(&*node.rhs).clone()],
                     span: node.span(),
-                    func: "add".into(),
                 };
 
                 let value = codegen_call(&call, cx);
@@ -747,21 +766,39 @@ pub fn codegen_binop_data(node: &BinaryOpNode, cx: &mut CodegenCx) -> DataModify
         | BinaryOperation::BitAnd
         | BinaryOperation::BitOr
         | BinaryOperation::BitXor => {
+            let span = node.span();
+
+            let func = match node.op.0 {
+                BinaryOperation::Sub => "sub",
+                BinaryOperation::Mul => "mul",
+                BinaryOperation::Div => "div",
+                BinaryOperation::Mod => "mod",
+                BinaryOperation::BitAnd => cg_todo!("TODO"; Method -> BitAnd),
+                BinaryOperation::BitOr => cg_todo!("TODO"; Method -> BitOr),
+                BinaryOperation::BitXor => cg_todo!("TODO"; Method -> BitXor),
+                _ => cx.bail(
+                    node.span,
+                    "How did we get here? Binary operation (value) type was not a possible value!",
+                ),
+            }
+            .into();
+
             let call = CallNode {
-                receiver: vec![cx.synthetic_local(&node.lhs)],
+                receiver: Box::new(Node::BinaryOp(BinaryOpNode {
+                    lhs: Box::new(Node::Literal(LiteralNode {
+                        data: LiteralData::Ident(cx.synthetic_local(&node.lhs)),
+                        span,
+                    })),
+                    rhs: Box::new(Node::Literal(LiteralNode {
+                        data: LiteralData::Ident(func),
+                        span,
+                    })),
+                    op: (BinaryOperation::Field, span),
+                    span,
+                })),
+
                 args: vec![(&*node.rhs).clone()],
                 span: node.span(),
-
-                func: match node.op {
-                    BinaryOperation::Sub => "sub",
-                    BinaryOperation::Mul => "mul",
-                    BinaryOperation::Div => "div",
-                    BinaryOperation::Mod => "mod",
-                    BinaryOperation::BitAnd => cg_todo!("TODO"; Method -> BitAnd),
-                    BinaryOperation::BitOr => cg_todo!("TODO"; Method -> BitOr),
-                    BinaryOperation::BitXor => cg_todo!("TODO"; Method -> BitXor),
-                    _ => cx.bail(node.span, "How did we get here? Binary operation (value) type was not a possible value!"),
-                }.into(),
             };
 
             let value = codegen_call(&call, cx);
@@ -788,7 +825,12 @@ pub fn codegen_binop_data(node: &BinaryOpNode, cx: &mut CodegenCx) -> DataModify
             // This system here *might* work, since fields effectively get chained instead of cloned,
             // but it's unlikely.
 
-            let Some(field) = node.rhs.as_ident() else {
+            let Some(field) = node
+                .rhs
+                .as_literal()
+                .map(|it| it.data.as_ident().map(|id| (id, it.span)))
+                .flatten()
+            else {
                 cx.bail(
                     node.rhs.span(),
                     "Invalid right-side operator for field operation!",
@@ -804,13 +846,13 @@ pub fn codegen_binop_data(node: &BinaryOpNode, cx: &mut CodegenCx) -> DataModify
                 } => DataModifyArg::From {
                     source: source,
                     source_path: Literal::Concat {
-                        inner: ConcatLiteral(vec![source_path, field.ident.into()]),
+                        inner: ConcatLiteral(vec![source_path, field.0.into()]),
                     },
                 },
 
                 DataModifyArg::Value { .. } | DataModifyArg::String { .. } => {
                     let temp = cx.alloc_temp();
-                    let output = temp.subpath(field.ident);
+                    let output = temp.subpath(field.0);
 
                     cx.set_data(&temp, lhs);
                     cx.from_data(&output)
@@ -867,7 +909,7 @@ pub fn codegen_binop_data(node: &BinaryOpNode, cx: &mut CodegenCx) -> DataModify
     }
 }
 
-pub fn codegen_at_block(block: &AtNode, cx: &mut CodegenCx) {
+pub fn codegen_at_block<'a>(block: &AtNode<'a>, cx: &mut CodegenCx<'a>) {
     let func = cx.begin_function(&block.ident);
 
     cx.push_scope(block.scope.clone().unwrap());
@@ -900,7 +942,7 @@ pub fn codegen_at_block(block: &AtNode, cx: &mut CodegenCx) {
     cx.call_with(&caller, &data);
 }
 
-pub fn codegen_block(block: &BlockNode, cx: &mut CodegenCx) {
+pub fn codegen_block<'a>(block: &BlockNode<'a>, cx: &mut CodegenCx<'a>) {
     let _func = cx.begin_function(&block.ident);
 
     cx.push_scope(block.scope.clone().unwrap());
@@ -915,7 +957,7 @@ pub fn codegen_block(block: &BlockNode, cx: &mut CodegenCx) {
     // TODO: Add to the proper tag
 }
 
-pub fn codegen_func(func: &FunctionNode, cx: &mut CodegenCx) {
+pub fn codegen_func<'a>(func: &FunctionNode<'a>, cx: &mut CodegenCx<'a>) {
     // TODO: Inline functions, ignore them here
 
     cx.begin_function(&func.ident);
@@ -932,6 +974,7 @@ pub fn codegen_func(func: &FunctionNode, cx: &mut CodegenCx) {
             .unwrap()
             .as_literal()
             .unwrap()
+            .data
             .as_string()
             .unwrap();
 
@@ -949,7 +992,7 @@ pub fn codegen_func(func: &FunctionNode, cx: &mut CodegenCx) {
                         MietteDiagnostic::new("Cannot have a '{' inside of an argument specifier!")
                             .with_help("Try using '{{'?"),
                     )
-                    .with_source_code(attr);
+                    .with_source_code(attr.to_string());
 
                     Err::<(), _>(err).unwrap();
                     unreachable!("Unwrapped but did not exit!");
@@ -968,7 +1011,7 @@ pub fn codegen_func(func: &FunctionNode, cx: &mut CodegenCx) {
                         )
                         .with_help("Try using '}}'?"),
                     )
-                    .with_source_code(attr);
+                    .with_source_code(attr.to_string());
 
                     Err::<(), _>(err).unwrap();
                     unreachable!("Unwrapped but did not exit!");
@@ -981,7 +1024,7 @@ pub fn codegen_func(func: &FunctionNode, cx: &mut CodegenCx) {
                         MietteDiagnostic::new("Argument specifier had no value!")
                             .with_help("Try putting something between the braces ('{}')?"),
                     )
-                    .with_source_code(attr);
+                    .with_source_code(attr.to_string());
 
                     Err::<(), _>(err).unwrap();
                     unreachable!("Unwrapped but did not exit!");
@@ -999,7 +1042,7 @@ pub fn codegen_func(func: &FunctionNode, cx: &mut CodegenCx) {
                 MietteDiagnostic::new("Argument specifier did not close!")
                     .with_help("Try adding '}'?"),
             )
-            .with_source_code(attr);
+            .with_source_code(attr.to_string());
 
             Err::<(), _>(err).unwrap();
             unreachable!("Unwrapped but did not exit!");
@@ -1022,7 +1065,7 @@ pub fn codegen_func(func: &FunctionNode, cx: &mut CodegenCx) {
     cx.end_function();
 }
 
-pub fn codegen_data(var: &Node, cx: &mut CodegenCx) -> DataModifyArg {
+pub fn codegen_data<'a>(var: &Node<'a>, cx: &mut CodegenCx<'a>) -> DataModifyArg {
     match var {
         Node::Variable(it) => cx.from_data(&it.location),
         Node::Constant(it) => codegen_data(&it.value, cx),
@@ -1035,16 +1078,6 @@ pub fn codegen_data(var: &Node, cx: &mut CodegenCx) -> DataModifyArg {
             let loc = codegen_call(it, cx);
 
             cx.from_data(&loc)
-        }
-
-        Node::Ident(it) => {
-            let Some(var) = cx.scope().lookup(&it.ident) else {
-                cx.bail(it.span, format!("Unable to resolve variable {}!", it.ident));
-            };
-
-            let var = var.as_node();
-
-            codegen_data(&var, cx)
         }
 
         Node::Objective(it) => DataModifyArg::Value {
@@ -1077,6 +1110,16 @@ pub fn codegen_literal_data(it: &LiteralNode, cx: &mut CodegenCx) -> DataModifyA
             value: it.to_string().into(),
         },
 
+        LiteralData::Ident(id) => {
+            let Some(var) = cx.scope().borrow().lookup(&id) else {
+                cx.bail(it.span, format!("Unable to resolve variable {}!", id));
+            };
+
+            let var = var.as_node();
+
+            codegen_data(&var, cx)
+        }
+
         LiteralData::Array(it) => {
             let temp = cx.alloc_temp();
 
@@ -1095,7 +1138,7 @@ pub fn codegen_literal_data(it: &LiteralNode, cx: &mut CodegenCx) -> DataModifyA
     }
 }
 
-pub fn codegen_special_data(it: &SpecialNode, cx: &mut CodegenCx) -> DataModifyArg {
+pub fn codegen_special_data<'a>(it: &SpecialNode<'a>, cx: &mut CodegenCx<'a>) -> DataModifyArg {
     match &it.data {
         // FIXME: How do we access the root object? Is it actually just '.'?
         SpecialData::Selector(it) => DataModifyArg::From {
@@ -1124,7 +1167,7 @@ pub fn codegen_special_data(it: &SpecialNode, cx: &mut CodegenCx) -> DataModifyA
 }
 
 // TODO: Compile-time math
-pub fn codegen_unary_data(it: &UnaryOpNode, cx: &mut CodegenCx) -> DataModifyArg {
+pub fn codegen_unary_data<'a>(it: &UnaryOpNode<'a>, cx: &mut CodegenCx<'a>) -> DataModifyArg {
     match it.op {
         UnaryOperation::None => codegen_data(&it.value, cx),
 
@@ -1135,7 +1178,7 @@ pub fn codegen_unary_data(it: &UnaryOpNode, cx: &mut CodegenCx) -> DataModifyArg
             let var = VarNode {
                 is_arg: false,
                 location: loc,
-                name: local.clone(),
+                name: (local, it.span),
                 span: it.span,
                 ty,
                 value: Some(it.value.clone()),
@@ -1143,13 +1186,26 @@ pub fn codegen_unary_data(it: &UnaryOpNode, cx: &mut CodegenCx) -> DataModifyArg
 
             codegen_var(&var, cx);
 
-            cx.scope_mut().locals.insert(local.clone(), var);
+            cx.scope().borrow_mut().locals.insert(local, Rc::new(var));
+
+            let span = it.span;
 
             let call = CallNode {
                 args: vec![],
-                func: "negate".into(), // operator function for negating values
-                receiver: vec![local],
-                span: it.span,
+                span,
+
+                receiver: Box::new(Node::BinaryOp(BinaryOpNode {
+                    lhs: Box::new(Node::Literal(LiteralNode {
+                        data: LiteralData::Ident(local),
+                        span,
+                    })),
+                    rhs: Box::new(Node::Literal(LiteralNode {
+                        data: LiteralData::Ident("negate"), // operator function for negating values
+                        span,
+                    })),
+                    op: (BinaryOperation::Field, span),
+                    span,
+                })),
             };
 
             let value = codegen_call(&call, cx);
@@ -1248,7 +1304,7 @@ pub fn codegen_unary_data(it: &UnaryOpNode, cx: &mut CodegenCx) -> DataModifyArg
     }
 }
 
-pub fn codegen_nbt_data(it: &NbtValue, cx: &mut CodegenCx) -> DataModifyArg {
+pub fn codegen_nbt_data<'a>(it: &NbtValue<'a>, cx: &mut CodegenCx<'a>) -> DataModifyArg {
     match &it.data {
         NbtValueData::Map(it) => {
             let temp = cx.alloc_temp();
@@ -1310,7 +1366,7 @@ pub fn codegen_nbt_data(it: &NbtValue, cx: &mut CodegenCx) -> DataModifyArg {
     }
 }
 
-pub fn codegen_var(node: &VarNode, cx: &mut CodegenCx) {
+pub fn codegen_var<'a>(node: &VarNode<'a>, cx: &mut CodegenCx<'a>) {
     if let Some(value) = &node.value {
         let value = codegen_data(value, cx);
 
@@ -1318,7 +1374,7 @@ pub fn codegen_var(node: &VarNode, cx: &mut CodegenCx) {
     }
 }
 
-pub fn codegen_return(node: &ReturnNode, cx: &mut CodegenCx) {
+pub fn codegen_return<'a>(node: &ReturnNode<'a>, cx: &mut CodegenCx<'a>) {
     let func = cx.func();
     let ret = cx.func_store(func).subpath("returns");
 
@@ -1337,7 +1393,7 @@ pub fn codegen_return(node: &ReturnNode, cx: &mut CodegenCx) {
     cx.command(ReturnCommand::Value { value: "0".into() });
 }
 
-pub fn codegen_call(call: &CallNode, cx: &mut CodegenCx) -> DataLocation {
+pub fn codegen_call<'a>(call: &CallNode<'a>, cx: &mut CodegenCx<'a>) -> DataLocation<'a> {
     let temp = cx.alloc_temp();
 
     let Some(target) = call.target_fn(cx.scope()) else {
@@ -1345,11 +1401,6 @@ pub fn codegen_call(call: &CallNode, cx: &mut CodegenCx) -> DataLocation {
     };
 
     let target = target.clone();
-
-    if call.receiver.len() > 1 {
-        todo!("Nested receivers");
-    }
-
     let mut start_idx = 0;
     let args = temp.subpath("args");
 
@@ -1365,24 +1416,23 @@ pub fn codegen_call(call: &CallNode, cx: &mut CodegenCx) -> DataLocation {
         },
     });
 
-    if let Some(it) = call.receiver.last() {
-        let var = cx.scope().lookup(it).unwrap().as_node();
-        let name = &target.args[0].name;
-        let target = temp.subpath(format!("args.{name}"));
-        let inner = codegen_data(&var, cx);
+    // TODO: Get function name from receiver and then call that function, storing the receiver as a param
+    let var = cx.scope().lookup(call.receiver).unwrap().as_node();
+    let name = &target.args[0].name;
+    let target_loc = temp.subpath(format!("args.{name}"));
+    let inner = codegen_data(&var, cx);
 
-        cx.command(DataCommand::Modify {
-            source: DataSource::Storage {
-                target: target.storage.to_string().into(),
-            },
+    cx.command(DataCommand::Modify {
+        source: DataSource::Storage {
+            target: target_loc.storage.to_string().into(),
+        },
 
-            target_path: target.path.into(),
+        target_path: target_loc.path.into(),
 
-            action: DataModifyAction::Set { inner },
-        });
+        action: DataModifyAction::Set { inner },
+    });
 
-        start_idx = 1;
-    }
+    start_idx = 1;
 
     for i in 0..call.args.len() {
         let name = &target.args[i + start_idx].name;
@@ -1409,7 +1459,7 @@ pub fn codegen_call(call: &CallNode, cx: &mut CodegenCx) -> DataLocation {
             target: args.storage.into(),
         },
         path: OptionLiteral::Inline {
-            inner: args.path.clone(),
+            inner: args.path.into(),
         },
     });
 

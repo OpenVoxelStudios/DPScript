@@ -1,3 +1,5 @@
+use ast::loc::Identifier;
+
 use crate::{
     mc::{
         BlockPos, Command, ConcatLiteral, DataCommand, DataModifyAction, DataModifyArg, DataSource,
@@ -5,7 +7,6 @@ use crate::{
         ReturnCommand, Rotation, ScoreboardCommand, ScoreboardObjectivesCommand,
         ScoreboardPlayersCommand,
     },
-    util::Identifier,
 };
 
 impl Command {
@@ -340,12 +341,6 @@ impl<T: AsRef<str>> From<T> for Literal {
         Self::Inline {
             inner: value.as_ref().into(),
         }
-    }
-}
-
-impl From<Identifier> for Literal {
-    fn from(value: Identifier) -> Self {
-        value.to_string().into()
     }
 }
 
