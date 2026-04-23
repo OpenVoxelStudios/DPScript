@@ -9,13 +9,13 @@ import std::transform::translation;
 import std::intrinsics::slice;
 
 pub fn gm_add(x: float, y: float) -> float {
-    at pos: [~0, x, ~0] {
-        math_entity.tp(pos: [29999999, ~y, 91665]);
+    at @[~, x, ~] {
+        math_entity.tp(@[29999999, ~y, 91665]);
     }
 
     let result = math_entity.Pos[1];
 
-    math_entity.tp(pos: [29999999, 0, 91665]);
+    math_entity.tp(@[29999999, 0, 91665]);
 
     return result;
 }
@@ -32,18 +32,19 @@ pub fn gm_sub(x: float, y: float) -> float {
         v2p = "";
     }
 
-    at pos: [~0, x, ~0] {
-        math_entity.tp(pos: [29999999, float_of(v2p + v2s), 91665]); // "v2p + var2" is string concatenation
+    at @[~, x, ~] {
+        math_entity.tp(@[29999999, float_of(v2p + v2s), 91665]); // "v2p + var2" is string concatenation. cursed.
     }
 
     let result = math_entity.Pos[1];
 
-    math_entity.tp(pos: [29999999, 0, 91665]);
+    math_entity.tp(@[29999999, 0, 91665]);
 
     return result;
 }
 
 pub fn gm_mul(x: float, y: float) -> float {
+    // compiler note: this is inferred to be a [float; 16]
     // yes those are floats, can i just put 0 and 1?
     let var1 = [0f,0f,0f,x,0f,1f,0f,0f,0f,0f,1f,0f,0f,0f,0f,1f];
 
@@ -122,12 +123,12 @@ pub fn gm_negate(x: float) -> float {
 //     // Again.... STRING TO DOUBLE LETS GOOOOO 🗣️
 //     var2 = var2.slice(0, -1);
 // 
-//     at pos: [~, x, ~] {
-//         math_entity.tp(pos: [29999999, v2p + var2, 91665]);
+//     at @[~, x, ~] {
+//         math_entity.tp(@[29999999, v2p + var2, 91665]);
 //     }
 // 
 //     let result = math_entity.Pos[1];
-//     math_entity.tp(pos: [29999999, 0, 91665]);
+//     math_entity.tp(@[29999999, 0, 91665]);
 //     
 //     return result;
 // }

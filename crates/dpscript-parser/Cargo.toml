@@ -1,0 +1,19 @@
+[package]
+name = "dpscript-parser"
+version = "0.1.0"
+edition = "2024"
+
+[[bench]]
+name = "bench"
+path = "./benches/bench.rs"
+harness = false
+
+[dependencies]
+miette = { version = "7.6.0", features = ["fancy"] }
+pest = { version = "2.8.5", features = ["miette-error"] }
+pest_derive = "2.8.5"
+
+dpscript-ast = { path = "../dpscript-ast" }
+
+[dev-dependencies]
+criterion = "0.8.1"

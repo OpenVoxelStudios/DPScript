@@ -21,7 +21,6 @@ clap = { version = "4.5.49", features = ["derive"] }
 clap-verbosity-flag = { version = "3.0.4", default-features = false, features = ["tracing"] }
 colored = "3.0.0"
 concat-idents = "1.1.5"
-dpscript-macros = { version = "0.1.0", path = "crates/macros" }
 indicatif = "0.18.0"
 itertools = "0.14.0"
 json5 = "0.4.1"
@@ -40,8 +39,10 @@ tracing-subscriber = { version = "0.3.20", features = ["ansi", "env-filter", "re
 uuid = { version = "1.18.1", features = ["v4"] }
 walkdir = "2.5.0"
 
-ast = { path = "./crates/ast" }
-parser-v2 = { path = "./crates/parser-v2" }
+dpscript-ast = { path = "./crates/dpscript-ast" }
+dpscript-macros = { path = "./crates/dpscript-macros" }
+dpscript-parser = { path = "./crates/dpscript-parser" }
+dpscript-tokenizer = { path = "./crates/dpscript-tokenizer" }
 
 [package.metadata.binstall]
 pkg-url = "{ repo }/releases/download/v{ version }/dsc-{ target }"

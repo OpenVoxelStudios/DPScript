@@ -5,16 +5,14 @@ pub const random_player: Selector = selector: "@r";
 pub const all_players: Selector = selector: "@a";
 pub const all_entities: Selector = selector: "@e";
 
-pub field Selector::Pos = Pos3;
-
 #[cmd("tellraw {target} {message}")]
-pub instance facade fn Selector::tellraw(#[this] target: Selector, message: NBT);
+pub fn Selector::tellraw(#[this] target: Selector, message: NBT);
 
 #[cmd("give {target} {item}")]
-pub instance facade fn Selector::give(#[this] target: Selector, #[id(item)] item: Ident);
+pub fn Selector::give(#[this] target: Selector, #[id(item)] item: Ident);
 
 #[cmd("give {target} {item} {data}")]
-pub instance facade fn Selector::give_nbt(#[this] target: Selector, #[id(item)] item: Ident, data: NBT);
+pub fn Selector::give_nbt(#[this] target: Selector, #[id(item)] item: Ident, data: NBT);
 
 #[cmd("tp {target} {position}")]
-pub instance facade fn Selector::tp(#[this] target: Selector, position: Pos3);
+pub fn Selector::tp(#[this] target: Selector, position: Pos3);

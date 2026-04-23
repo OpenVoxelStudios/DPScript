@@ -5,12 +5,12 @@ pub objective config: dummy = "dpscript_config";
 pub const enable_message: Selector = selector: "enable_std_hello";
 
 init {
-    const welcome: [NBT] = [c: "Thank you for using DPScript!" + nbt: { bold: true }];
-    const hint_base: NBT = c: "Hint: " + nbt: { bold: true, color: "gold" };
-    const disable: NBT = c: "You can disable this message by running:\n" + nbt: { color: "dark_aqua" };
-    const cmd: NBT = c: "/scoreboard players set enable_std_hello dpscript_config 0\n" + nbt: { bold: true, color: "gray" };
+    const welcome: Text = "Thank you for using DPScript!" + { bold: true };
+    const hint_base: Text = "Hint: " + { bold: true, color: "gold" };
+    const disable: Text = "You can disable this message by running:\n" + { color: "dark_aqua" };
+    const cmd: Text = "/scoreboard players set enable_std_hello dpscript_config 0\n" + { bold: true, color: "gray" };
     
-    const click: NBT = c: "[Click to copy!]" + nbt: {
+    const click = "[Click to copy!]" + {
         bold: true,
         color: "dark_aqua",
         clickEvent: {
@@ -23,7 +23,7 @@ init {
         },
     };
     
-    const hint: [NBT] = [hint_base, disable, cmd, click];
+    const hint: Text = [hint_base, disable, cmd, click];
 
     if !config[enable_message] { // matches -2147483648..2147483647
         config[enable_message] = 1;

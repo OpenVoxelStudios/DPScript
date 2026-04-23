@@ -9,22 +9,34 @@ import std::{
 
 const looper: Selector = selector: "__sqrt_loop";
 
-pub fn sqrt(x: float) -> float {
-    gm_std[looper] = 0;
-
-    let temp = nbt: {
-        var1: x,
-        var2: 1,
-        var3: [0d, 0d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 2d],
-        var4: [0f, 0f, 0f, x, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 0f],
-    };
-
-    return sqrt_handling(x, 1, temp);
+// Compiler note: structs are only used for compile-time type checking
+// they are always represented as NBT objects in data storage
+struct SqrtTemp {
+    var1: float;
+    var2: float;
+    var3: [double; 16];
+    var4: [float; 16];
+    v1m2p: str;
 }
 
-fn sqrt_handling(var1: float, var2: float, ref temp: NBT) -> float {
-    at pos: [~0, var1, ~0] {
-        math_entity.tp(pos: [29999999, ~var2, 91665]);
+pub fn gm_sqrt(x: float) -> float {
+    gm_std[looper] = 0;
+
+    let temp = SqrtTemp {
+        var1: x,
+        var2: 1f,
+        var3: [0d, 0d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 2d],
+        var4: [0f, 0f, 0f, x, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 0f],
+        v1m2p: "",
+    };
+
+    return sqrt_handling(x, 1f, temp);
+}
+
+// ref just ensures the object is not cloned
+fn sqrt_handling(var1: float, var2: float, ref temp: SqrtTemp) -> float {
+    at @[~, var1, ~] {
+        math_entity.tp(@[29999999, ~var2, 91665]);
     }
 
     temp.var3 = [temp.var3[0], math_entity.Pos[1], temp.var3[2]];
@@ -42,15 +54,15 @@ fn sqrt_handling(var1: float, var2: float, ref temp: NBT) -> float {
         sqrt_handling(temp.var1, temp.var2, temp);
     }
 
-    math_entity.tp(pos: [29999999, 0, 91665]);
+    math_entity.tp(@[29999999, 0, 91665]);
 
     return temp.var1;
 }
 
-fn positive_subtract(var2: float, ref temp: NBT) {
-    at pos: [~0, float_of(temp.var1), ~0] {
-        at pos: [~0, ~0 - 0.000000001, ~0] {
-            math_entity.tp(pos: [29999999, ~0 - var2, 91665]);
+fn positive_subtract(var2: float, ref temp: SqrtTemp) {
+    at @[~, float_of(temp.var1), ~] {
+        at @[~, ~ - 0.000000001, ~] {
+            math_entity.tp(@[29999999, ~ -var2, 91665]);
         }
     }
 

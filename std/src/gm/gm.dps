@@ -1,0 +1,17 @@
+import std::base::forceload_add;
+import std::base::summon_with;
+
+pub objective gm_std: dummy = "gm.std";
+
+pub const math_entity: Selector = @"91bb5-0-0-0-ffff";
+
+init {
+    forceload_add(29999999, 91665);
+
+    if !math_entity {
+        summon_with("item_display", @[29999999, 0, 91665], {
+            UUID: "00091bb5-0000-0000-0000-00000000ffff",
+            CustomName: "gm.math_entity",
+        });
+    }
+}

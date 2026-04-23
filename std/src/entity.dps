@@ -1,7 +1,5 @@
-#[since = "0.4.0"]
 #[cmd("data get entity {target} UUID")]
-pub facade instance fn Selector::uuid(#[this] target: Selector) -> [int; 4];
+pub fn Entity::uuid(#[this] target: Entity) -> [int; 4];
 
-#[since = "0.4.0"]
 #[cmd("tp {target} {pos}")]
-pub facade instance fn Selector::tp(#[this] target: Selector, pos: Pos3);
+pub fn Entity::tp(#[this] target: Entity, pos: Pos3);

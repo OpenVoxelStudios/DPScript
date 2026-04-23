@@ -1,0 +1,27 @@
+import std::types::math::FVec3;
+
+#[allow(incomplete)] // when type checking, users can initialize a value of this type without all fields present
+pub struct Transform {
+    /// (Required) Translation transformation. This tag corresponds to the last column in the matrix form.
+    translation: FVec3;
+
+    /// (Required) Scale the model centered on the origin. This tag corresponds to the singular values of the
+    /// matrix after singular value decomposition.
+    scale: FVec3;
+}
+
+#[repr(nbt_array)] // This is actually a facade for an array
+pub struct Rot {
+    /// Yaw is rotation about the Y axis. It is measured in degrees and ranges from -180 to +180. The
+    /// yaw increases as the entity turns clockwise (right from their perspective). A yaw of 0 means the
+    /// entity is facing south.
+    #[array(0)] // This is array element 0
+    yaw: float;
+
+    /// The entity's pitch. Pitch is rotation about the local X axis after yaw is applied. It is measured
+    /// in degrees and ranges from -90 to +90. A pitch of 0 means the entity is facing parallel to the
+    /// ground or directly towards the horizon. The pitch increases as the entity looks downwards, so a
+    /// pitch of 90 is facing directly down and a pitch of -90 facing directly up.
+    #[array(1)] // This is array element 1
+    pitch: float;
+}

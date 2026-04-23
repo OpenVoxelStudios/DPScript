@@ -14,5 +14,18 @@
     "rust-analyzer.cargo.buildScripts.enable": true,
     "rust-analyzer.inlayHints.bindingModeHints.enable": true,
     "rust-analyzer.inlayHints.chainingHints.enable": true,
-    "rust-analyzer.inlayHints.closureCaptureHints.enable": true
+    "rust-analyzer.inlayHints.closureCaptureHints.enable": true,
+    "rust-analyzer.assist.preferSelf": true,
+    "rust-analyzer.assist.emitMustUse": true,
+    "rust-analyzer.diagnostics.enable": true,
+    "rust-analyzer.hover.dropGlue.enable": true,
+    "rust-analyzer.inlayHints.implicitDrops.enable": true,
+    "rust-analyzer.inlayHints.discriminantHints.enable": "always",
+    "rust-analyzer.inlayHints.lifetimeElisionHints.enable": "always",
+    "rust-analyzer.inlayHints.lifetimeElisionHints.useParameterNames": true,
+    "rust-analyzer.inlayHints.typeHints.enable": true,
+    "rust-analyzer.imports.merge.glob": true,
+    "rust-analyzer.imports.preferPrelude": true,
+    "rust-analyzer.procMacro.attributes.enable": true,
+    "rust-analyzer.procMacro.enable": true
 }

@@ -1,0 +1,7 @@
+#[repr(str)]
+pub enum BillboardType {
+    Fixed = "fixed",
+    Horizontal = "horizontal",
+    Vertical = "vertical",
+    Center = "center",
+}

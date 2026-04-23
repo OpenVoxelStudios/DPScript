@@ -1,0 +1,6 @@
+#[repr(str)]
+pub enum TextAlignment {
+    Center = "center",
+    Left = "left",
+    Right = "right",
+}

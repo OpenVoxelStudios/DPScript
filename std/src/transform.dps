@@ -1,2 +1,0 @@
-pub field Selector::transformation = Transform;
-pub field Transform::translation = Pos3;

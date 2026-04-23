@@ -1,0 +1,114 @@
+/// Entities include all dynamic, moving objects throughout the Minecraft world.
+#[allow(incomplete)] // when type checking, users can initialize a value of this type without all fields present
+pub struct Entity {
+    /// How much air the entity has, in game ticks. Decreases when unable to breathe (except
+    /// suffocating in a block). Increases when it can breathe. Air being <= -20 game ticks
+    /// (while still unable to breathe) on a given game tick causes the entity to immediately
+    /// lose 1 health to drowning damage. This resets Air to 0 game ticks. Most mobs can have
+    /// a maximum of 300 game ticks (15 seconds) of Air, while dolphins can reach up to 4800
+    /// game ticks (240 seconds), and axolotls have 6000 game ticks (300 seconds).
+    #[nullable]
+    Air: short; // 16-bit int
+
+    /// If true, and this entity has a custom name, the name always appears above the entity,
+    /// regardless of where the cursor points. If the entity does not have a custom name, a
+    /// default name is shown. May not exist.
+    #[nullable]
+    CustomNameVisible: bool;
+
+    /// Optional arbitrary NBT data. Is removed if empty. Represents the minecraft:custom_data
+    /// component.
+    #[nullable]
+    data: NBT;
+
+    /// Distance the entity has fallen. Larger values cause more damage when the entity lands.
+    #[nullable]
+    fall_distance: double;
+
+    /// Number of game ticks until the fire is put out. Negative values reflect how long the
+    /// entity can stand in fire before burning. Default to -20 when not on fire.
+    #[nullable]
+    Fire: short;
+
+    /// If true, the entity has a glowing outline.
+    #[nullable]
+    Glowing: bool;
+
+    /// If true, the entity visually appears on fire, even if it is not actually on fire.
+    #[nullable]
+    HasVisualFire: bool;
+
+    /// Namespaced ID of the entity's entity type. Does not exist for entities in the world, only
+    /// stored entities (such as in data components).
+    #[nullable]
+    #[hint(entity_id)]
+    id: Ident;
+
+    /// If true, the entity should not take damage. This applies to living and nonliving entities
+    /// alike: mobs should not take damage from any source (including potion effects), and cannot
+    /// be moved by fishing rods, attacks, explosions, or projectiles, and objects such as vehicles
+    /// and item frames cannot be destroyed unless their supports are removed. Invulnerable player
+    /// entities are also ignored by any hostile mobs. Note that these entities can be damaged by
+    /// players in Creative mode.
+    #[nullable]
+    Invulnerable: bool;
+
+    /// List of 3 doubles describing the current dX, dY, and dZ velocity of the entity in meters
+    /// per game tick. Only allows between 10.0 and -10.0 (inclusive), else resets to 0.
+    #[nullable]
+    Motion: DVec3;
+
+    /// If true, the entity does not fall down naturally. Does not exist if set to false. Set to
+    /// true by striders in lava.
+    #[nullable]
+    NoGravity: bool;
+
+    /// If true, the entity is touching the ground.
+    #[nullable]
+    OnGround: bool;
+
+    /// The data of the entities that are riding this entity.
+    ///
+    /// Note that each passenger entity, and the ridden entity (the vehicle) have equal control of
+    /// the movement of the ridden entity. The topmost entity controls spawning conditions when the
+    /// vehicle entity is created by a mob spawner.
+    #[nullable]
+    Passengers: [Entity];
+
+    /// The number of game ticks before which the entity may be teleported back through a nether portal.
+    /// Initially starts at 300 game ticks (15 seconds) after teleportation and counts down to 0.
+    #[nullable]
+    PortalCooldown: int;
+
+    /// List of 3 doubles describing the current X, Y, and Z position (coordinates) of the entity.
+    #[nullable]
+    Pos: DVec3;
+
+    /// List of 2 floats representing the entity's server-side rotation (facing direction). This does
+    /// not necessarily match with the direction that the mob is looking in on the client's side. The
+    /// yaw and pitch are stored inverted for most projectile entities.
+    #[nullable]
+    Rotation: Rot;
+
+    /// If true, this entity is silenced. May not exist.
+    #[nullable]
+    Silent: bool;
+
+    /// List of scoreboard tags of this entity. It is not preserved if it is removed.
+    #[nullable]
+    Tags: [str];
+
+    /// Optional. How many game ticks the entity has been freezing. Although this tag is defined for
+    /// all entities, it is actually only used by mobs that are not in the freeze_immune_entity_types
+    /// entity type tag. Increases while in powder snow, even partially, up to a maximum of 300 game
+    /// ticks (15 seconds), and decreases at double speed while not in powder snow.
+    #[nullable]
+    TicksFrozen: int;
+
+    /// This entity's Universally Unique IDentifier. The 128-bit UUID is stored as four 32-bit integers
+    /// (Ints), ordered from most to least significant.
+    #[nullable]
+    #[typed] // specifically an NBT typed list, so [I; a, b, c, d] instead of just [a, b, c, d]
+    #[convertable(uuid)] // compiler has a list of possible conversions, the `uuid` one allows an str to become an [int; 4]
+    UUID: [int; 4];
+}

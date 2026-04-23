@@ -1,4 +1,9 @@
 // std::prelude's members is automatically imported in every DPScript module.
 
-// Are exports necessary?
-// export std::entity::*;
+export std::base::*;
+export std::entity::*;
+export std::intrinsics::*;
+export std::math::*;
+export std::scoreboard::*;
+export std::selectors::*;
+export std::types::*;
