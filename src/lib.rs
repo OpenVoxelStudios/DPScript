@@ -10,9 +10,6 @@ extern crate tracing;
 // extern crate dpscript_macros;
 
 pub mod cli;
-pub mod common;
-pub mod compiler;
-pub mod dpscript;
 pub mod error;
 pub mod lsp;
 pub mod macros;

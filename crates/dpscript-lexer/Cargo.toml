@@ -1,0 +1,15 @@
+[package]
+name = "dpscript-lexer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+miette = { version = "7.6.0", features = ["fancy"] }
+dpscript-ast = { path = "../dpscript-ast" }
+itertools = "0.14.0"
+dpscript-core = { version = "0.1.0", path = "../dpscript-core" }
+thiserror = "2.0.18"
+dpscript-parser = { version = "0.1.0", path = "../dpscript-parser" }
+
+[dev-dependencies]
+criterion = "0.8.1"

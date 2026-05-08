@@ -11,3 +11,9 @@ pub struct FVec3 {
     y: float;
     z: float;
 }
+
+pub struct BlockPos {
+    x: int;
+    y: int;
+    z: int;
+}

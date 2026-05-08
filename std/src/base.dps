@@ -1,4 +1,4 @@
-objective compiler_support: dummy = "__dpscript__.compiler.support";
+objective compiler_support = "dummy";
 
 #[cmd("summon {id}")]
 pub fn summon(#[hint(entity_id)] id: Ident);

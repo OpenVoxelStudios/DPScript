@@ -1,16 +1,20 @@
 import std::selectors::tellraw;
 import std::selectors::all_players;
 
-pub objective config: dummy = "dpscript_config";
-pub const enable_message: Selector = selector: "enable_std_hello";
+#[name = "dpscript_config"]
+pub objective config = "dummy";
+
+pub const enable_message: Entity = @"enable_std_hello";
 
 init {
-    const welcome: Text = "Thank you for using DPScript!" + { bold: true };
-    const hint_base: Text = "Hint: " + { bold: true, color: "gold" };
-    const disable: Text = "You can disable this message by running:\n" + { color: "dark_aqua" };
-    const cmd: Text = "/scoreboard players set enable_std_hello dpscript_config 0\n" + { bold: true, color: "gray" };
+    // compiler note: '#"..."' syntax means text component
+    // LSP note: when the left side of a `+` operation is typed NBT, assume the same schema for right side NBT
+    const welcome: Text = #"Thank you for using DPScript!" + { bold: true };
+    const hint_base: Text = #"Hint: " + { bold: true, color: "gold" };
+    const disable: Text = #"You can disable this message by running:\n" + { color: "dark_aqua" };
+    const cmd: Text = #"/scoreboard players set enable_std_hello dpscript_config 0\n" + { bold: true, color: "gray" };
     
-    const click = "[Click to copy!]" + {
+    const click = #"[Click to copy!]" + {
         bold: true,
         color: "dark_aqua",
         clickEvent: {
@@ -19,7 +23,7 @@ init {
         },
         hoverEvent: {
             action: "show_text",
-            contents: ["Copy: /scoreboard players set enable_std_hello dpscript_config 0"],
+            contents: [#"Copy: /scoreboard players set enable_std_hello dpscript_config 0"],
         },
     };
     

@@ -1,9 +1,13 @@
-#[built_in] typedef bool;
-#[built_in] typedef byte;
-#[built_in] typedef int;
-#[built_in] typedef short;
-#[built_in] typedef float;
-#[built_in] typedef double;
-#[built_in] typedef str;
-#[built_in] typedef Ident;
-#[built_in] typedef NBT;
+// typedef can only be used in the standard library
+
+pub typedef bool;
+pub typedef byte;
+pub typedef int;
+pub typedef short;
+pub typedef float;
+pub typedef double;
+pub typedef str;
+pub typedef Ident;
+pub typedef NBT;
+pub typedef void;
+pub typedef Objective;

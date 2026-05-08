@@ -1,12 +1,9 @@
-use ast::loc::Identifier;
+use dpscript_ast::prelude::Identifier;
 
-use crate::{
-    mc::{
-        BlockPos, Command, ConcatLiteral, DataCommand, DataModifyAction, DataModifyArg, DataSource,
-        ExecuteCommand, ExecuteIf, ExecuteIfData, ExecuteStore, Literal, OptionLiteral,
-        ReturnCommand, Rotation, ScoreboardCommand, ScoreboardObjectivesCommand,
-        ScoreboardPlayersCommand,
-    },
+use crate::mc::{
+    BlockPos, Command, ConcatLiteral, DataCommand, DataModifyAction, DataModifyArg, DataSource,
+    ExecuteCommand, ExecuteIf, ExecuteIfData, ExecuteStore, Literal, OptionLiteral, ReturnCommand,
+    Rotation, ScoreboardCommand, ScoreboardObjectivesCommand, ScoreboardPlayersCommand,
 };
 
 impl Command {

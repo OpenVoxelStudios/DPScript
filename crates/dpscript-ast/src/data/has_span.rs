@@ -8,3 +8,13 @@ pub trait HasSpan {
     /// Get the span from this node, consuming it.
     fn into_span(self) -> SourceSpan;
 }
+
+impl<T> HasSpan for (T, SourceSpan) {
+    fn span(&self) -> SourceSpan {
+        self.1
+    }
+
+    fn into_span(self) -> SourceSpan {
+        self.1
+    }
+}

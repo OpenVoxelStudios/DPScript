@@ -2,7 +2,7 @@ pub mod macros;
 pub mod util;
 
 use crate::cmd_enums;
-use ast::loc::Identifier;
+use dpscript_ast::prelude::Identifier;
 use itertools::Itertools;
 use std::{fmt, fs, io, path::PathBuf};
 

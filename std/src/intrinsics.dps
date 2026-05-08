@@ -1,16 +1,38 @@
-// COMPILER NOTE: compiler-builtins are always inlined, so that has been removed.
+// COMPILER NOTE: compiler-builtins are always inlined.
 
 /// Clone the value given into a compiler-assigned temporary storage.
 #[builtin]
 pub fn clone(value: Any) -> Any;
 
 /// Converts any value to a string.
-#[builtin]
+#[builtin(convert_to = str)]
 pub fn stringify(value: Any) -> str;
 
 /// Converts a string value to a float.
-#[builtin]
+#[builtin(convert_to = float)]
 pub fn float_of(value: str) -> float;
+
+#[inline]
+#[dsl(prefix = "#")] // these are defined in the compiler too, but assigned meaning at compile-time based on these; '#' and '@' are allowed as DSL markers in the compiler
+pub const fn dsl_plain_text(const value: str) -> Text {
+    return { text: value };
+}
+
+#[builtin(cast)]
+#[dsl(prefix = "@")]
+pub fn dsl_entity_id(value: str) -> Entity;
+
+#[builtin(cast)]
+#[dsl(prefix = "@")]
+pub fn dsl_pos_int(value: [int; 3]) -> BlockPos;
+
+#[builtin(cast)]
+#[dsl(prefix = "@")]
+pub fn dsl_pos_float(value: [float; 3]) -> FVec3;
+
+#[builtin(cast)]
+#[dsl(prefix = "@")]
+pub fn dsl_pos_double(value: [double; 3]) -> DVec3;
 
 // COMPILER NOTE: `facade fn` has been removed and is now implied with a `#[cmd]` attribute.
 // `#[cmd]` functions are also now automatically inlined.
@@ -21,7 +43,7 @@ pub fn float_of(value: str) -> float;
 // it will instead be placed in data.
 
 // `#[require(store)]` just tells the compiler that the caller has to provide a location
-// in storage for this, or else throw an error.
+// of storage for this, or else throw an error.
 
 // `ref` means the value will not be cloned when passed to the function, and will instead
 // mutate the actual value directly.
@@ -29,7 +51,7 @@ pub fn float_of(value: str) -> float;
 /// Set a string from a source to a target, slicing it.
 #[cmd("data modify {source} set string {target} {start} {end}")]
 fn set_string(
-    #[store] ref source: str,
+    #[require(store)] ref source: str,
     #[require(store)] ref target: str,
     start: int,
     end: int

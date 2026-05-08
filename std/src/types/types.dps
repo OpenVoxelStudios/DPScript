@@ -7,6 +7,7 @@ export std::types::items::*;
 export std::types::level::*;
 export std::types::math::*;
 export std::types::misc::*;
+export std::types::players::*;
 export std::types::text::*;
 export std::types::transform::*;
 export std::types::types::*;

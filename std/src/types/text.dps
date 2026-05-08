@@ -1,6 +1,150 @@
+import std::types::base::{str, Objective, bool, Ident};
+import std::types::entities::Entity;
+import std::types::math::BlockPos;
+import std::types::players::PlayerProfile;
+
 #[repr(str)]
 pub enum TextAlignment {
     Center = "center",
     Left = "left",
     Right = "right",
 }
+
+pub struct ScoreRef {
+    /// The name of the score holder whose score should be displayed. This can be a selector like @p or an
+    /// explicit name. If the text is a selector, the selector must be guaranteed to never select more than
+    /// one entity, possibly by adding limit=1. If the text is "*", it shows the reader's own score (for example,
+    /// `/tellraw @a {score: {name: "*", objective: "obj"}}` shows every online player their own score in the
+    /// "obj" objective).
+    name: Entity;
+
+    /// The internal name of the objective to display the player's score in.
+    objective: Objective;
+}
+
+#[allow(incomplete)]
+#[require(one_of = [text, translate, selector, keybind, nbt])] // compiler error if all of these fields are missing
+pub struct Text {
+    // =============================== Plain ===============================
+
+    /// A string containing plain text to display directly.
+    #[nullable]
+    text: str;
+
+    // =============================== Translatable ===============================
+
+    /// A translation identifier, corresponding to the identifiers found in loaded language files.
+    /// Displayed as the corresponding text in the player's selected language. If no corresponding
+    /// translation can be found, the identifier itself is used as the translated text.
+    #[nullable]
+    translate: str;
+
+    /// If no corresponding translation can be found, this is used as the translated text.
+    /// Ignored if [`Text::translate`] is not present.
+    #[nullable]
+    fallback: str;
+
+    /// A list of text components to be inserted into slots in the translation text.
+    /// Ignored if [`Text::translate`] is not present.
+    #[nullable]
+    with: [Text];
+
+    // =============================== Scores ===============================
+
+    /// Displays a score holder's current score in an objective. Displays nothing if the given score
+    /// holder or the given objective do not exist, or if the score holder is not tracked in the objective.
+    #[nullable]
+    score: ScoreRef;
+
+    // =============================== Selectors ===============================
+
+    /// A string containing a selector.
+    #[nullable]
+    selector: Entity;
+
+    /// Optional, defaults to `{color: "gray", text: ", "}`. A text component. Used as the separator between
+    /// different names/tags, if the component selects multiple entities/tags.
+    ///
+    /// Used when this text component is referencing a selector or NBT data.
+    #[nullable]
+    separator: str;
+
+    // =============================== Keybinds ===============================
+
+    /// A keybind identifier, to be displayed as the name of the button that is currently bound to that action.
+    /// For example, `{keybind: "key.inventory"}` displays "e" if the player is using the default control scheme.
+    /// As a fallback it displays the translation if it exists.
+    #[nullable]
+    keybind: str;
+
+    // =============================== NBT ===============================
+
+    /// Allowed values are "block", "entity", and "storage", corresponding to the source of the NBT data.
+    #[nullable]
+    source: str;
+
+    /// The NBT path used for looking up NBT values from an entity, block entity, or storage. Requires one of
+    /// `block`, `entity`, or `storage`. Having more than one is allowed, but only one is used.
+    #[nullable]
+    #[require(one_of = [block, entity, storage])]
+    nbt: str;
+
+    /// Optional, defaults to false. If true, the game attempts to interpret each NBT value as a text component
+    /// instead of displaying it as SNBT. Ignored if `nbt` is not present. Can't be set to true at the same time
+    /// as `plain`.
+    #[nullable]
+    interpret: bool;
+
+    /// Optional, defaults to false. If false, the game will style the SNBT with colors for the keys and values.
+    /// If true, no coloring is added. Can't be set to true at the same time as `interpret`.
+    /// Ignored if `nbt` is not present.
+    #[nullable]
+    plain: bool;
+
+    /// A string specifying the target selector for the entity or entities from which the NBT value is obtained.
+    /// Ignored if `nbt` is not present.
+    #[nullable]
+    entity: Entity;
+
+    /// A string specifying the coordinates of the block entity from which the NBT value is obtained. The coordinates
+    /// can be absolute, relative, or local. Ignored if `nbt` is not present.
+    #[nullable]
+    block: BlockPos;
+
+    /// A string specifying the resource location of the command storage from which the NBT value is obtained.
+    /// Ignored if `nbt` is not present.
+    #[nullable]
+    #[hint(data_storage)]
+    storage: Ident;
+
+    // =============================== Atlas ===============================
+
+    // TODO(compiler): #[also_set(...)]
+
+    /// The name of texture atlas. Defaults to "minecraft:blocks".
+    #[nullable]
+    #[hint(atlas)]
+    // #[also_set(object = "atlas")] // sets the field "object" to "atlas"
+    atlas: Ident;
+
+    /// The sprite name (for example: "block/emerald_block").
+    #[nullable]
+    #[hint(sprite)]
+    sprite: str;
+
+    // =============================== Player Object ===============================
+
+    // TODO(compiler): #[also_set(...)]
+
+    /// The textures and/or player profile used to render the face sprite. Provided with the same format as the profile
+    /// data component. If specified as a string, it corresponds to `name`.
+    #[nullable]
+    // #[also_set(object = "player")] // sets the field "object" to "player"
+    player: PlayerProfile;
+
+    /// Whether to display the hat layer. (Defaults to true)
+    #[nullable]
+    hat: bool;
+}
+
+

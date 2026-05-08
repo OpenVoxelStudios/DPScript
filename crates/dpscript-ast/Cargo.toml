@@ -19,3 +19,7 @@ pastey = "0.2.1"
 thiserror = "2.0.18"
 
 dpscript-macros = { path = "../dpscript-macros" }
+ordered-float = { version = "5.3.0", features = ["serde"] }
+facet = { version = "0.46.0", features = ["ordered-float"] }
+dpscript-core = { version = "0.1.0", path = "../dpscript-core" }
+better_default = "1.0.5"

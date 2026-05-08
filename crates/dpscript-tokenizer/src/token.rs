@@ -1,15 +1,24 @@
-use std::num::{ParseFloatError, ParseIntError};
-
 use crate::kw::Keyword;
+use derive_more::Display;
+use dpscript_core::{MSourceSpan, Spanned, StringCursor};
+use miette::Diagnostic;
 use ordered_float::OrderedFloat;
-use peekmore::PeekMoreIterator;
+use std::{
+    fmt,
+    num::{ParseFloatError, ParseIntError},
+};
 use thiserror::Error;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
 pub enum BraceType {
-    Parens,   // ()
+    #[display("()")]
+    Parens, // ()
+
+    #[display("[]")]
     Brackets, // []
-    Braces,   // {}
+
+    #[display("{{}}")]
+    Braces, // {}
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -22,107 +31,207 @@ pub enum Punct {
     GroupEnd(BraceType),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum Comparison {
-    Equal,        // ==
-    Less,         // <
-    LessEqual,    // <=
-    Greater,      // >
-    GreaterEqual, // >=
-    NotEqual,     // !=
+impl fmt::Display for Punct {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Hash => write!(f, "#"),
+            Self::Semi => write!(f, ";"),
+            Self::Comma => write!(f, ","),
+            Self::Colon => write!(f, ":"),
+            Self::GroupStart(brace_type) => match brace_type {
+                BraceType::Parens => write!(f, "("),
+                BraceType::Brackets => write!(f, "["),
+                BraceType::Braces => write!(f, "{{"),
+            },
+            Self::GroupEnd(brace_type) => match brace_type {
+                BraceType::Parens => write!(f, ")"),
+                BraceType::Brackets => write!(f, "]"),
+                BraceType::Braces => write!(f, "}}"),
+            },
+        }
+    }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
+pub enum Comparison {
+    #[display("==")]
+    Equal, // ==
+    #[display("<")]
+    Less, // <
+    #[display("<=")]
+    LessEqual, // <=
+    #[display(">")]
+    Greater, // >
+    #[display(">=")]
+    GreaterEqual, // >=
+    #[display("!=")]
+    NotEqual, // !=
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
 pub enum Assignment {
-    Equal,    // =
+    #[display("=")]
+    Equal, // =
+    #[display("+=")]
     AddEqual, // +=
+    #[display("-=")]
     SubEqual, // -=
+    #[display("*=")]
     MulEqual, // *=
+    #[display("/=")]
     DivEqual, // /=
+    #[display("%=")]
     ModEqual, // %=
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
 pub enum Operator {
-    Plus,       // +
-    Minus,      // -
-    Star,       // *
-    Slash,      // /
-    Percent,    // %
-    Bang,       // !
-    Dot,        // .
-    Range,      // ..
+    #[display("@")]
+    At, // +
+    #[display("+")]
+    Plus, // +
+    #[display("-")]
+    Minus, // -
+    #[display("*")]
+    Star, // *
+    #[display("/")]
+    Slash, // /
+    #[display("%")]
+    Percent, // %
+    #[display("!")]
+    Bang, // !
+    #[display(".")]
+    Dot, // .
+    #[display("..")]
+    Range, // ..
+    #[display("::")]
     ModulePath, // ::
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum Literal {
-    // insert praying hands emoji here
-    // these HAVE to be Copy so...
-    Identifier(&'static str),
-    String(&'static str),
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
+pub enum Literal<'a> {
+    #[display("{_0}")]
+    Identifier(&'a str),
+    #[display("\"{_0}\"")]
+    String(&'a str),
 
+    #[display("{_0}")]
     Int(i32),
+
+    #[display("{_0}")]
     Long(i64),
+
+    #[display("{_0}")]
     Byte(i8), // Minecraft bytes are signed (java moment)
+
+    #[display("{_0}")]
     Float(OrderedFloat<f32>),
+
+    #[display("{_0}")]
     Double(OrderedFloat<f64>),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum Token {
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
+pub enum Token<'a> {
+    #[display("{_0}")]
     Keyword(Keyword),
+
+    #[display("{_0}")]
     Punct(Punct),
+
+    #[display("{_0}")]
     Comparison(Comparison),
+
+    #[display("{_0}")]
     Assignment(Assignment),
+
+    #[display("{_0}")]
     Operator(Operator),
-    Literal(Literal),
+
+    #[display("{_0}")]
+    Literal(Literal<'a>),
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Diagnostic)]
 pub enum TokenError {
-    #[error("unexpected character: {0}")]
-    Unexpected(char),
+    #[error("unexpected character: {ch:?}")]
+    #[diagnostic(code(dpscript_tokenizer::unexpected))]
+    Unexpected {
+        ch: char,
+
+        #[label("here")]
+        span: MSourceSpan,
+    },
 
     #[error("float/double cannot have more than one decimal")]
     DoubleDotFloat,
 
     #[error(transparent)]
-    ParseInt(#[from] ParseIntError),
+    ParseInt {
+        #[from]
+        inner: ParseIntError,
+    },
 
     #[error(transparent)]
-    ParseFloat(#[from] ParseFloatError),
+    ParseFloat {
+        #[from]
+        inner: ParseFloatError,
+    },
 }
 
 macro_rules! one_extra {
     ($iter: ident; $ch: expr, $g1: ident::$v1: ident, $g2: ident::$v2: ident) => {
-        if $iter.next_if_eq(&$ch).is_some() {
-            Token::$g1($g1::$v1)
+        if $iter.next_if_eq($ch).is_some() {
+            (Token::$g1($g1::$v1), $iter.end_span())
         } else {
-            Token::$g2($g2::$v2)
+            (Token::$g2($g2::$v2), $iter.end_span())
         }
     };
 }
 
-pub fn parse_next<I: Iterator<Item = char>>(
-    iter: &mut PeekMoreIterator<I>,
-) -> Option<Result<Token, TokenError>> {
-    while iter.next_if(|it| it.is_whitespace()).is_some() {}
+macro_rules! token {
+    ($iter: ident; $group: ident::$name: ident) => {
+        (Token::$group($group::$name), $iter.end_span())
+    };
 
-    Some(Ok(match iter.next()? {
-        '#' => Token::Punct(Punct::Hash),
-        ';' => Token::Punct(Punct::Semi),
-        ',' => Token::Punct(Punct::Comma),
-        
-        '(' => Token::Punct(Punct::GroupStart(BraceType::Parens)),
-        ')' => Token::Punct(Punct::GroupEnd(BraceType::Parens)),
-        
-        '[' => Token::Punct(Punct::GroupStart(BraceType::Brackets)),
-        ']' => Token::Punct(Punct::GroupEnd(BraceType::Brackets)),
-        
-        '{' => Token::Punct(Punct::GroupStart(BraceType::Braces)),
-        '}' => Token::Punct(Punct::GroupEnd(BraceType::Braces)),
-        
+    ($iter: ident; $group: ident::$name: ident($($tkn: tt)+)) => {
+        (Token::$group($group::$name($($tkn)+)), $iter.end_span())
+    };
+
+    ($iter: ident; Punct::GroupStart = $name: ident) => {
+        (Token::Punct(Punct::GroupStart(BraceType::$name)), $iter.end_span())
+    };
+
+    ($iter: ident; Punct::GroupEnd = $name: ident) => {
+        (Token::Punct(Punct::GroupEnd(BraceType::$name)), $iter.end_span())
+    };
+}
+
+#[track_caller]
+pub fn parse_next<'a>(
+    iter: &mut StringCursor<'a>,
+) -> Option<Result<Option<Spanned<Token<'a>>>, TokenError>> {
+    let _ = iter.take_while(|it| it.is_whitespace());
+
+    iter.begin_span();
+
+    Some(Ok(Some(match iter.next()? {
+        c if c.is_whitespace() => return Some(Ok(None)),
+
+        '#' => token!(iter; Punct::Hash),
+        ';' => token!(iter; Punct::Semi),
+        ',' => token!(iter; Punct::Comma),
+        '@' => token!(iter; Operator::At),
+
+        '(' => token!(iter; Punct::GroupStart = Parens),
+        ')' => token!(iter; Punct::GroupEnd = Parens),
+
+        '[' => token!(iter; Punct::GroupStart = Brackets),
+        ']' => token!(iter; Punct::GroupEnd = Brackets),
+
+        '{' => token!(iter; Punct::GroupStart = Braces),
+        '}' => token!(iter; Punct::GroupEnd = Braces),
+
         ':' => one_extra!(iter; ':', Operator::ModulePath, Punct::Colon),
         '=' => one_extra!(iter; '=', Comparison::Equal, Assignment::Equal),
         '!' => one_extra!(iter; '=', Comparison::NotEqual, Operator::Bang),
@@ -135,117 +244,129 @@ pub fn parse_next<I: Iterator<Item = char>>(
         '.' => one_extra!(iter; '.', Operator::Range, Operator::Dot),
 
         '/' => {
-            if iter.next_if_eq(&'/').is_some() {
-                let _ = iter.take_while(|it| *it != '\n').collect::<Vec<_>>();
+            if iter.next_if_eq('/').is_some() {
+                let _ = iter.take_while(|it| it != '\n');
+                iter.next();
 
-                return parse_next(iter);
-            } else if iter.next_if_eq(&'=').is_some() {
-                Token::Assignment(Assignment::DivEqual)
+                return Some(Ok(None));
+            } else if iter.next_if_eq('=').is_some() {
+                token!(iter; Assignment::DivEqual)
             } else {
-                Token::Operator(Operator::Slash)
+                token!(iter; Operator::Slash)
             }
         }
 
         '"' => {
-            let mut buf = String::new();
             let mut last = '"';
+            let mut len = 0;
 
-            while let Some(ch) = iter.next() {
+            while let Some(ch) = iter.peek() {
                 if ch == '"' && last != '\\' {
-                    buf.push(last);
+                    len += 1;
                     break;
                 } else if ch == '"' && last == '\\' {
                     last = '"';
                 } else {
-                    buf.push(last);
+                    len += 1;
                     last = ch;
                 }
             }
 
-            if !buf.is_empty() {
-                buf.remove(0);
-            }
-
-            // insert praying hands emoji here
-            // these HAVE to be Copy so...
-            let buf = Box::leak(Box::new(buf));
-            let s = buf.as_str();
-
-            Token::Literal(Literal::String(s))
+            (
+                Token::Literal(Literal::String(iter.take(len))),
+                iter.end_span(),
+            )
         }
 
-        c if c.is_alphanumeric()
+        c if c.is_alphabetic()
             && let Some(kw) = Keyword::try_parse(c, iter) =>
         {
-            Token::Keyword(kw)
+            (Token::Keyword(kw), iter.end_span())
         }
 
         c if c.is_alphabetic() || c == '_' => {
-            let mut buf = String::new();
+            let mut len = 0;
 
-            buf.push(c);
-
-            while let Some(ch) = iter.next_if(|it| it.is_alphanumeric() || *it == '_') {
-                buf.push(ch);
+            while iter
+                .peek()
+                .is_some_and(|it| it.is_alphanumeric() || it == '_')
+            {
+                len += 1;
             }
 
-            // insert praying hands emoji here
-            // these HAVE to be Copy so...
-            let buf = Box::leak(Box::new(buf));
-            let s = buf.as_str();
+            iter.back();
 
-            Token::Literal(Literal::Identifier(s))
+            (
+                Token::Literal(Literal::Identifier(iter.take(len + 1))),
+                iter.end_span(),
+            )
         }
 
         c if c.is_numeric() => {
-            let mut buf = String::new();
             let mut dot = false;
+            let mut len = 0;
 
-            buf.push(c);
+            while let Some(ch) = iter.peek() {
+                if !ch.is_numeric() || ch != '.' {
+                    break;
+                }
 
-            while let Some(ch) = iter.next_if(|it| it.is_numeric() || *it == '.') {
                 if ch == '.' {
                     if dot {
                         return Some(Err(TokenError::DoubleDotFloat));
                     } else {
                         dot = true;
-                        buf.push(ch);
+                        len += 1;
                     }
                 } else {
-                    buf.push(ch);
+                    len += 1;
                 }
             }
 
+            iter.back();
+
+            let buf = iter.take(len + 1);
+
             match iter.next_if(|it| ['d', 'f', 'b', 'L'].contains(&it)) {
                 Some('d') => match buf.parse::<f64>() {
-                    Ok(it) => Token::Literal(Literal::Double(it.into())),
+                    Ok(it) => token!(iter; Literal::Double(it.into())),
                     Err(err) => return Some(Err(err.into())),
                 },
 
                 Some('f') => match buf.parse::<f32>() {
-                    Ok(it) => Token::Literal(Literal::Float(it.into())),
+                    Ok(it) => token!(iter; Literal::Float(it.into())),
                     Err(err) => return Some(Err(err.into())),
                 },
 
                 Some('b') => match buf.parse::<i8>() {
-                    Ok(it) => Token::Literal(Literal::Byte(it.into())),
+                    Ok(it) => token!(iter; Literal::Byte(it.into())),
                     Err(err) => return Some(Err(err.into())),
                 },
 
                 Some('L') => match buf.parse::<i64>() {
-                    Ok(it) => Token::Literal(Literal::Long(it.into())),
+                    Ok(it) => token!(iter; Literal::Long(it.into())),
                     Err(err) => return Some(Err(err.into())),
                 },
 
-                Some(c) => return Some(Err(TokenError::Unexpected(c))), // how does this even happen??
+                Some(c) => {
+                    return Some(Err(TokenError::Unexpected {
+                        ch: c,
+                        span: iter.end_span().into(),
+                    }));
+                } // how does this even happen??
 
                 None => match buf.parse::<i32>() {
-                    Ok(it) => Token::Literal(Literal::Int(it.into())),
+                    Ok(it) => token!(iter; Literal::Int(it.into())),
                     Err(err) => return Some(Err(err.into())),
                 },
             }
         }
 
-        c => return Some(Err(TokenError::Unexpected(c))),
-    }))
+        c => {
+            return Some(Err(TokenError::Unexpected {
+                ch: c,
+                span: iter.end_span().into(),
+            }));
+        }
+    })))
 }

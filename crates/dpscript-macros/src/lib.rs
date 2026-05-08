@@ -1,3 +1,10 @@
+#![allow(
+    unknown_lints,
+    mismatched_lifetime_syntaxes,
+    dead_code,
+    unexpected_cfgs
+)]
+
 use proc_macro::TokenStream;
 use quote::{quote, quote_spanned};
 use syn::{Data, DeriveInput, parse_macro_input, spanned::Spanned};

@@ -105,10 +105,12 @@ pub struct Entity {
     #[nullable]
     TicksFrozen: int;
 
+    // TODO(compiler): #[typed], #[convertable(...)]
+
     /// This entity's Universally Unique IDentifier. The 128-bit UUID is stored as four 32-bit integers
     /// (Ints), ordered from most to least significant.
     #[nullable]
-    #[typed] // specifically an NBT typed list, so [I; a, b, c, d] instead of just [a, b, c, d]
-    #[convertable(uuid)] // compiler has a list of possible conversions, the `uuid` one allows an str to become an [int; 4]
+    // #[typed] // specifically an NBT typed list, so [I; a, b, c, d] instead of just [a, b, c, d]
+    // #[convertable(uuid)] // compiler has a list of possible conversions, the `uuid` one allows an str to become an [int; 4]
     UUID: [int; 4];
 }

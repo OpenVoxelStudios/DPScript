@@ -40,8 +40,8 @@ uuid = { version = "1.18.1", features = ["v4"] }
 walkdir = "2.5.0"
 
 dpscript-ast = { path = "./crates/dpscript-ast" }
+dpscript-lexer = { path = "./crates/dpscript-lexer" }
 dpscript-macros = { path = "./crates/dpscript-macros" }
-dpscript-parser = { path = "./crates/dpscript-parser" }
 dpscript-tokenizer = { path = "./crates/dpscript-tokenizer" }
 
 [package.metadata.binstall]
@@ -55,17 +55,6 @@ members = [".", "crates/*"]
 [features]
 default = []
 print-clarity = []
-
-[dev-dependencies]
-criterion = { version = "0.7.0", features = ["html_reports"] }
-
-[[bench]]
-name = "tokenizer"
-harness = false
-
-[[bench]]
-name = "lexer"
-harness = false
 
 [profile.bench]
 debug = true

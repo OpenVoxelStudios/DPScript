@@ -1,0 +1,10 @@
+[package]
+name = "dpscript-core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+facet = "0.46.0"
+miette = "7.6.0"
+pest = "2.8.6"
+serde = { version = "1.0.228", features = ["derive"] }

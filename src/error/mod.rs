@@ -9,15 +9,6 @@ pub use lowerer::*;
 use miette::Diagnostic;
 use thiserror::Error;
 
-use crate::dpscript::validator::err::{AllErrors, ValidationErr};
-
-#[derive(Debug, Error, Diagnostic)]
-#[error("Validation failed:")]
-pub struct CompleteValidationErrors {
-    #[related]
-    pub errors: Vec<AllErrors>,
-}
-
 #[derive(Debug, Error, Diagnostic)]
 pub enum Error {
     #[error("An error occured!")]
@@ -30,29 +21,6 @@ pub enum Error {
 
     #[error(transparent)]
     #[diagnostic(transparent)]
-    AllValidator(#[from] AllErrors),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    AllValidator2(#[from] CompleteValidationErrors),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    Validator(#[from] ValidationErr),
-
-    // #[error(transparent)]
-    // #[diagnostic(transparent)]
-    // Compiler(#[from] CompilerError),
-
-    // #[error(transparent)]
-    // #[diagnostic(transparent)]
-    // UnnamedCompiler(#[from] UnnamedCompilerError),
-
-    // #[error(transparent)]
-    // #[diagnostic(transparent)]
-    // UnsourcedCompiler(#[from] UnsourcedCompilerError),
-    #[error(transparent)]
-    #[diagnostic(transparent)]
     Dependency(#[from] DependencyError),
 
     #[error(transparent)]
@@ -63,11 +31,6 @@ pub enum Error {
 
     #[error(transparent)]
     Toml(#[from] toml::de::Error),
-    // #[error(transparent)]
-    // Json5(#[from] json5::Error),
-
-    // #[error(transparent)]
-    // Json(#[from] serde_json::Error),
 }
 
 impl From<miette::Report> for Error {

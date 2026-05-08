@@ -1,4 +1,4 @@
-use crate::{Result, compiler::Compiler};
+use crate::Result;
 use clap::{Parser, Subcommand};
 use clap_verbosity_flag::{InfoLevel, Verbosity};
 use std::{env::set_current_dir, path::PathBuf};
@@ -99,17 +99,17 @@ impl Commands {
                 allow_dead_code,
                 detailed,
             } => {
-                Compiler::new(
-                    config_path,
-                    out_dir,
-                    dump_tokens,
-                    dump_ast,
-                    dump_ir,
-                    allow_dead_code,
-                    detailed,
-                    quiet,
-                )?
-                .compile_project()?;
+                // Compiler::new(
+                //     config_path,
+                //     out_dir,
+                //     dump_tokens,
+                //     dump_ast,
+                //     dump_ir,
+                //     allow_dead_code,
+                //     detailed,
+                //     quiet,
+                // )?
+                // .compile_project()?;
             }
 
             Self::Compile {
