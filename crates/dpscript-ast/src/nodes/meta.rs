@@ -44,7 +44,7 @@ pub struct DefMeta<'a> {
     /// The hint ID.
     /// This is usually a registry, but can be anything, really.
     /// Used in the LSP for providing smart autocomplete for identifiers.
-    pub hint: Option<&'a str>,
+    pub hint: Option<Spanned<&'a str>>,
 
     /// Any `#[restrict(...)]` declarations.
     pub restrict: Vec<Restrict<'a>>,

@@ -10,6 +10,9 @@ itertools = "0.14.0"
 dpscript-core = { version = "0.1.0", path = "../dpscript-core" }
 thiserror = "2.0.18"
 dpscript-parser = { version = "0.1.0", path = "../dpscript-parser" }
+tracing = { version = "0.1.44", features = ["log"] }
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+ron = "0.12.1"
 
 [dev-dependencies]
 criterion = "0.8.1"

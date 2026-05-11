@@ -1,4 +1,7 @@
-use crate::{prelude::{SourceSpan, expr::Expr, value::Value}, util::Name};
+use crate::{
+    prelude::{SourceSpan, expr::Expr, value::Value},
+    util::Name,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
 pub struct ForLoop<'a> {

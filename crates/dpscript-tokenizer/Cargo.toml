@@ -9,4 +9,5 @@ dpscript-core = { version = "0.1.0", path = "../dpscript-core" }
 miette = { version = "7.6.0", features = ["fancy"] }
 ordered-float = "5.3.0"
 pastey = "0.2.1"
+serde = { version = "1.0.228", features = ["derive"] }
 thiserror = "2.0.18"

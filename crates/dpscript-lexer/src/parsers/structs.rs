@@ -10,10 +10,11 @@ use crate::{
 use dpscript_ast::prelude::def::structs::{Struct, StructField};
 use dpscript_parser::{BraceType, Keyword, Punct, Token};
 
+#[tracing::instrument(level = tracing::Level::DEBUG)]
 fn parse_struct_field<'a>(
     c: &mut TokenCursor<'a>,
     cx: &mut ParseCx<'a>,
-) -> Result<'a, StructField<'a>> {
+) -> Result<StructField<'a>> {
     c.begin_span();
 
     let meta = parse_def_meta(c, cx)?;
@@ -36,13 +37,13 @@ fn parse_struct_field<'a>(
     })
 }
 
-pub fn parse_struct<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<'a, Struct<'a>> {
+#[tracing::instrument(level = tracing::Level::DEBUG)]
+pub fn parse_struct<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Struct<'a>> {
     c.begin_span();
 
-    let meta = parse_def_meta(c, cx)?;
     let flags = parse_def_flags(c, cx)?;
 
-    c.expect(Token::Keyword(Keyword::Struct))?;
+    c.expect_or_skip(Token::Keyword(Keyword::Struct))?;
 
     let name = c.expect_ident()?;
     let mut extends = Vec::new();
@@ -58,6 +59,8 @@ pub fn parse_struct<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result
         fields.push(parse_struct_field(&mut inner, cx)?);
     }
 
+    inner.assert_empty()?;
+
     let span = c.end_span();
 
     Ok(Struct {
@@ -66,6 +69,6 @@ pub fn parse_struct<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result
         flags,
         fields,
         span,
-        meta,
+        meta: Default::default(),
     })
 }

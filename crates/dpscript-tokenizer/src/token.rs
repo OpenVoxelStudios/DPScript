@@ -3,13 +3,14 @@ use derive_more::Display;
 use dpscript_core::{MSourceSpan, Spanned, StringCursor};
 use miette::Diagnostic;
 use ordered_float::OrderedFloat;
+use serde::Serialize;
 use std::{
     fmt,
     num::{ParseFloatError, ParseIntError},
 };
 use thiserror::Error;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display, Serialize)]
 pub enum BraceType {
     #[display("()")]
     Parens, // ()
@@ -21,7 +22,7 @@ pub enum BraceType {
     Braces, // {}
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
 pub enum Punct {
     Hash,  // #
     Semi,  // ;
@@ -52,7 +53,7 @@ impl fmt::Display for Punct {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display, Serialize)]
 pub enum Comparison {
     #[display("==")]
     Equal, // ==
@@ -68,7 +69,7 @@ pub enum Comparison {
     NotEqual, // !=
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display, Serialize)]
 pub enum Assignment {
     #[display("=")]
     Equal, // =
@@ -84,10 +85,10 @@ pub enum Assignment {
     ModEqual, // %=
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display, Serialize)]
 pub enum Operator {
     #[display("@")]
-    At, // +
+    At, // @
     #[display("+")]
     Plus, // +
     #[display("-")]
@@ -106,12 +107,15 @@ pub enum Operator {
     Range, // ..
     #[display("::")]
     ModulePath, // ::
+    #[display("->")]
+    Returns, // ->
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display, Serialize)]
 pub enum Literal<'a> {
     #[display("{_0}")]
     Identifier(&'a str),
+
     #[display("\"{_0}\"")]
     String(&'a str),
 
@@ -131,7 +135,45 @@ pub enum Literal<'a> {
     Double(OrderedFloat<f64>),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Display, Serialize)]
+pub enum OwnedLiteral {
+    #[display("{_0}")]
+    Identifier(String),
+
+    #[display("\"{_0}\"")]
+    String(String),
+
+    #[display("{_0}")]
+    Int(i32),
+
+    #[display("{_0}")]
+    Long(i64),
+
+    #[display("{_0}")]
+    Byte(i8), // Minecraft bytes are signed (java moment)
+
+    #[display("{_0}")]
+    Float(OrderedFloat<f32>),
+
+    #[display("{_0}")]
+    Double(OrderedFloat<f64>),
+}
+
+impl<'a> From<Literal<'a>> for OwnedLiteral {
+    fn from(value: Literal<'a>) -> Self {
+        match value {
+            Literal::Identifier(it) => OwnedLiteral::Identifier(it.into()),
+            Literal::String(it) => OwnedLiteral::String(it.into()),
+            Literal::Int(it) => OwnedLiteral::Int(it),
+            Literal::Long(it) => OwnedLiteral::Long(it),
+            Literal::Byte(it) => OwnedLiteral::Byte(it),
+            Literal::Float(it) => OwnedLiteral::Float(it),
+            Literal::Double(it) => OwnedLiteral::Double(it),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display, Serialize)]
 pub enum Token<'a> {
     #[display("{_0}")]
     Keyword(Keyword),
@@ -189,6 +231,22 @@ macro_rules! one_extra {
     };
 }
 
+macro_rules! two_extra {
+    ($iter: ident; $ch: expr, $g1: ident::$v1: ident, $ch2: expr, $g2: ident::$v2: ident, $g3: ident::$v3: ident) => {
+        if $iter.next_if_eq($ch).is_some() {
+            (Token::$g1($g1::$v1), $iter.end_span())
+        } else {
+            $iter.clear_peeker();
+
+            if $iter.next_if_eq($ch2).is_some() {
+                (Token::$g2($g2::$v2), $iter.end_span())
+            } else {
+                (Token::$g2($g3::$v3), $iter.end_span())
+            }
+        }
+    };
+}
+
 macro_rules! token {
     ($iter: ident; $group: ident::$name: ident) => {
         (Token::$group($group::$name), $iter.end_span())
@@ -238,7 +296,7 @@ pub fn parse_next<'a>(
         '<' => one_extra!(iter; '=', Comparison::LessEqual, Comparison::Less),
         '>' => one_extra!(iter; '=', Comparison::GreaterEqual, Comparison::Greater),
         '+' => one_extra!(iter; '=', Assignment::AddEqual, Operator::Plus),
-        '-' => one_extra!(iter; '=', Assignment::SubEqual, Operator::Minus),
+        '-' => two_extra!(iter; '=', Assignment::SubEqual, '>', Operator::Returns, Operator::Minus),
         '*' => one_extra!(iter; '=', Assignment::MulEqual, Operator::Star),
         '%' => one_extra!(iter; '=', Assignment::ModEqual, Operator::Percent),
         '.' => one_extra!(iter; '.', Operator::Range, Operator::Dot),
@@ -262,7 +320,6 @@ pub fn parse_next<'a>(
 
             while let Some(ch) = iter.peek() {
                 if ch == '"' && last != '\\' {
-                    len += 1;
                     break;
                 } else if ch == '"' && last == '\\' {
                     last = '"';
@@ -272,10 +329,11 @@ pub fn parse_next<'a>(
                 }
             }
 
-            (
-                Token::Literal(Literal::String(iter.take(len))),
-                iter.end_span(),
-            )
+            let content = iter.take(len);
+
+            iter.next();
+
+            (Token::Literal(Literal::String(content)), iter.end_span())
         }
 
         c if c.is_alphabetic()

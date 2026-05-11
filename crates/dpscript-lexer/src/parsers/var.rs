@@ -7,9 +7,10 @@ use crate::{
 use dpscript_ast::prelude::expr::var::Variable;
 use dpscript_parser::{Assignment, Keyword, Punct, Token};
 
-pub fn parse_var<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<'a, Variable<'a>> {
+#[tracing::instrument(level = tracing::Level::DEBUG)]
+pub fn parse_var<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Variable<'a>> {
     c.begin_span();
-    c.expect(Token::Keyword(Keyword::Let))?;
+    c.expect_or_skip(Token::Keyword(Keyword::Let))?;
 
     let name = c.expect_ident()?;
     let mut ty = None;
@@ -24,6 +25,8 @@ pub fn parse_var<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<'a
     {
         value = Some(parse_value(c, cx)?);
     }
+
+    c.expect(Token::Punct(Punct::Semi))?;
 
     let span = c.end_span();
 

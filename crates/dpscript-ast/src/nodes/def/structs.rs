@@ -1,6 +1,6 @@
 use crate::{
     nodes::{meta::DefFlags, types::TypeRef},
-    prelude::{SourceSpan, meta::DefMeta},
+    prelude::{SourceSpan, def::DefTrait, meta::DefMeta},
     util::Name,
 };
 
@@ -31,4 +31,11 @@ pub struct StructField<'a> {
     pub ty: TypeRef<'a>,
     pub span: SourceSpan,
     pub meta: DefMeta<'a>,
+}
+
+impl<'a> DefTrait<'a> for Struct<'a> {
+    fn with_meta(mut self, meta: DefMeta<'a>) -> Self {
+        self.meta = meta;
+        self
+    }
 }

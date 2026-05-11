@@ -7,6 +7,13 @@ pub struct Literal<'a> {
     pub span: SourceSpan,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+pub struct DslLiteral<'a> {
+    pub dsl_marker: DslMarker,
+    pub value: LiteralValue<'a>,
+    pub span: SourceSpan,
+}
+
 #[repr(u8)]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, Deserialize)]
 pub enum LiteralValue<'a> {
@@ -17,4 +24,13 @@ pub enum LiteralValue<'a> {
     Long(i64),
     Float(OrderedFloat<f32>),
     Double(OrderedFloat<f64>),
+}
+
+#[repr(u8)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, Deserialize,
+)]
+pub enum DslMarker {
+    At,   // @"..."
+    Hash, // #"..."
 }

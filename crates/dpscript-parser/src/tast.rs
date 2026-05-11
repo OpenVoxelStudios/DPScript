@@ -12,6 +12,7 @@ pub use dpscript_tokenizer::{
     token::{Assignment, BraceType, Comparison, Literal, Operator},
 };
 use miette::Diagnostic;
+use serde::Serialize;
 use thiserror::Error;
 
 #[derive(Debug, Error, Diagnostic)]
@@ -41,7 +42,7 @@ pub enum Error {
     },
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display, Serialize)]
 pub enum Punct {
     #[display("#")]
     Hash, // #
@@ -53,7 +54,7 @@ pub enum Punct {
     Colon, // :
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
 pub enum Token<'a> {
     Keyword(Keyword),
     Punct(Punct),

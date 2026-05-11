@@ -4,7 +4,8 @@ use crate::{
     nodes::meta::DefFlags,
     prelude::{
         SourceSpan,
-        def::{enums::Enum, structs::Struct}, meta::DefMeta,
+        def::{DefTrait, enums::Enum, structs::Struct},
+        meta::DefMeta,
     },
     util::{ModulePath, Name},
 };
@@ -15,6 +16,13 @@ pub struct Typedef<'a> {
     pub flags: Vec<DefFlags>,
     pub span: SourceSpan,
     pub meta: DefMeta<'a>,
+}
+
+impl<'a> DefTrait<'a> for Typedef<'a> {
+    fn with_meta(mut self, meta: DefMeta<'a>) -> Self {
+        self.meta = meta;
+        self
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]

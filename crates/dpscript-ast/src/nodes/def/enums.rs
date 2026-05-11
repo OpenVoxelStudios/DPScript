@@ -1,6 +1,7 @@
 use crate::{
     prelude::{
         SourceSpan, Spanned,
+        def::DefTrait,
         meta::{DefFlags, DefMeta},
     },
     util::Name,
@@ -29,4 +30,11 @@ pub enum EnumValue<'a> {
     String(Spanned<&'a str>),
     Byte(Spanned<i8>),
     None,
+}
+
+impl<'a> DefTrait<'a> for Enum<'a> {
+    fn with_meta(mut self, meta: DefMeta<'a>) -> Self {
+        self.meta = meta;
+        self
+    }
 }

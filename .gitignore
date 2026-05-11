@@ -12,3 +12,4 @@ vscode-test-web
 .vscode-test-web
 perf.data*
 flamegraph.svg
+/*.ron

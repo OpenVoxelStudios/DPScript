@@ -7,5 +7,6 @@ edition = "2024"
 derive_more = { version = "2.1.1", features = ["display"] }
 dpscript-core = { version = "0.1.0", path = "../dpscript-core" }
 dpscript-tokenizer = { version = "0.1.0", path = "../dpscript-tokenizer" }
-miette = "7.6.0"
+miette = { version = "7.6.0", features = ["fancy"] }
+serde = { version = "1.0.228", features = ["derive"] }
 thiserror = "2.0.18"

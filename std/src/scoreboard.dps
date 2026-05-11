@@ -42,16 +42,16 @@ pub operator fn Objective::index_mod_assign(#[this] obj: Objective, sel: Selecto
 }
 
 #[inline]
-pub instance fn Objective::min_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
+pub fn Objective::min_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
     return operation(obj, sel, "<", obj2, sel2);
 }
 
 #[inline]
-pub instance fn Objective::max_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
+pub fn Objective::max_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
     return operation(obj, sel, ">", obj2, sel2);
 }
 
 #[inline]
-pub instance fn Objective::swap_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
+pub fn Objective::swap_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
     return operation(obj, sel, "><", obj2, sel2);
 }

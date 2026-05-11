@@ -14,6 +14,9 @@ pub struct DynArray<T> {
     len: usize,
 }
 
+unsafe impl<T> Send for DynArray<T> {}
+unsafe impl<T> Sync for DynArray<T> {}
+
 impl<T> DynArray<T> {
     pub fn from_array(arr: Box<[T]>) -> Self {
         let len = arr.len();

@@ -1,35 +1,30 @@
-use crate::{
-    Result,
-    cx::ParseCx,
-    parsers::meta::{parse_def_flags, parse_def_meta},
-    util::TokenCursor,
-};
+use crate::{Result, cx::ParseCx, parsers::meta::parse_def_flags, util::TokenCursor};
 use dpscript_ast::prelude::def::objective::Objective;
-use dpscript_parser::{Assignment, Keyword, Token};
+use dpscript_parser::{Assignment, Keyword, Punct, Token};
 
-pub fn parse_objective<'a>(
-    c: &mut TokenCursor<'a>,
-    cx: &mut ParseCx<'a>,
-) -> Result<'a, Objective<'a>> {
+#[tracing::instrument(level = tracing::Level::DEBUG)]
+pub fn parse_objective<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Objective<'a>> {
     c.begin_span();
 
-    let meta = parse_def_meta(c, cx)?;
     let flags = parse_def_flags(c, cx)?;
 
-    c.expect(Token::Keyword(Keyword::Objective))?;
+    c.expect_or_skip(Token::Keyword(Keyword::Objective))?;
 
     let name = c.expect_ident()?;
 
     c.expect(Token::Assignment(Assignment::Equal))?;
 
     let criteria = c.expect_str()?;
+
+    c.expect(Token::Punct(Punct::Semi))?;
+
     let span = c.end_span();
 
     Ok(Objective {
         name,
         criteria,
         span,
-        meta,
+        meta: Default::default(),
         flags,
     })
 }

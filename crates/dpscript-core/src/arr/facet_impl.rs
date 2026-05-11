@@ -1,6 +1,10 @@
 use std::cmp::Ordering;
 
-use facet::{Def, Facet, HashProxy, OxPtrConst, OxPtrMut, OxRef, PtrConst, PtrMut, SequenceType, Shape, ShapeBuilder, SliceDef, SliceType, SliceVTable, Type, TypeNameFn, TypeNameOpts, TypeOpsIndirect, TypeParam, VTableIndirect, Variance, VarianceDep, VarianceDesc};
+use facet::{
+    Def, Facet, HashProxy, OxPtrConst, OxPtrMut, OxRef, PtrConst, PtrMut, SequenceType, Shape,
+    ShapeBuilder, SliceDef, SliceType, SliceVTable, Type, TypeNameFn, TypeNameOpts,
+    TypeOpsIndirect, TypeParam, VTableIndirect, Variance, VarianceDep, VarianceDesc,
+};
 
 use crate::DynArray;
 

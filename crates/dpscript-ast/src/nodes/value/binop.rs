@@ -17,6 +17,7 @@ pub struct BinOp<'a> {
 pub enum Operation {
     Bool(BoolOp),
     Math(MathOp),
+    ArrayIndex,
 }
 
 #[repr(u8)]

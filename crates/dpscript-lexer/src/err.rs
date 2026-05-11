@@ -1,13 +1,13 @@
 use dpscript_core::MSourceSpan;
-use dpscript_parser::Token;
+use dpscript_parser::OwnedToken;
 use miette::Diagnostic;
 use thiserror::Error;
 
 #[derive(Debug, Error, Diagnostic)]
-pub enum Error<'a> {
+pub enum Error {
     #[error("unexpected token: {token}")]
     UnexpectedToken {
-        token: Token<'a>,
+        token: OwnedToken,
 
         #[label("here")]
         span: MSourceSpan,
@@ -32,4 +32,9 @@ pub enum Error<'a> {
         #[label("here")]
         span: MSourceSpan,
     },
+
+    #[error(
+        "skip this branch in attempting to parse. if you see this, report it! this should never be shown!"
+    )]
+    Skip,
 }

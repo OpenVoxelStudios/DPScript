@@ -13,6 +13,7 @@ use dpscript_ast::prelude::meta::{
 use dpscript_core::{MaxBy, MinBy, Spanned};
 use dpscript_parser::{Assignment, BraceType, Keyword, Literal, Punct, Token};
 
+#[derive(Debug)]
 pub struct DefFlagsBuilder<'a> {
     inner: Vec<DefFlags>,
     _ty: PhantomData<&'a ()>,
@@ -31,7 +32,7 @@ impl<'a> DefFlagsBuilder<'a> {
         cx: &ParseCx<'a>,
         token: Spanned<Token<'a>>,
         item: DefFlags,
-    ) -> Result<'a, ()> {
+    ) -> Result<()> {
         if !self.inner.contains(&item) {
             self.inner.push(item);
             Ok(())
@@ -45,23 +46,24 @@ impl<'a> DefFlagsBuilder<'a> {
     }
 }
 
-pub fn parse_def_flags<'a>(
-    c: &mut TokenCursor<'a>,
-    cx: &mut ParseCx<'a>,
-) -> Result<'a, Vec<DefFlags>> {
+#[tracing::instrument(level = tracing::Level::DEBUG)]
+pub fn parse_def_flags<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Vec<DefFlags>> {
     let mut flags = DefFlagsBuilder::new();
 
     loop {
-        match c.peek() {
-            Some(&Token::Keyword(Keyword::Pub)) => {
+        match c.peek().copied() {
+            Some(Token::Keyword(Keyword::Pub)) => {
                 flags.try_push(cx, c.take_next()?, DefFlags::Public)?
             }
 
-            Some(&Token::Keyword(Keyword::Const)) => {
+            Some(Token::Keyword(Keyword::Const))
+                if c.peek()
+                    .is_some_and(|it| *it == Token::Keyword(Keyword::Fn)) =>
+            {
                 flags.try_push(cx, c.take_next()?, DefFlags::Const)?
             }
 
-            Some(&Token::Keyword(Keyword::Operator)) => {
+            Some(Token::Keyword(Keyword::Operator)) => {
                 flags.try_push(cx, c.take_next()?, DefFlags::Operator)?
             }
 
@@ -69,13 +71,17 @@ pub fn parse_def_flags<'a>(
         }
     }
 
+    c.clear_peek();
+
     Ok(flags.build())
 }
 
+#[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_single_def_meta<'a>(
     c: &mut TokenCursor<'a>,
     cx: &mut ParseCx<'a>,
-) -> Result<'a, DefMeta<'a>> {
+) -> Result<DefMeta<'a>> {
+    c.clear_peek();
     c.expect(Token::Punct(Punct::Hash))?;
     c.begin_span_prev();
 
@@ -128,14 +134,7 @@ pub fn parse_single_def_meta<'a>(
     } else if inner.next_if_ident("hint").is_some() {
         // #[hint = "..."]
         inner.expect(Token::Assignment(Assignment::Equal))?;
-
-        let it = inner.take_next()?;
-
-        let Token::Literal(Literal::String(s)) = it.0 else {
-            return Err(cx.unexpected(it));
-        };
-
-        meta.hint = Some(s);
+        meta.hint = Some(inner.expect_str()?);
     } else if inner.next_if_ident("restrict").is_some() {
         // #[restrict(...)]
         let mut group = inner.expect_group(BraceType::Parens)?;
@@ -212,36 +211,18 @@ pub fn parse_single_def_meta<'a>(
     } else if inner.next_if_ident("cmd").is_some() {
         // #[cmd(...)]
         let mut group = inner.expect_group(BraceType::Parens)?;
-        let it = group.take_next()?;
-
-        let Token::Literal(Literal::String(s)) = it.0 else {
-            return Err(cx.unexpected(it));
-        };
+        let cmd = group.expect_str()?;
 
         group.assert_empty()?;
-        meta.cmd = Some((s, it.1));
+        meta.cmd = Some(cmd);
     } else if inner.next_if_ident("since").is_some() {
         // #[since = "..."]
         inner.expect(Token::Assignment(Assignment::Equal))?;
-
-        let it = inner.take_next()?;
-
-        let Token::Literal(Literal::String(s)) = it.0 else {
-            return Err(cx.unexpected(it));
-        };
-
-        meta.since = Some((s, it.1));
+        meta.since = Some(inner.expect_str()?);
     } else if inner.next_if_ident("name").is_some() {
         // #[name = "..."]
         inner.expect(Token::Assignment(Assignment::Equal))?;
-
-        let it = inner.take_next()?;
-
-        let Token::Literal(Literal::String(s)) = it.0 else {
-            return Err(cx.unexpected(it));
-        };
-
-        meta.name = Some((s, it.1));
+        meta.name = Some(inner.expect_str()?);
     } else if inner.next_if_ident("this").is_some() {
         // #[this]
         meta.this = true;
@@ -289,7 +270,7 @@ pub fn parse_single_def_meta<'a>(
     Ok(meta)
 }
 
-fn merge_def_meta<'a>(a: &mut DefMeta<'a>, b: DefMeta<'a>) -> Result<'a, ()> {
+fn merge_def_meta<'a>(a: &mut DefMeta<'a>, b: DefMeta<'a>) -> Result<()> {
     if let Some(builtin) = b.builtin {
         if a.builtin.is_some() {
             return Err(Error::DuplicateMeta {
@@ -392,7 +373,7 @@ fn merge_def_meta<'a>(a: &mut DefMeta<'a>, b: DefMeta<'a>) -> Result<'a, ()> {
     }
 
     if let Some(name) = b.name {
-        if b.name.is_some() {
+        if a.name.is_some() {
             return Err(Error::DuplicateMeta {
                 kind: "name",
                 span: b.span.into(),
@@ -447,15 +428,15 @@ fn merge_def_meta<'a>(a: &mut DefMeta<'a>, b: DefMeta<'a>) -> Result<'a, ()> {
     Ok(())
 }
 
-pub fn parse_def_meta<'a>(
-    c: &mut TokenCursor<'a>,
-    cx: &mut ParseCx<'a>,
-) -> Result<'a, DefMeta<'a>> {
+#[tracing::instrument(level = tracing::Level::DEBUG)]
+pub fn parse_def_meta<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<DefMeta<'a>> {
     let mut meta = DefMeta::default();
 
     while c.peek().is_some_and(|it| *it == Token::Punct(Punct::Hash)) {
         merge_def_meta(&mut meta, parse_single_def_meta(c, cx)?)?;
     }
+
+    c.clear_peek();
 
     Ok(meta)
 }

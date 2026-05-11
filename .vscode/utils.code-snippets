@@ -29,7 +29,7 @@
     "Parser Function": {
         "scope": "rust",
         "prefix": "parse_",
-        "body": "pub fn parse_${1:node}<'a>(\n    c: &mut TokenCursor<'a>,\n    cx: &mut ParseCx<'a>,\n) -> Result<'a, ${2:NodeType<'a>}> {\n    $0\n}",
+        "body": "pub fn parse_${1:node}<'a>(\n    c: &mut TokenCursor<'a>,\n    cx: &mut ParseCx<'a>,\n) -> Result<${2:NodeType<'a>}> {\n    $0\n}",
         "description": "A new parser function"
     }
 }

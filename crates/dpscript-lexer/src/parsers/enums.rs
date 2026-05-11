@@ -7,10 +7,11 @@ use crate::{
 use dpscript_ast::prelude::def::enums::{Enum, EnumValue, EnumVariant};
 use dpscript_parser::{Assignment, BraceType, Keyword, Literal, Punct, Token};
 
+#[tracing::instrument(level = tracing::Level::DEBUG)]
 fn parse_enum_variant<'a>(
     c: &mut TokenCursor<'a>,
     cx: &mut ParseCx<'a>,
-) -> Result<'a, EnumVariant<'a>> {
+) -> Result<EnumVariant<'a>> {
     c.begin_span();
 
     let meta = parse_def_meta(c, cx)?;
@@ -51,13 +52,13 @@ fn parse_enum_variant<'a>(
     })
 }
 
-pub fn parse_enum<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<'a, Enum<'a>> {
+#[tracing::instrument(level = tracing::Level::DEBUG)]
+pub fn parse_enum<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Enum<'a>> {
     c.begin_span();
 
-    let meta = parse_def_meta(c, cx)?;
     let flags = parse_def_flags(c, cx)?;
 
-    c.expect(Token::Keyword(Keyword::Enum))?;
+    c.expect_or_skip(Token::Keyword(Keyword::Enum))?;
 
     let name = c.expect_ident()?;
     let mut inner = c.expect_group(BraceType::Braces)?;
@@ -67,6 +68,8 @@ pub fn parse_enum<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<'
         variants.push(parse_enum_variant(&mut inner, cx)?);
     }
 
+    inner.assert_empty()?;
+
     let span = c.end_span();
 
     Ok(Enum {
@@ -74,6 +77,6 @@ pub fn parse_enum<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<'
         flags,
         variants,
         span,
-        meta,
+        meta: Default::default(),
     })
 }

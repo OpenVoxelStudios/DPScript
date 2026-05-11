@@ -1,6 +1,7 @@
 use crate::{
     prelude::{
         SourceSpan,
+        def::DefTrait,
         expr::Expr,
         meta::{DefFlags, DefMeta},
         types::TypeRef,
@@ -48,4 +49,11 @@ pub struct FunctionInfo<'a> {
 
     /// The definition metadata of the function.
     pub meta: DefMeta<'a>,
+}
+
+impl<'a> DefTrait<'a> for Function<'a> {
+    fn with_meta(mut self, meta: DefMeta<'a>) -> Self {
+        self.info.meta = meta;
+        self
+    }
 }

@@ -14,13 +14,15 @@ init {
     const disable: Text = #"You can disable this message by running:\n" + { color: "dark_aqua" };
     const cmd: Text = #"/scoreboard players set enable_std_hello dpscript_config 0\n" + { bold: true, color: "gray" };
     
-    const click = #"[Click to copy!]" + {
+    const click: Text = #"[Click to copy!]" + {
         bold: true,
         color: "dark_aqua",
+
         clickEvent: {
             action: "copy_to_clipboard",
             value: "/scoreboard players set enable_std_hello dpscript_config 0"
         },
+
         hoverEvent: {
             action: "show_text",
             contents: [#"Copy: /scoreboard players set enable_std_hello dpscript_config 0"],

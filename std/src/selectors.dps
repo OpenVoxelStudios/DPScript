@@ -1,18 +1,18 @@
-pub const self: Selector = selector: "@s";
-pub const nearest_entity: Selector = selector: "@n";
-pub const nearest_player: Selector = selector: "@p";
-pub const random_player: Selector = selector: "@r";
-pub const all_players: Selector = selector: "@a";
-pub const all_entities: Selector = selector: "@e";
+pub const self: Selector = @"@s";
+pub const nearest_entity: Selector = @"@n";
+pub const nearest_player: Selector = @"@p";
+pub const random_player: Selector = @"@r";
+pub const all_players: Selector = @"@a";
+pub const all_entities: Selector = @"@e";
 
 #[cmd("tellraw {target} {message}")]
 pub fn Selector::tellraw(#[this] target: Selector, message: NBT);
 
 #[cmd("give {target} {item}")]
-pub fn Selector::give(#[this] target: Selector, #[id(item)] item: Ident);
+pub fn Selector::give(#[this] target: Selector, #[hint = "item"] item: Ident);
 
 #[cmd("give {target} {item} {data}")]
-pub fn Selector::give_nbt(#[this] target: Selector, #[id(item)] item: Ident, data: NBT);
+pub fn Selector::give_nbt(#[this] target: Selector, #[hint = "item"] item: Ident, data: NBT);
 
 #[cmd("tp {target} {position}")]
 pub fn Selector::tp(#[this] target: Selector, position: Pos3);

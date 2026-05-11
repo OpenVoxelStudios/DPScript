@@ -14,7 +14,7 @@ pest = "2.8.5"
 serde = { version = "1.0.228", features = ["derive"] }
 strum = { version = "0.28.0", features = ["derive"] }
 tracing = "0.1.41"
-miette = "7.6.0"
+miette = { version = "7.6.0", features = ["fancy"] }
 pastey = "0.2.1"
 thiserror = "2.0.18"
 

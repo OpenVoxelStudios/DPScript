@@ -1,4 +1,4 @@
-use crate::prelude::{SourceSpan, expr::Expr, meta::DefMeta};
+use crate::prelude::{SourceSpan, def::DefTrait, expr::Expr, meta::DefMeta};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
 pub struct Block<'a> {
@@ -22,4 +22,11 @@ pub struct Block<'a> {
 pub enum BlockKind {
     Init,
     Tick,
+}
+
+impl<'a> DefTrait<'a> for Block<'a> {
+    fn with_meta(mut self, meta: DefMeta<'a>) -> Self {
+        self.meta = meta;
+        self
+    }
 }

@@ -1,6 +1,7 @@
 use crate::{
     prelude::{
         SourceSpan, Spanned,
+        def::DefTrait,
         meta::{DefFlags, DefMeta},
     },
     util::Name,
@@ -22,4 +23,11 @@ pub struct Objective<'a> {
 
     /// The definition's flags.
     pub flags: Vec<DefFlags>,
+}
+
+impl<'a> DefTrait<'a> for Objective<'a> {
+    fn with_meta(mut self, meta: DefMeta<'a>) -> Self {
+        self.meta = meta;
+        self
+    }
 }

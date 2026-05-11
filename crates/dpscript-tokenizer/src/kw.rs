@@ -3,7 +3,7 @@ macro_rules! keywords {
         $($name: ident $(= $real: expr)?;)*
     } => {
         pastey::paste! {
-            #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+            #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize)]
             pub enum Keyword {
                 $($name),*
             }
@@ -55,7 +55,7 @@ macro_rules! keywords {
                         if cur == c0 && (
                             [<_KW_ $name _LEN>] == 1
                             || iter.peek_many([<_KW_ $name _PEEK>]).is_some_and(|it| it == &[<_KW_ $name _RAW>][1..])
-                        ) {
+                        ) && iter.peek().is_none_or(|it| !it.is_alphanumeric()) {
                             if [<_KW_ $name _LEN>] != 1 {
                                 let _ = iter.take([<_KW_ $name _PEEK>]);
                             }
@@ -90,6 +90,8 @@ keywords! {
     Objective;
     Struct; // type check only
     Enum;
+    Init;
+    Tick;
 
     // Modifiers
     Pub;
@@ -108,7 +110,9 @@ keywords! {
     As;
     At;
     If;
+    Else;
     For;
+    In;
     While;
     Loop; // infinite loop
 

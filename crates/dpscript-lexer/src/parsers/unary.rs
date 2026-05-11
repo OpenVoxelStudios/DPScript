@@ -5,7 +5,8 @@ use dpscript_ast::prelude::{
 };
 use dpscript_parser::{Operator, Token};
 
-pub fn parse_unary<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<'a, Unary<'a>> {
+#[tracing::instrument(level = tracing::Level::DEBUG)]
+pub fn parse_unary<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Unary<'a>> {
     if let Some((_, span)) = c.next_if_eq(&Token::Operator(Operator::Minus)) {
         let value = parse_value(c, cx)?;
         let span = span + value.span();
@@ -25,6 +26,6 @@ pub fn parse_unary<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<
             value: Box::new(value),
         })
     } else {
-        Err(cx.unexpected(c.take_next()?))
+        Err(cx.skip())
     }
 }

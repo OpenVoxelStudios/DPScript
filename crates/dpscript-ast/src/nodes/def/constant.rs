@@ -1,6 +1,7 @@
 use crate::{
     prelude::{
         SourceSpan,
+        def::DefTrait,
         meta::{DefFlags, DefMeta},
         types::TypeRef,
         value::Value,
@@ -16,4 +17,11 @@ pub struct Constant<'a> {
     pub span: SourceSpan,
     pub meta: DefMeta<'a>,
     pub flags: Vec<DefFlags>,
+}
+
+impl<'a> DefTrait<'a> for Constant<'a> {
+    fn with_meta(mut self, meta: DefMeta<'a>) -> Self {
+        self.meta = meta;
+        self
+    }
 }

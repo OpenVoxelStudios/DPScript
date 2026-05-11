@@ -1,26 +1,19 @@
 use crate::{
     Result,
     cx::ParseCx,
-    parsers::{
-        meta::{parse_def_flags, parse_def_meta},
-        types::parse_typeref,
-        value::parse_value,
-    },
+    parsers::{meta::parse_def_flags, types::parse_typeref, value::parse_value},
     util::TokenCursor,
 };
 use dpscript_ast::prelude::def::constant::Constant;
 use dpscript_parser::{Assignment, Keyword, Punct, Token};
 
-pub fn parse_constant<'a>(
-    c: &mut TokenCursor<'a>,
-    cx: &mut ParseCx<'a>,
-) -> Result<'a, Constant<'a>> {
+#[tracing::instrument(level = tracing::Level::DEBUG)]
+pub fn parse_constant<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Constant<'a>> {
     c.begin_span();
 
-    let meta = parse_def_meta(c, cx)?;
     let flags = parse_def_flags(c, cx)?;
 
-    c.expect(Token::Keyword(Keyword::Const))?;
+    c.expect_or_skip(Token::Keyword(Keyword::Const))?;
 
     let name = c.expect_ident()?;
 
@@ -31,11 +24,14 @@ pub fn parse_constant<'a>(
     c.expect(Token::Assignment(Assignment::Equal))?;
 
     let value = parse_value(c, cx)?;
+
+    c.expect(Token::Punct(Punct::Semi))?;
+
     let span = c.end_span();
 
     Ok(Constant {
         name,
-        meta,
+        meta: Default::default(),
         flags,
         span,
         ty,

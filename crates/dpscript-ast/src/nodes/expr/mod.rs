@@ -1,7 +1,21 @@
+pub mod assign;
 pub mod block;
 pub mod call;
 pub mod ret;
-pub mod unop;
 pub mod var;
 
-crate::nodes::util::node_group! { Expr = [call::Call, block::Block, ret::Return, var::Variable] }
+use crate::prelude::def::constant;
+use block::*;
+
+crate::nodes::util::node_group! {
+    Expr = [
+        call::Call,
+        at::At,
+        cond::Cond,
+        loops::ForLoop,
+        ret::Return,
+        var::Variable,
+        constant::Constant,
+        assign::Assign,
+    ]
+}
