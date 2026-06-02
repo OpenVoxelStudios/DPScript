@@ -1,208 +1,173 @@
 {
-    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-    "name": "DPScript",
+    "displayName": "DPScript",
+    "name": "dps",
     "patterns": [
-        {
-            "include": "#all"
-        }
+        { "include": "#all" }
     ],
     "repository": {
         "all": {
             "patterns": [
-                {
-                    "include": "#comments"
-                },
-                {
-                    "include": "#block-comments"
-                },
-                {
-                    "include": "#keywords"
-                },
-                {
-                    "include": "#storage"
-                },
-                {
-                    "include": "#support"
-                },
-                {
-                    "include": "#numbers"
-                },
-                {
-                    "include": "#strings"
-                },
-                {
-                    "include": "#other"
-                }
+                { "include": "#comments" },
+                { "include": "#block-comments" },
+                { "include": "#items" },
+                { "include": "#keywords" },
+                { "include": "#literals" }
             ]
         },
         "comments": {
-			"patterns": [
-				{
-					"comment": "line comments",
-					"name": "comment.line.double-slash.dpscript",
-					"match": "(//).*$",
-					"captures": {
-						"1": {
-							"name": "punctuation.definition.comment.dpscript"
-						}
-					}
-				}
-			]
-		},
-		"block-comments": {
-			"patterns": [
-				{
-					"comment": "empty block comments",
-					"name": "comment.block.dpscript",
-					"match": "/\\*\\*/"
-				},
-				{
-					"comment": "block comments",
-					"name": "comment.block.dpscript",
-					"begin": "/\\*(?!\\*)",
-					"end": "\\*/",
-					"patterns": [
-						{
-							"include": "#block-comments"
-						}
-					]
-				}
-			]
-		},
+            "patterns": [
+                {
+                    "comment": "line comments",
+                    "name": "comment.line.double-slash.dps",
+                    "match": "(//).*$",
+                    "captures": { "1": { "name": "punctuation.definition.comment.dps" } }
+                }
+            ]
+        },
+        "block-comments": {
+            "patterns": [
+                {
+                    "comment": "empty block comments",
+                    "name": "comment.block.dps",
+                    "match": "/\\*\\*/"
+                },
+                {
+                    "comment": "block comments",
+                    "name": "comment.block.dps",
+                    "begin": "/\\*(?!\\*)",
+                    "end": "\\*/",
+                    "patterns": [ { "include": "#block-comments" } ]
+                }
+            ]
+        },
+        "ident": {
+            "match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\b"
+        },
+        "items": {
+            "patterns": [
+                {
+                    "name": "function.dps",
+                    "match": "\\b(?:(pub|const|operator)\\s+)*(fn)\\s+(?:([A-Za-z_][A-Za-z0-9_]*)(::))?([A-Za-z_][A-Za-z0-9_]*)\\b(?:(\\()(?:([A-Za-z_][A-Za-z0-9_]*)(:)\\s*([A-Za-z_][A-Za-z0-9_]*))*(\\)))",
+                    "captures": {
+                        "1": { "name": "entity.name.tag.dps" },
+                        "2": { "name": "keyword.control.dps" },
+                        "3": { "name": "entity.name.type.dps" },
+                        "4": { "name": "keyword.operator.dps" },
+                        "5": { "name": "entity.name.function.dps" },
+                        "6": { "name": "punctuation.parens.dps" },
+                        "7": { "name": "storage.dps" },
+                        "8": { "name": "punctuation.separator.var.dps" },
+                        "9": { "name": "entity.name.type.dps" },
+                        "10": { "name": "punctuation.parens.dps" }
+                    }
+                },
+                {
+                    "name": "constant.dps",
+                    "match": "\\b(?:(pub)\\s+)*(const)\\s+([A-Za-z_][A-Za-z0-9_]*)(?:(:)\\s*([A-Za-z_][A-Za-z0-9_]*))?\\s*(=)",
+                    "captures": {
+                        "1": { "name": "entity.name.tag.dps" },
+                        "2": { "name": "keyword.control.dps" },
+                        "3": { "name": "variable.other.name.dps" },
+                        "4": { "name": "punctuation.separator.var.dps" },
+                        "5": { "name": "entity.name.type.dps" },
+                        "6": { "name": "punctuation.separator.value.dps" }
+                    }
+                },
+                {
+                    "name": "variable.dps",
+                    "match": "\\b(let)\\s+([A-Za-z_][A-Za-z0-9_]*)(?:(:)\\s*([A-Za-z_][A-Za-z0-9_]*))?\\s*(=)",
+                    "captures": {
+                        "1": { "name": "keyword.control.dps" },
+                        "2": { "name": "variable.other.dps" },
+                        "3": { "name": "punctuation.separator.var.dps" },
+                        "4": { "name": "entity.name.type.dps" },
+                        "5": { "name": "punctuation.separator.value.dps" }
+                    }
+                },
+                {
+                    "begin": "{",
+                    "end": "}",
+                    "beginCaptures": { "0": { "name": "punctuation.block.begin.dps" } },
+                    "endCaptures": { "0": { "name": "punctuation.block.end.dps" } },
+                    "patterns": [ { "include": "#all" } ]
+                },
+                {
+                    "begin": "([A-Za-z_][A-Za-z0-9_]*)(\\()",
+                    "end": "\\)",
+                    "beginCaptures": {
+                        "1": { "name": "entity.name.function.dps" },
+                        "2": { "name": "punctuation.call.begin.dps" }
+                    },
+                    "endCaptures": { "0": { "name": "punctuation.call.end.dps" } },
+                    "patterns": [ { "include": "#all" } ]
+                },
+                {
+                    "match": "\\b(import)\\s+((?:\\b([A-Za-z_][A-Za-z0-9_]*)\\b(::)\\b)*)([A-Za-z_][A-Za-z0-9_]*)(;)",
+                    "captures": {
+                        "1": { "name": "keyword.control.dps" },
+                        "2": { "name": "entity.section.dps" },
+                        "3": { "name": "entity.section.dps" },
+                        "4": { "name": "punctuation.separator.import.dps" },
+                        "5": { "name": "entity.name.dps" },
+                        "6": { "name": "punctuation.semicolon.dps" }
+                    }
+                }
+            ]
+        },
+        "literals": {
+            "patterns": [
+                {
+                    "match": "\\b(true|false)\\b",
+                    "name": "constant.language.dps"
+                },
+                {
+                    "match": "\\b(\\d+(\\.\\d+)?)\\b",
+                    "name": "constant.numeric.dps"
+                },
+                {
+                    "begin": "\"",
+                    "end": "\"",
+                    "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.dps" } },
+                    "endCaptures": { "0": { "name": "punctuation.definition.string.end.dps" } },
+                    "name": "string.quoted.double.dps",
+                    "patterns": [
+                        {
+                            "_comment": "stolen from javascript, thx fam <3",
+                            "match": "\\\\(x\\h{2}|u\\h{4}|u\\{\\h+}|[012][0-7]{0,2}|3[0-6][0-7]?|37[0-7]?|[4-7][0-7]?|.|$)",
+                            "name": "constant.character.escape.dps"
+                        }
+                    ]
+                },
+                {
+                    "begin": "\\[",
+                    "end": "\\]",
+                    "beginCaptures": { "0": { "name": "punctuation.definition.array.begin.dps" } },
+                    "endCaptures": { "0": { "name": "punctuation.definition.array.end.dps" } },
+                    "patterns": [ { "include": "#all" } ]
+                },
+                {
+                    "match": "[A-Za-z_][A-Za-z0-9_]*",
+                    "name": "entity.other.dps"
+                }
+            ]
+        },
         "keywords": {
             "patterns": [
                 {
-                    "name": "keyword.control.dpscript",
-                    "match": "\\b(if|else|for|in|return|break|continue|export|import|goto|init|tick|at)\\b"
+                    "name": "keyword.control.item.top_level.dps",
+                    "match": "\\b(init|tick)\\b"
                 },
                 {
-                    "name": "entity.name.type.dpscript",
-                    "match": "\\b(component|selector|c|entity|path|pos|nbt|store)\\s*:\\b"
+                    "name": "keyword.control.item.inner.dps",
+                    "match": "\\b(at|if|for|in)\\b"
                 },
                 {
-					"name": "keyword.operator.logical.dpscript",
-					"match": "(\\|\\||&&|!)"
-				},
-                {
-					"name": "keyword.operator.comparison.dpscript",
-					"match": "(=(=)?(?!>)|!=|<=|(?<!=)>=)"
-				}
-            ]
-        },
-        "storage": {
-            "patterns": [
-                {
-                    "name": "storage.type.function.dpscript",
-                    "match": "\\b(?:fn)\\s+([A-Za-z0-9_]+)\\b",
-                    "captures": {
-                        "1": {
-                            "name": "entity.name.function.dpscript"
-                        }
-                    }
+                    "name": "punctuation.misc.dps",
+                    "match": ",|\\."
                 },
                 {
-                    "name": "storage.type.block.dpscript",
-                    "match": "\\b(?:sub)\\s+([A-Za-z0-9_]+)\\b",
-                    "captures": {
-                        "1": {
-                            "name": "variable.other.dpscript"
-                        }
-                    }
-                },
-                {
-                    "name": "storage.type.module.dpscript",
-                    "match": "\\b(?:module)\\s+([A-Za-z0-9_]+)\\b",
-                    "captures": {
-                        "1": {
-                            "name": "entity.name.class.dpscript"
-                        }
-                    }
-                },
-                {
-                    "name": "storage.type.variable.dpscript",
-                    "match": "\\b(?:let|objective|const|enum)\\s+([A-Za-z0-9_]+)\\b",
-                    "captures": {
-                        "1": {
-                            "name": "variable.name.dpscript"
-                        }
-                    }
-                },
-                {
-                    "name": "storage.modifier.dpscript",
-                    "match": "\\b(pub|ref|facade|compiler|inline)\\b"
-                }
-            ]
-        },
-        "support": {
-            "patterns": [
-                {
-                    "name": "support.type.dpscript",
-                    "match": "\\b(Identifier|NBTPath|Store|NBT|Selector|Component|Pos2|Entity|Pos3|Any|float|int|double)\\b"
-                },
-                {
-                    "name": "constant.language.bool.dpscript",
-                    "match": "\\b(true|false)\\b"
-                },
-                {
-                    "name": "meta.function.call.dpscript",
-                    "match": "((?:[A-Za-z0-9_]+\\.?)+)\\s*(?:\\()",
-                    "captures": {
-                        "1": {
-                            "name": "entity.name.function.dpscript"
-                        }
-                    }
-                },
-                {
-                    "name": "meta.preprocessor.dpscript",
-                    "begin": "#\\[",
-                    "end": "\\]",
-                    "patterns": [
-                        {
-                            "include": "#strings"
-                        },
-                        {
-                            "include": "#numbers"
-                        },
-                        {
-                            "name": "keyword.other.dpscript",
-                            "match": "\\b(gen|item|entity_type|block|any|sound_event)\\b"
-                        }
-                    ]
-                }
-            ]
-        },
-        "numbers": {
-            "patterns": [
-                {
-                    "name": "constant.numeric.dpscript",
-                    "match": "\\b[+-]?\\d[\\d]*(\\.?)[\\d]*(f|d|s|b)?\\b",
-                    "captures": {
-                        "1": {
-                            "name": "punctuation.separator.dot.decimal.dpscript"
-                        },
-                        "2": {
-                            "name": "entity.name.type.numeric.dpscript"
-                        }
-                    }
-                }
-            ]
-        },
-        "strings": {
-            "name": "string.quoted.double.dpscript",
-            "begin": "\"",
-            "end": "\"",
-            "patterns": [
-                {
-                    "name": "constant.character.escape.dpscript",
-                    "match": "\\\\."
-                }
-            ]
-        },
-        "other": {
-            "patterns": [
-                {
-                    "name": "variable.name",
-                    "match": "[A-Za-z0-9_]+"
+                    "name": "keyword.operator.dps",
+                    "match": "\\+|\\-|\\*|\\/|%|=|!"
                 }
             ]
         }
