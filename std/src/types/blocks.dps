@@ -3,12 +3,12 @@
 pub struct BlockState {
     /// The identifier of the block to use.
     #[nullable]
-    #[hint(block_id)]
-    Name: str;
+    #[hint = "block_id"]
+    Name: str,
 
     /// (Optional, can be empty) Block properties. Unspecified properties of the specified block will be set
     /// to their default values.
     #[nullable]
-    #[hint(block_state_property)]
-    Properties: NBT;
+    #[hint = "block_state_property"]
+    Properties: NBT,
 }

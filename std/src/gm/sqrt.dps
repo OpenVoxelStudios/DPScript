@@ -1,28 +1,29 @@
-import std::{
-    entity::tp,
-    gm::{gm_std, math_entity},
-    math::sub,
-    selectors::Pos,
-    transform::{transformation, translation},
-    intrinsics::{slice, float_of},
-};
+import std::entity::tp;
+import std::gm::gm_std;
+import std::gm::math_entity;
+import std::math::sub;
+import std::selectors::Pos;
+import std::transform::transformation;
+import std::transform::translation;
+import std::intrinsics::slice;
+import std::intrinsics::slice;
 
-const looper: Selector = selector: "__sqrt_loop";
+const looper: Selector = @"__sqrt_loop";
 
 // Compiler note: structs are only used for compile-time type checking
 // they are always represented as NBT objects in data storage
 struct SqrtTemp {
-    var1: float;
-    var2: float;
-    var3: [double; 16];
-    var4: [float; 16];
-    v1m2p: str;
+    var1: float,
+    var2: float,
+    var3: [double; 16],
+    var4: [float; 16],
+    v1m2p: str,
 }
 
 pub fn gm_sqrt(x: float) -> float {
     gm_std[looper] = 0;
 
-    let temp = SqrtTemp {
+    let temp: SqrtTemp = {
         var1: x,
         var2: 1f,
         var3: [0d, 0d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 2d],
@@ -60,11 +61,15 @@ fn sqrt_handling(var1: float, var2: float, ref temp: SqrtTemp) -> float {
 }
 
 fn positive_subtract(var2: float, ref temp: SqrtTemp) {
-    at @[~, float_of(temp.var1), ~] {
+    let var1f = float_of(temp.var1);
+
+    at @[~, var1f, ~] {
         at @[~, ~ - 0.000000001, ~] {
             math_entity.tp(@[29999999, ~ -var2, 91665]);
         }
     }
 
-    temp.v1m2p = math_entity.Pos[1].slice(0, 1);
+    let y_str = str_of(math_entity.Pos[1]);
+
+    temp.v1m2p = y_str.slice(0, 1);
 }

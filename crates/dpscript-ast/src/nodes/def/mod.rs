@@ -3,6 +3,7 @@ use crate::prelude::{meta::DefMeta, types};
 pub mod block;
 pub mod constant;
 pub mod enums;
+pub mod export;
 pub mod func;
 pub mod import;
 pub mod objective;
@@ -18,6 +19,7 @@ crate::nodes::util::node_group! {
         structs::Struct,
         block::Block,
         types::Typedef,
+        export::Export,
     ]
 }
 
@@ -36,6 +38,7 @@ impl<'a> DefTrait<'a> for Def<'a> {
             Self::Struct(it) => Self::Struct(it.with_meta(meta)),
             Self::Block(it) => Self::Block(it.with_meta(meta)),
             Self::Typedef(it) => Self::Typedef(it.with_meta(meta)),
+            Self::Export(it) => Self::Export(it.with_meta(meta)),
         }
     }
 }

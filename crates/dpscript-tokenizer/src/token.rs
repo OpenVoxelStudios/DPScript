@@ -67,6 +67,10 @@ pub enum Comparison {
     GreaterEqual, // >=
     #[display("!=")]
     NotEqual, // !=
+    #[display("&&")]
+    And, // &&
+    #[display("||")]
+    Or, // ||
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display, Serialize)]
@@ -109,6 +113,8 @@ pub enum Operator {
     ModulePath, // ::
     #[display("->")]
     Returns, // ->
+    #[display("~")]
+    CurPos, // ~
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display, Serialize)]
@@ -229,6 +235,17 @@ macro_rules! one_extra {
             (Token::$g2($g2::$v2), $iter.end_span())
         }
     };
+
+    ($c: ident, $iter: ident; $ch: expr, $g1: ident::$v1: ident) => {
+        if $iter.next_if_eq($ch).is_some() {
+            (Token::$g1($g1::$v1), $iter.end_span())
+        } else {
+            return Some(Err(TokenError::Unexpected {
+                ch: $c,
+                span: $iter.end_span().into(),
+            }));
+        }
+    };
 }
 
 macro_rules! two_extra {
@@ -280,6 +297,7 @@ pub fn parse_next<'a>(
         ';' => token!(iter; Punct::Semi),
         ',' => token!(iter; Punct::Comma),
         '@' => token!(iter; Operator::At),
+        '~' => token!(iter; Operator::CurPos),
 
         '(' => token!(iter; Punct::GroupStart = Parens),
         ')' => token!(iter; Punct::GroupEnd = Parens),
@@ -300,6 +318,8 @@ pub fn parse_next<'a>(
         '*' => one_extra!(iter; '=', Assignment::MulEqual, Operator::Star),
         '%' => one_extra!(iter; '=', Assignment::ModEqual, Operator::Percent),
         '.' => one_extra!(iter; '.', Operator::Range, Operator::Dot),
+        c if c == '&' => one_extra!(c, iter; '&', Comparison::And),
+        c if c == '|' => one_extra!(c, iter; '|', Comparison::Or),
 
         '/' => {
             if iter.next_if_eq('/').is_some() {
@@ -365,7 +385,7 @@ pub fn parse_next<'a>(
             let mut len = 0;
 
             while let Some(ch) = iter.peek() {
-                if !ch.is_numeric() || ch != '.' {
+                if !ch.is_numeric() && ch != '.' {
                     break;
                 }
 
@@ -413,10 +433,19 @@ pub fn parse_next<'a>(
                     }));
                 } // how does this even happen??
 
-                None => match buf.parse::<i32>() {
-                    Ok(it) => token!(iter; Literal::Int(it.into())),
-                    Err(err) => return Some(Err(err.into())),
-                },
+                None => {
+                    if dot {
+                        match buf.parse::<f32>() {
+                            Ok(it) => token!(iter; Literal::Float(it.into())),
+                            Err(err) => return Some(Err(err.into())),
+                        }
+                    } else {
+                        match buf.parse::<i32>() {
+                            Ok(it) => token!(iter; Literal::Int(it.into())),
+                            Err(err) => return Some(Err(err.into())),
+                        }
+                    }
+                }
             }
         }
 

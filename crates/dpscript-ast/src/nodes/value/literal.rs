@@ -1,4 +1,4 @@
-use crate::prelude::SourceSpan;
+use crate::prelude::{SourceSpan, value::Value};
 use ordered_float::OrderedFloat;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
@@ -10,7 +10,7 @@ pub struct Literal<'a> {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
 pub struct DslLiteral<'a> {
     pub dsl_marker: DslMarker,
-    pub value: LiteralValue<'a>,
+    pub value: Box<Value<'a>>,
     pub span: SourceSpan,
 }
 
@@ -24,6 +24,7 @@ pub enum LiteralValue<'a> {
     Long(i64),
     Float(OrderedFloat<f32>),
     Double(OrderedFloat<f64>),
+    CurPos,
 }
 
 #[repr(u8)]

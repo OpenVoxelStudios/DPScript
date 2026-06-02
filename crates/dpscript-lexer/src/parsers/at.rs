@@ -7,6 +7,7 @@ use crate::{
 use dpscript_ast::prelude::expr::block::at::At;
 use dpscript_parser::{BraceType, Keyword, Token};
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_at_block<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<At<'a>> {
     c.begin_span();

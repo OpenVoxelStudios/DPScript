@@ -13,3 +13,5 @@ vscode-test-web
 perf.data*
 flamegraph.svg
 /*.ron
+*.dps.ron
+*.tokens_raw.ron

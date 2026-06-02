@@ -25,6 +25,7 @@ pub struct FunctionArg<'a> {
     pub span: SourceSpan,
     pub meta: DefMeta<'a>,
     pub is_ref: bool,
+    pub is_const: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]

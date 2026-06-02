@@ -2,6 +2,7 @@ use crate::{Result, cx::ParseCx, parsers::meta::parse_def_flags, util::TokenCurs
 use dpscript_ast::prelude::def::objective::Objective;
 use dpscript_parser::{Assignment, Keyword, Punct, Token};
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_objective<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Objective<'a>> {
     c.begin_span();

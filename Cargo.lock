@@ -576,8 +576,10 @@ dependencies = [
 name = "dpscript-core"
 version = "0.1.0"
 dependencies = [
+ "dpscript-macros",
  "facet",
  "miette",
+ "once_cell",
  "pest",
  "serde",
 ]
@@ -586,6 +588,7 @@ dependencies = [
 name = "dpscript-lexer"
 version = "0.1.0"
 dependencies = [
+ "backtrace",
  "criterion",
  "dpscript-ast",
  "dpscript-core",
@@ -1180,9 +1183,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.21.3"
+version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42f5e15c9953c5e4ccceeb2e7382a716482c34515315f7b03532b8b4e8393d2d"
+checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
 
 [[package]]
 name = "onig"
@@ -1806,9 +1809,9 @@ checksum = "b7401a30af6cb5818bb64852270bb722533397edcfc7344954a38f420819ece2"
 
 [[package]]
 name = "syn"
-version = "2.0.106"
+version = "2.0.117"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ede7c438028d4436d71104916910f5bb611972c5cfd7f89b8300a8186e6fada6"
+checksum = "e665b8803e7b1d2a727f4023456bbbbe74da67099c585258af0ad9c5013b9b99"
 dependencies = [
  "proc-macro2",
  "quote",

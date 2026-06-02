@@ -2,6 +2,7 @@ use crate::{Result, cx::ParseCx, err::Error, parsers::value::parse_value, util::
 use dpscript_ast::prelude::value::binop::{BinOp, BoolOp, MathOp, Operation};
 use dpscript_parser::{BraceType, Comparison, Operator as TOperator, Punct, Token};
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_binop<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<BinOp<'a>> {
     // TODO: Some sort of PEMDAS here with chains of binary operations
@@ -65,6 +66,16 @@ pub fn parse_binop<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<
 
             Token::Comparison(Comparison::LessEqual) => {
                 op = Some(Operation::Bool(BoolOp::LessEq));
+                break;
+            }
+
+            Token::Comparison(Comparison::And) => {
+                op = Some(Operation::Bool(BoolOp::And));
+                break;
+            }
+
+            Token::Comparison(Comparison::Or) => {
+                op = Some(Operation::Bool(BoolOp::Or));
                 break;
             }
 
@@ -270,9 +281,14 @@ pub fn parse_binop<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<
 //     })
 // }
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_array_index<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<BinOp<'a>> {
     c.begin_span();
+
+    if c.check(&Token::Operator(TOperator::At)) {
+        return Err(cx.skip());
+    }
 
     let mut lhs_buf = Vec::new();
     let mut rhs_buf = None;

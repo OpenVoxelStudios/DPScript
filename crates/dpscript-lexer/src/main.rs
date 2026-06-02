@@ -14,23 +14,47 @@ pub fn main() -> miette::Result<()> {
         .init();
 
     let files = [
-        "std/src/std.dps",
-        "std/src/selectors.dps",
-        "std/src/scoreboard.dps",
-        // "std/src/prelude.dps",
-        "std/src/math.dps",
-        "std/src/intrinsics.dps",
-        "std/src/entity.dps",
+        "std/src/gm/gm.dps",
+        "std/src/gm/simple.dps",
+        "std/src/gm/sqrt.dps",
+        "std/src/types/entities/display.dps",
+        "std/src/types/entities/entities.dps",
+        "std/src/types/base.dps",
+        "std/src/types/blocks.dps",
+        "std/src/types/items.dps",
+        "std/src/types/level.dps",
+        "std/src/types/math.dps",
+        "std/src/types/misc.dps",
+        "std/src/types/players.dps",
+        "std/src/types/text.dps",
+        "std/src/types/transform.dps",
+        "std/src/types/types.dps",
         "std/src/base.dps",
+        "std/src/entity.dps",
+        "std/src/intrinsics.dps",
+        "std/src/math.dps",
+        // "std/src/prelude.dps",
+        "std/src/scoreboard.dps",
+        "std/src/selectors.dps",
+        "std/src/std.dps",
     ];
 
     for file in files {
+        tracing::info!("Work: {file}");
+
         let content = fs::read_to_string(&file).into_diagnostic()?;
         let tokens = tokenize_first(&file, &content)?;
+
+        std::fs::write(
+            format!("{}.tokens_raw.ron", file),
+            ron::ser::to_string_pretty(&tokens, ron::ser::PrettyConfig::new()).into_diagnostic()?,
+        )
+        .into_diagnostic()?;
+
         let tokens = tast_from_tokens(tokens)?;
 
         std::fs::write(
-            format!("{}.tokens.ron", file.replace("/", "_")),
+            format!("{}.tokens.ron", file),
             ron::ser::to_string_pretty(&tokens, ron::ser::PrettyConfig::new()).into_diagnostic()?,
         )
         .into_diagnostic()?;
@@ -38,7 +62,7 @@ pub fn main() -> miette::Result<()> {
         match parse(tokens) {
             Ok(defs) => {
                 std::fs::write(
-                    format!("{}.ron", file.replace("/", "_")),
+                    format!("{}.ron", file),
                     ron::ser::to_string_pretty(&defs, ron::ser::PrettyConfig::new())
                         .into_diagnostic()?,
                 )

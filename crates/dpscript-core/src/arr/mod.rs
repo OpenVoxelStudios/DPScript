@@ -1,5 +1,6 @@
 mod facet_impl;
 
+use core::fmt;
 use std::{
     hash::Hash,
     ops::{Deref, DerefMut},
@@ -8,7 +9,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub struct DynArray<T> {
     inner: NonNull<T>,
     len: usize,
@@ -124,5 +125,14 @@ where
 
     fn into_iter(self) -> Self::IntoIter {
         <&'a [T] as IntoIterator>::into_iter(self)
+    }
+}
+
+impl<T> fmt::Debug for DynArray<T>
+where
+    [T]: fmt::Debug,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt::Debug::fmt(&**self, f)
     }
 }

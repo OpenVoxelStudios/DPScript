@@ -6,6 +6,7 @@ use crate::{
         SourceSpan,
         def::{DefTrait, enums::Enum, structs::Struct},
         meta::DefMeta,
+        value::Value,
     },
     util::{ModulePath, Name},
 };
@@ -27,9 +28,26 @@ impl<'a> DefTrait<'a> for Typedef<'a> {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
 pub struct TypeRef<'a> {
-    pub name: Name<'a>,
+    pub data: TypeRefData<'a>,
     pub span: SourceSpan,
     pub resolved: Option<Box<ResolvedTypeRef<'a>>>,
+}
+
+#[repr(u8)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet)]
+pub enum TypeRefData<'a> {
+    Named {
+        name: Name<'a>,
+    },
+
+    SizedArray {
+        inner: Box<TypeRef<'a>>,
+        length: Box<Value<'a>>,
+    },
+
+    UnsizedArray {
+        inner: Box<TypeRef<'a>>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
@@ -51,7 +69,9 @@ pub enum TypeData<'a> {
 impl<'a> TypeRef<'a> {
     pub fn void(span: SourceSpan) -> Self {
         Self {
-            name: ("void", span),
+            data: TypeRefData::Named {
+                name: ("void", span),
+            },
             span,
             resolved: None,
         }

@@ -6,6 +6,7 @@ use crate::{
 use dpscript_ast::prelude::expr::Expr;
 use dpscript_parser::{Punct, Token};
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_expr<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Expr<'a>> {
     c.save();
@@ -36,12 +37,8 @@ pub fn parse_expr<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<E
 
     c.save();
 
-    match parse_call(c, cx) {
-        Ok(it) => {
-            c.expect(Token::Punct(Punct::Semi))?;
-            return Ok(Expr::Call(it));
-        }
-
+    match parse_ret(c, cx) {
+        Ok(it) => return Ok(Expr::Return(it)),
         Err(Error::Skip) => c.restore(),
         Err(other) => return Err(other),
     }
@@ -50,14 +47,6 @@ pub fn parse_expr<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<E
 
     match parse_var(c, cx) {
         Ok(it) => return Ok(Expr::Variable(it)),
-        Err(Error::Skip) => c.restore(),
-        Err(other) => return Err(other),
-    }
-
-    c.save();
-
-    match parse_ret(c, cx) {
-        Ok(it) => return Ok(Expr::Return(it)),
         Err(Error::Skip) => c.restore(),
         Err(other) => return Err(other),
     }
@@ -74,6 +63,18 @@ pub fn parse_expr<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<E
 
     match parse_assign(c, cx) {
         Ok(it) => return Ok(Expr::Assign(it)),
+        Err(Error::Skip) => c.restore(),
+        Err(other) => return Err(other),
+    }
+
+    c.save();
+
+    match parse_call(c, cx) {
+        Ok(it) => {
+            c.expect(Token::Punct(Punct::Semi))?;
+            return Ok(Expr::Call(it));
+        }
+
         Err(Error::Skip) => c.restore(),
         Err(other) => return Err(other),
     }

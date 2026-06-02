@@ -46,6 +46,11 @@ pub struct DefMeta<'a> {
     /// Used in the LSP for providing smart autocomplete for identifiers.
     pub hint: Option<Spanned<&'a str>>,
 
+    /// If this is an item that can be used as a fill-in for a hint, this is its id.
+    /// 
+    /// Format: (hint, id)
+    pub hint_id: Option<(Spanned<&'a str>, Spanned<&'a str>)>,
+
     /// Any `#[restrict(...)]` declarations.
     pub restrict: Vec<Restrict<'a>>,
 
@@ -79,6 +84,16 @@ pub struct DefMeta<'a> {
 
     /// The span of this metadata declaration.
     pub span: SourceSpan,
+
+    /// Bounds to limit potential values to.
+    /// 
+    /// Only works on struct fields.
+    pub limit: Option<(Literal<'a>, Literal<'a>)>,
+
+    /// Whether this field is represented as raw JSON when serializing for commands.
+    /// 
+    /// Only works on struct fields.
+    pub raw_json: bool,
 }
 
 #[repr(u8)]
@@ -133,6 +148,9 @@ pub enum Restrict<'a> {
 pub enum Require<'a> {
     /// Require one of the following fields in any initialization of the object.
     OneOf(Vec<Name<'a>>),
+
+    /// Require the argument to be placed in data storage somewhere.
+    Store,
 }
 
 #[repr(u8)]

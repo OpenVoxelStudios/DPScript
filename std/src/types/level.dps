@@ -1,11 +1,9 @@
 pub struct Brightness {
-    // TODO(compiler): #[limit(...)]
-
     /// (Required) The block-light level, with values from 0-15.
-    // #[limit(0, 15)] // user sets to a literal: error if outside of range. otherwise compiler will just do it and let MC clamp it.
-    block: int;
+    #[limit(0, 15)] // user sets to a literal: error if outside of range. otherwise compiler will just do it and let MC clamp it.
+    block: int,
 
     /// (Required) The skylight level, with values from 0-15.
-    // #[limit(0, 15)]
-    sky: int;
+    #[limit(0, 15)]
+    sky: int,
 }

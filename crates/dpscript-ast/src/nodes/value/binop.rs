@@ -31,6 +31,8 @@ pub enum BoolOp {
     LessEq,
     Greater,
     GreaterEq,
+    And,
+    Or,
 }
 
 #[repr(u8)]

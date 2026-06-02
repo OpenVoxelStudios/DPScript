@@ -46,6 +46,7 @@ impl<'a> DefFlagsBuilder<'a> {
     }
 }
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_def_flags<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Vec<DefFlags>> {
     let mut flags = DefFlagsBuilder::new();
@@ -76,6 +77,7 @@ pub fn parse_def_flags<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Res
     Ok(flags.build())
 }
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_single_def_meta<'a>(
     c: &mut TokenCursor<'a>,
@@ -178,13 +180,15 @@ pub fn parse_single_def_meta<'a>(
                     return Err(cx.unexpected((tkn, span)));
                 }
 
-                if !group.next_if_eq(&Token::Punct(Punct::Comma)).is_some() {
+                if !list.check(&Token::Punct(Punct::Comma)) {
                     break;
                 }
             }
 
             list.assert_empty()?;
             require.push(Require::OneOf(fields));
+        } else if group.next_if_ident("store").is_some() {
+            require.push(Require::Store);
         }
 
         group.assert_empty()?;
@@ -226,6 +230,9 @@ pub fn parse_single_def_meta<'a>(
     } else if inner.next_if_ident("this").is_some() {
         // #[this]
         meta.this = true;
+    } else if inner.next_if_ident("raw_json").is_some() {
+        // #[raw_json]
+        meta.raw_json = true;
     } else if inner.next_if_ident("enforce").is_some() {
         // #[enforce(...)]
         let mut group = inner.expect_group(BraceType::Parens)?;
@@ -262,6 +269,26 @@ pub fn parse_single_def_meta<'a>(
 
         group.assert_empty()?;
         meta.same_as.push(ty);
+    } else if inner.next_if_ident("limit").is_some() {
+        let mut group = inner.expect_group(BraceType::Parens)?;
+        let a = parse_literal(&mut group, cx)?;
+
+        group.expect(Token::Punct(Punct::Comma))?;
+
+        let b = parse_literal(&mut group, cx)?;
+
+        group.assert_empty()?;
+        meta.limit = Some((a, b));
+    } else if inner.next_if_ident("hint_id").is_some() {
+        let mut group = inner.expect_group(BraceType::Parens)?;
+        let hint = group.expect_ident()?;
+
+        group.expect(Token::Assignment(Assignment::Equal))?;
+
+        let id = group.expect_str()?;
+
+        group.assert_empty()?;
+        meta.hint_id = Some((hint, id));
     }
 
     inner.assert_empty()?;
@@ -418,6 +445,39 @@ fn merge_def_meta<'a>(a: &mut DefMeta<'a>, b: DefMeta<'a>) -> Result<()> {
 
     a.same_as.extend(b.same_as);
 
+    if let Some(limit) = b.limit {
+        if a.limit.is_some() {
+            return Err(Error::DuplicateMeta {
+                kind: "limit",
+                span: b.span.into(),
+            });
+        }
+
+        a.limit = Some(limit);
+    }
+
+    if b.raw_json {
+        if a.raw_json {
+            return Err(Error::DuplicateMeta {
+                kind: "raw_json",
+                span: b.span.into(),
+            });
+        }
+
+        a.raw_json = true;
+    }
+
+    if let Some(hint_id) = b.hint_id {
+        if a.hint_id.is_some() {
+            return Err(Error::DuplicateMeta {
+                kind: "hint_id",
+                span: b.span.into(),
+            });
+        }
+
+        a.hint_id = Some(hint_id);
+    }
+
     let min = (a.span, b.span).min_by(|it| it.start);
     let max = (a.span, b.span).max_by(|it| it.start);
 
@@ -428,6 +488,7 @@ fn merge_def_meta<'a>(a: &mut DefMeta<'a>, b: DefMeta<'a>) -> Result<()> {
     Ok(())
 }
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_def_meta<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<DefMeta<'a>> {
     let mut meta = DefMeta::default();

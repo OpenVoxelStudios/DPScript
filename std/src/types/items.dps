@@ -3,16 +3,16 @@
 pub struct ItemStack {
     /// The resource location of the item.
     #[nullable]
-    #[hint(item_id)]
-    id: Ident;
+    #[hint = "item_id"]
+    id: Ident,
 
     /// Number of items stacked in this inventory slot. Any item can be stacked, even if unstackable through normal
     /// means. Defaults to 1 if not specified.
     #[nullable]
-    count: int;
+    count: int,
 
     /// Optional map of additional (non-default) data components.
     #[nullable]
-    #[hint(data_components)]
-    components: NBT;
+    #[hint = "data_component"]
+    components: NBT,
 }

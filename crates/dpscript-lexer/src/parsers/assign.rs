@@ -2,6 +2,7 @@ use crate::{Result, cx::ParseCx, err::Error, parsers::value::parse_value, util::
 use dpscript_ast::prelude::expr::assign::{Assign, AssignOp};
 use dpscript_parser::{Assignment, Punct, Token};
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_assign<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Assign<'a>> {
     c.begin_span();
@@ -60,7 +61,7 @@ pub fn parse_assign<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result
 
     let rhs = parse_value(c, cx)?;
 
-    // c.expect(Token::Punct(Punct::Semi))?;
+    c.expect(Token::Punct(Punct::Semi))?;
 
     let span = c.end_span();
 

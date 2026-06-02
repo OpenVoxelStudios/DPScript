@@ -1,13 +1,13 @@
 objective compiler_support = "dummy";
 
 #[cmd("summon {id}")]
-pub fn summon(#[hint(entity_id)] id: Ident);
+pub fn summon(#[hint = "entity_id"] id: Ident);
 
 #[cmd("summon {id} {position}")]
-pub fn summon_at(#[hint(entity_id)] id: Ident, position: Pos3);
+pub fn summon_at(#[hint = "entity_id"] id: Ident, position: Pos3);
 
 #[cmd("summon {id} {position} {data}")]
-pub fn summon_with(#[hint(entity_id)] id: Ident, position: Pos3, data: NBT);
+pub fn summon_with(#[hint = "entity_id"] id: Ident, position: Pos3, data: NBT);
 
 #[cmd("forceload add {x} {z}")]
 pub fn forceload_add(x: int, z: int);

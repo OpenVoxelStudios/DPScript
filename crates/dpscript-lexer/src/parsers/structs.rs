@@ -10,6 +10,7 @@ use crate::{
 use dpscript_ast::prelude::def::structs::{Struct, StructField};
 use dpscript_parser::{BraceType, Keyword, Punct, Token};
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 fn parse_struct_field<'a>(
     c: &mut TokenCursor<'a>,
@@ -37,6 +38,7 @@ fn parse_struct_field<'a>(
     })
 }
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_struct<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Struct<'a>> {
     c.begin_span();

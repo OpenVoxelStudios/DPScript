@@ -3,16 +3,17 @@ use crate::{
     cx::ParseCx,
     err::Error,
     parsers::{
-        blocks::parse_block, constant::parse_constant, enums::parse_enum, func::parse_func,
-        import::parse_import, meta::parse_def_meta, objective::parse_objective,
+        blocks::parse_block, constant::parse_constant, enums::parse_enum, export::parse_export,
+        func::parse_func, import::parse_import, meta::parse_def_meta, objective::parse_objective,
         structs::parse_struct, types::parse_typedef,
     },
     util::TokenCursor,
 };
 use dpscript_ast::prelude::def::{Def, DefTrait};
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
-fn parse_def_inner<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Def<'a>> {
+fn parse_def_select<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Def<'a>> {
     c.save();
 
     match parse_block(c, cx) {
@@ -77,13 +78,22 @@ fn parse_def_inner<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<
         Err(other) => return Err(other),
     }
 
+    c.save();
+
+    match parse_export(c, cx) {
+        Ok(it) => return Ok(Def::Export(it)),
+        Err(Error::Skip) => c.restore(),
+        Err(other) => return Err(other),
+    }
+
     Err(cx.unexpected(c.take_next()?))
 }
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_def<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Def<'a>> {
     let meta = parse_def_meta(c, cx)?;
-    let def = parse_def_inner(c, cx)?;
+    let def = parse_def_select(c, cx)?;
 
     Ok(def.with_meta(meta))
 }

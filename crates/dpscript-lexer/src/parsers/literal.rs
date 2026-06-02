@@ -6,6 +6,7 @@ use dpscript_ast::prelude::value::{
 };
 use dpscript_parser::{BraceType, Keyword, Literal as TLiteral, Operator, Punct, Token};
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_literal<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Literal<'a>> {
     match c.next() {
@@ -49,11 +50,17 @@ pub fn parse_literal<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Resul
             span,
         }),
 
+        Some((Token::Operator(Operator::CurPos), span)) => Ok(Literal {
+            value: LiteralValue::CurPos,
+            span,
+        }),
+
         Some(_) => Err(cx.skip()),
         None => Err(cx.eof(c.cur_span())),
     }
 }
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_dsl_literal<'a>(
     c: &mut TokenCursor<'a>,
@@ -67,15 +74,16 @@ pub fn parse_dsl_literal<'a>(
         _ => return Err(cx.skip()),
     };
 
-    let value = parse_literal(c, cx)?;
+    let value = parse_value(c, cx)?;
 
     Ok(DslLiteral {
         dsl_marker: marker,
-        value: value.value,
+        value: Box::new(value),
         span: c.end_span(),
     })
 }
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_nbt_literal<'a>(
     c: &mut TokenCursor<'a>,
@@ -108,6 +116,7 @@ pub fn parse_nbt_literal<'a>(
     })
 }
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_array_literal<'a>(
     c: &mut TokenCursor<'a>,
@@ -124,7 +133,7 @@ pub fn parse_array_literal<'a>(
     while group.has_next() {
         values.push(parse_value(&mut group, cx)?);
 
-        if !group.next_if_eq(&Token::Punct(Punct::Comma)).is_some() {
+        if !group.check(&Token::Punct(Punct::Comma)) {
             break;
         }
     }

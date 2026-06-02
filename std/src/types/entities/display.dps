@@ -8,63 +8,63 @@ pub struct DisplayEntity extends Entity {
     /// horizontal (pivots around horizontal axis), and center (pivots around center point). Defaults
     /// to fixed.
     #[nullable]
-    billboard: BillboardType;
+    billboard: BillboardType,
 
     /// If present, overrides light values used for rendering. Omitted by default (which means rendering
     /// uses values from entity position).
     #[nullable]
-    brightness: Brightness;
+    brightness: Brightness,
 
     /// Overrides the glow border color. If -1, uses the color of the team that the display entity is in.
     /// Defaults to -1. Is not preserved when removed.
     #[nullable]
-    glow_color_override: int;
+    glow_color_override: int,
 
     /// The maximum height of the entity. Rendering culling bounding box spans vertically y to y+height,
     /// and the part beyond will be culled. If set to 0, no culling on both vertical and horizontal directions.
     /// Defaults to 0.
     #[nullable]
-    height: float;
+    height: float,
 
     /// The maximum width of the entity. Rendering culling bounding box spans horizontally width/2 from entity
     /// position, and the part beyond will be culled. If set to 0, no culling on both vertical and horizontal
     /// directions. Defaults to 0.
     #[nullable]
-    width: float;
+    width: float,
 
     /// Interpolation duration in ticks.
     #[nullable]
-    interpolation_duration: int;
+    interpolation_duration: int,
 
     /// Interpolation duration in ticks for teleportation. Values are clamped between 0 and 59 (inclusive).
     #[nullable]
     #[limit(0, 59)]
-    teleport_duration: int;
+    teleport_duration: int,
 
     /// Delay before starting interpolation. If 0, interpolation starts immediately. (Not saved to entity,
     /// but can be set by commands.)
     #[nullable]
-    start_interpolation: int;
+    start_interpolation: int,
 
     /// Shadow radius. Value is treated as 64 when higher than 64. If less than or equal to 0, the entity
     /// has no shadow. Defaults to 0. Interpolated.
     #[nullable]
-    shadow_radius: float;
+    shadow_radius: float,
 
     /// Controls the opacity of the shadow as a function of distance to block below. Defaults to 1.
     /// Interpolated.
     #[nullable]
-    shadow_strength: float;
+    shadow_strength: float,
 
     /// Maximum view range of the entity. When the distance is more than `<view_range> * <entityDistanceScaling> * 64`,
     /// the entity is not rendered. Defaults to 1.0.
     #[nullable]
-    view_range: float;
+    view_range: float,
 
     /// The rendering transformation applied to model after normal entity orientation, taking the position
     /// of the entity as the origin. Defaults to no transformation. Interpolated.
     #[nullable]
-    transformation: Transform;
+    transformation: Transform,
 }
 
 /// Item Display entities can display any item in the game using the item tag.
@@ -76,11 +76,11 @@ pub struct DisplayEntity extends Entity {
 ///
 /// Per default, the location of an item display without transformations represents the center of the item.
 #[allow(incomplete)]
-#[entity_id = "minecraft:item_display"]
+#[hint_id(entity_id = "minecraft:item_display")]
 pub struct ItemDisplay extends DisplayEntity {
     /// The item to display.
     #[nullable]
-    item: ItemStack;
+    item: ItemStack,
 }
 
 /// Block Display entities can display most block in the game using the block_state tag, except for fluid blocks
@@ -89,11 +89,11 @@ pub struct ItemDisplay extends DisplayEntity {
 /// The location of a block display without transformations represents the north-west-bottom (negative XYZ) corner
 /// of the block.
 #[allow(incomplete)]
-#[entity_id = "minecraft:block_display"]
+#[hint_id(entity_id = "minecraft:block_display")]
 pub struct BlockDisplay extends DisplayEntity {
     /// The block state to display.
     #[nullable]
-    block_state: BlockState;
+    block_state: BlockState,
 }
 
 /// Text Display entities can display any text using the text tag.
@@ -105,44 +105,44 @@ pub struct BlockDisplay extends DisplayEntity {
 ///
 /// By default, each pixel of text is 1/40th of a meter wide.
 #[allow(incomplete)]
-#[entity_id = "minecraft:text_display"]
+#[hint_id(entity_id = "minecraft:text_display")]
 pub struct TextDisplay extends DisplayEntity {
     /// Text alignment direction. Can be center, left, and right. Defaults to center.
     #[nullable]
-    alignment: TextAlignment;
+    alignment: TextAlignment,
 
     /// The background color, arranged by ARGB. Since pixels with an alpha channel less than 0.1 are discarded when
     /// rendering in vanilla shader, the background becomes fully transparent when A is less than 26 (0x1A). Defaults
     /// to 1073741824 (0x40000000). Interpolated.
     #[nullable]
-    background: int;
+    background: int,
 
     /// If true, rendering uses default text background color (same as in chat), which overrides background. Defaults
     /// to false.
     #[nullable]
-    default_background: bool;
+    default_background: bool,
 
     /// Maximum line width used to split lines (note: new line can be also added with \n characters). Defaults to 200.
     #[nullable]
-    line_width: int;
+    line_width: int,
 
     /// Whether the text is visible through blocks. Defaults to false.
     #[nullable]
-    see_through: bool;
+    see_through: bool,
 
     /// Whether the text is displayed with shadow. Defaults to false.
     #[nullable]
-    shadow: bool;
+    shadow: bool,
 
     /// The text to be displayed in the format of raw JSON text, which are resolved with the context of the display entity.
     #[nullable]
     #[raw_json] // signals to the compiler that it should be wrapped in a string as raw json text ('{"text": ""}')
-    text: Text;
+    text: Text,
 
     /// Alpha value of rendered text. Value ranges from 0 to 255. Values up to 3 are treated as fully opaque (255). Similar
     /// to the background, the text rendering is discarded for values between 4 and 26. NBT stores the value as signed byte,
     /// -128 to 127. Defaults to -1, which represents 255 and is completely opaque. SNBT to NBT handles conversion from unsigned
     /// to signed, but if needed, replace values greater than 127 with alpha-256 or alphaUB. Interpolated.
     #[nullable]
-    text_opacity: byte;
+    text_opacity: byte,
 }

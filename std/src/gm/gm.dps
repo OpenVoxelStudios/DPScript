@@ -1,7 +1,7 @@
 import std::base::forceload_add;
 import std::base::summon_with;
 
-pub objective gm_std: dummy = "gm.std";
+pub objective gm_std = "dummy";
 
 pub const math_entity: Selector = @"91bb5-0-0-0-ffff";
 

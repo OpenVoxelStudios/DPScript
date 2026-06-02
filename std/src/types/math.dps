@@ -1,19 +1,19 @@
 #[same_as(FVec3)] // can be implicitly cast to a FVec3
 pub struct DVec3 {
-    x: double;
-    y: double;
-    z: double;
+    x: double,
+    y: double,
+    z: double,
 }
 
 #[same_as(DVec3)] // can be implicitly cast to a FVec3
 pub struct FVec3 {
-    x: float;
-    y: float;
-    z: float;
+    x: float,
+    y: float,
+    z: float,
 }
 
 pub struct BlockPos {
-    x: int;
-    y: int;
-    z: int;
+    x: int,
+    y: int,
+    z: int,
 }

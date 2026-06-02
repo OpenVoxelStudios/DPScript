@@ -3,8 +3,9 @@ use dpscript_ast::prelude::{
     HasSpan,
     value::refs::{ValueRef, VarRef},
 };
-use dpscript_parser::{Operator, Punct, Token};
+use dpscript_parser::{BraceType, Operator, Punct, Token};
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_var_ref<'a>(c: &mut TokenCursor<'a>, _cx: &mut ParseCx<'a>) -> Result<VarRef<'a>> {
     let name = c.expect_ident().map_err(|_| Error::Skip)?;
@@ -16,6 +17,7 @@ pub fn parse_var_ref<'a>(c: &mut TokenCursor<'a>, _cx: &mut ParseCx<'a>) -> Resu
     })
 }
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_value_ref<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<ValueRef<'a>> {
     let mut buf = Vec::new();
@@ -24,7 +26,9 @@ pub fn parse_value_ref<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Res
         // if we somehow reach the end of the file before encountering a dot, then we are not accessing any fields
         let tkn = c.take_next().map_err(|_| Error::Skip)?;
 
-        if tkn.0 == Token::Punct(Punct::Semi) {
+        if tkn.0 == Token::Punct(Punct::Semi)
+            || matches!(tkn.0, Token::BraceGroup(BraceType::Braces, _))
+        {
             return Err(cx.skip());
         }
 

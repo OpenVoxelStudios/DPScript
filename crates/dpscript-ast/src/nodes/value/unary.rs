@@ -21,4 +21,8 @@ pub enum UnaryOp {
     /// Boolean operation - invert
     /// `!bool`
     Invert,
+
+    /// Offset from the current position.
+    /// `~value`
+    Offset,
 }

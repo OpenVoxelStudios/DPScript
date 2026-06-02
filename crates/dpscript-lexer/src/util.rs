@@ -161,6 +161,16 @@ impl<'a> TokenCursor<'a> {
         }
     }
 
+    pub fn check(&mut self, eq: &Token<'a>) -> bool {
+        if self.peek().is_some_and(|it| it == eq) {
+            self.next().unwrap(); // essentially an assertion that it's not None because that wouldn't make sense anyway
+            true
+        } else {
+            self.peeker = self.peeker.saturating_sub(1);
+            false
+        }
+    }
+
     pub fn has_next(&self) -> bool {
         self.pos < self.inner.len()
     }
@@ -176,6 +186,10 @@ impl<'a> TokenCursor<'a> {
                 span: self.cur_span().into(),
             })
         }
+    }
+
+    pub fn remaining(&self) -> usize {
+        self.inner.len() - self.pos
     }
 
     pub fn take_while<F: Fn(&Token<'a>) -> bool>(&mut self, f: F) -> Vec<Spanned<Token<'a>>> {
@@ -326,5 +340,9 @@ impl<'a> TokenCursor<'a> {
 
     pub fn clear_peek(&mut self) {
         self.peeker = 0;
+    }
+
+    pub fn get(&self) -> &Vec<Spanned<Token<'a>>> {
+        &self.inner
     }
 }

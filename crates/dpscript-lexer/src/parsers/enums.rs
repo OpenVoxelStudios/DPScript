@@ -7,6 +7,7 @@ use crate::{
 use dpscript_ast::prelude::def::enums::{Enum, EnumValue, EnumVariant};
 use dpscript_parser::{Assignment, BraceType, Keyword, Literal, Punct, Token};
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 fn parse_enum_variant<'a>(
     c: &mut TokenCursor<'a>,
@@ -52,6 +53,7 @@ fn parse_enum_variant<'a>(
     })
 }
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_enum<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Enum<'a>> {
     c.begin_span();

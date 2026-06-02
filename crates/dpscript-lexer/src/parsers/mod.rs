@@ -7,6 +7,7 @@ pub mod cond;
 pub mod constant;
 pub mod defs;
 pub mod enums;
+pub mod export;
 pub mod expr;
 pub mod func;
 pub mod import;

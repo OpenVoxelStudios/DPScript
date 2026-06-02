@@ -61,6 +61,7 @@ impl<'a> StringCursor<'a> {
         if self.peek().is_some_and(|it| f(it)) {
             self.next()
         } else {
+            self.peeker = self.peeker.saturating_sub(1);
             None
         }
     }
@@ -69,6 +70,7 @@ impl<'a> StringCursor<'a> {
         if self.peek().is_some_and(|it| it == eq) {
             Some(self.next().unwrap()) // essentially an assertion that it's not None because that wouldn't make sense anyway
         } else {
+            self.peeker = self.peeker.saturating_sub(1);
             None
         }
     }

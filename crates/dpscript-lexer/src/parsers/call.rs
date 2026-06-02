@@ -2,6 +2,7 @@ use crate::{Result, cx::ParseCx, err::Error, parsers::value::parse_value, util::
 use dpscript_ast::prelude::expr::call::Call;
 use dpscript_parser::{BraceType, Punct, Token};
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_call<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Call<'a>> {
     c.begin_span();
@@ -13,12 +14,14 @@ pub fn parse_call<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<C
         // if we somehow reach the end of the file before finding the arg list, then we are not calling anything
         let tkn = c.take_next().map_err(|_| Error::Skip)?;
 
-        if tkn.0 == Token::Punct(Punct::Semi) {
+        if tkn.0 == Token::Punct(Punct::Semi)
+            || matches!(tkn.0, Token::BraceGroup(BraceType::Braces, _))
+        {
             return Err(cx.skip());
         }
 
         if let Token::BraceGroup(BraceType::Parens, buf) = tkn.0 {
-            args_buf = TokenCursor::new(buf.into_inner());
+            args_buf = TokenCursor::new(buf.to_vec());
             break;
         }
 

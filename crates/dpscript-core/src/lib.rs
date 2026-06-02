@@ -4,6 +4,8 @@ extern crate serde;
 #[macro_use]
 extern crate facet;
 
+pub mod bt;
+
 mod arr;
 mod cursor;
 mod ops;
@@ -18,3 +20,5 @@ pub use span_ops::*;
 
 pub type Spanned<T> = (T, SourceSpan);
 pub type MSourceSpan = miette::SourceSpan;
+
+pub use dpscript_macros::*;

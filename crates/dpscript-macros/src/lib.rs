@@ -6,8 +6,8 @@
 )]
 
 use proc_macro::TokenStream;
-use quote::{quote, quote_spanned};
-use syn::{Data, DeriveInput, parse_macro_input, spanned::Spanned};
+use quote::{format_ident, quote, quote_spanned};
+use syn::{Data, DeriveInput, FnArg, ItemFn, Visibility, parse_macro_input, spanned::Spanned};
 
 #[proc_macro_derive(HasSpan)]
 pub fn derive_has_span(stream: TokenStream) -> TokenStream {
@@ -140,6 +140,54 @@ pub fn derive_has_span_group(stream: TokenStream) -> TokenStream {
                 }
             }
         }
+    }
+    .into()
+}
+
+#[proc_macro_attribute]
+pub fn trace_fn_lexer(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let mut input = parse_macro_input!(item as ItemFn);
+    let mut wrap = input.clone();
+
+    let name = input.sig.ident;
+    let inner = format_ident!("{name}_inner");
+
+    input.sig.ident = inner.clone();
+    input.vis = Visibility::Inherited;
+
+    let name_s = name.to_string();
+
+    let mut args = Vec::new();
+
+    for arg in &input.sig.inputs {
+        if let FnArg::Typed(arg) = arg {
+            args.push(arg.pat.clone());
+        }
+    }
+
+    wrap.block = syn::parse2(quote! {{
+        dpscript_core::bt::push_frame(#name_s, module_path!(), file!(), line!());
+        let res = #inner(#(#args),*);
+
+        match &res {
+            Ok(_) => {
+                dpscript_core::bt::pop_frame();
+            },
+
+            Err(crate::err::Error::Skip) => {
+                dpscript_core::bt::pop_frame();
+            },
+
+            _ => {}
+        };
+
+        res
+    }})
+    .unwrap();
+
+    quote! {
+        #input
+        #wrap
     }
     .into()
 }

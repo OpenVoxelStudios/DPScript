@@ -7,6 +7,7 @@ use crate::{
 use dpscript_ast::prelude::def::constant::Constant;
 use dpscript_parser::{Assignment, Keyword, Punct, Token};
 
+#[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn parse_constant<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<Constant<'a>> {
     c.begin_span();

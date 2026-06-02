@@ -6,20 +6,20 @@ pub struct PlayerProfile {
     /// cape, and elytra textures) can be used for rendering. If the profile does not exist, a random default
     /// skin is provided. Optional.
     #[nullable]
-    name: str;
+    name: str,
 
     /// A UUID. If no other profile fields are specified, this is used to dynamically request the profile of a
     /// player with that UUID from Mojang's servers. Once received, that profile's properties (such as its skin,
     /// cape, and elytra textures) can be used for rendering. If the profile does not exist, a random default
     /// skin is provided. Optional.
     #[nullable]
-    uuid: [int; 4];
+    uuid: [int; 4],
 
     /// A non-empty list of user profile properties. If this is specified, the dynamic profile fields are ignored,
     /// and a custom profile with these properties is used instead. If set to an empty list, the field is removed
     /// rather than invalidating the whole component. Optional.
     #[nullable]
-    properties: [ProfileProperty];
+    properties: [ProfileProperty],
 
     /// Namespaced path to a player skin texture, relative to the textures folder in a resource pack. If specified,
     /// this texture is used when rendering a player model or skin, overriding the skin texture provided by a profile.
@@ -27,31 +27,31 @@ pub struct PlayerProfile {
     /// opaque. If omitted and no skin is provided by a profile, the slim Alex skin is used
     /// (`minecraft:entity/player/slim/alex`). Optional.
     #[nullable]
-    #[hint(texture)]
-    texture: Ident;
+    #[hint = "texture"]
+    texture: Ident,
 
     /// Namespaced path to a cape texture, relative to the textures folder in a resource pack. If specified, this texture
     /// is used when rendering a cape, overriding the cape texture provided by a profile. If the resolved profile (or lack
     /// thereof) does not have a cape, it will gain one. This does not affect the elytra texture. If Optional.
     #[nullable]
-    #[hint(texture)]
-    cape: Ident;
+    #[hint = "texture"]
+    cape: Ident,
 
     /// Namespaced path to an elytra texture, relative to the textures folder in a resource pack. If specified, this texture
     /// is used when rendering an elytra, overriding the elytra texture provided by a profile. This does not affect the cape
     /// texture. If omitted and no elytra texture is provided by a profile, the normal elytra texture is used
     /// (`minecraft:entity/equipment/wings/elytra`). Optional.
     #[nullable]
-    #[hint(texture)]
-    elytra: Ident;
+    #[hint = "texture"]
+    elytra: Ident,
 
     /// The type of player model to use. Either "wide" or "slim". If specified, this overrides the model type provided by a
     /// profile. If omitted and no model type is provided by a profile, a slim model type is used. Optional.
     #[nullable]
-    model: PlayerModelType;
+    model: PlayerModelType,
 }
 
-#[repr(str)]
+#[repr(string)]
 pub enum PlayerModelType {
     Wide = "wide",
     Slim = "slim",
@@ -62,12 +62,12 @@ pub enum PlayerModelType {
 pub struct ProfileProperty {
     /// The name of the property. Can only be "textures".
     #[restrict(values = ["textures"])]
-    name: str;
+    name: str,
 
     /// The texture data json, encoded in base64.
-    value: str;
+    value: str,
 
     /// Optional. Mojang's signature of the value, encoded in base64.
     #[nullable]
-    signature: str;
+    signature: str,
 }
