@@ -38,18 +38,23 @@ pub fn main() -> miette::Result<()> {
         "std/src/std.dps",
     ];
 
+    let write_output = false;
+
     let contents = files
         .iter()
         .map(|it| (*it, StaticRef::new(fs::read_to_string(it).unwrap())))
         .collect::<HashMap<_, _>>();
 
-    let modules = dpscript_analyzer::analyze(&files, &contents)?;
+    let modules = dpscript_analyzer::analyze(&files, &contents, write_output)?;
 
-    std::fs::write(
-        "modules.ron",
-        ron::ser::to_string_pretty(&modules, ron::ser::PrettyConfig::new()).into_diagnostic()?,
-    )
-    .into_diagnostic()?;
+    if write_output {
+        std::fs::write(
+            "modules.ron",
+            ron::ser::to_string_pretty(&modules, ron::ser::PrettyConfig::new())
+                .into_diagnostic()?,
+        )
+        .into_diagnostic()?;
+    }
 
     for (_, v) in contents {
         v.free();

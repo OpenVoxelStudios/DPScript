@@ -67,6 +67,7 @@ impl StaticRef {
 pub fn analyze<'a>(
     files: &[&'static str],
     contents: &HashMap<&'static str, StaticRef>,
+    write_output: bool,
 ) -> Result<HashMap<String, Module<'a>>, ErrorGroup> {
     let mut modules = HashMap::new();
 
@@ -86,27 +87,33 @@ pub fn analyze<'a>(
         let text = content.get();
         let tokens = tokenize_first(&file, text).unwrap();
 
-        std::fs::write(
-            format!("{}.tokens_raw.ron", file),
-            ron::ser::to_string_pretty(&tokens, ron::ser::PrettyConfig::new()).unwrap(),
-        )
-        .unwrap();
+        if write_output {
+            std::fs::write(
+                format!("{}.tokens_raw.ron", file),
+                ron::ser::to_string_pretty(&tokens, ron::ser::PrettyConfig::new()).unwrap(),
+            )
+            .unwrap();
+        }
 
         let tokens = tast_from_tokens(tokens).unwrap();
 
-        std::fs::write(
-            format!("{}.tokens.ron", file),
-            ron::ser::to_string_pretty(&tokens, ron::ser::PrettyConfig::new()).unwrap(),
-        )
-        .unwrap();
+        if write_output {
+            std::fs::write(
+                format!("{}.tokens.ron", file),
+                ron::ser::to_string_pretty(&tokens, ron::ser::PrettyConfig::new()).unwrap(),
+            )
+            .unwrap();
+        }
 
         let defs = match parse(tokens) {
             Ok(defs) => {
-                std::fs::write(
-                    format!("{}.ron", file),
-                    ron::ser::to_string_pretty(&defs, ron::ser::PrettyConfig::new()).unwrap(),
-                )
-                .unwrap();
+                if write_output {
+                    std::fs::write(
+                        format!("{}.ron", file),
+                        ron::ser::to_string_pretty(&defs, ron::ser::PrettyConfig::new()).unwrap(),
+                    )
+                    .unwrap();
+                }
 
                 defs
             }

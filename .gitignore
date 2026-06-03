@@ -15,3 +15,4 @@ flamegraph.svg
 /*.ron
 *.dps.ron
 *.tokens_raw.ron
+profile.json.gz
