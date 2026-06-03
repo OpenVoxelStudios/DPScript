@@ -2,9 +2,7 @@
 
 use crate::{
     cx::VisitCx,
-    util::{
-        ConstExport, EnumExport, Export, FuncExport, ObjectiveExport, StructExport, TypedefExport,
-    },
+    util::{ConstExport, Export, FuncExport, ObjectiveExport, TypeExport},
     visitor::DefVisitor,
 };
 use dpscript_ast::prelude::{
@@ -14,12 +12,151 @@ use dpscript_ast::prelude::{
         objective::Objective, structs::Struct,
     },
     meta::DefFlags,
-    types::Typedef,
+    types::{TypeData, Typedef},
 };
 
 pub struct ExportResolver;
 
 impl<'a, 'visit> DefVisitor<'a, 'visit> for ExportResolver
+where
+    'a: 'visit,
+{
+    fn visit_constant(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Constant<'a>) {
+        if node.flags.contains(&DefFlags::Public) {
+            if let Some(export) = cx.module.exports.get(&node.name.0) {
+                cx.duplicate_export(node.name.0, export.span(), node.span);
+            } else {
+                cx.module.exports.insert(
+                    &node.name.0,
+                    Export::Constant(ConstExport {
+                        name: node.name,
+                        ty: node.ty.clone(),
+                        meta: node.meta.clone(),
+                        span: node.span,
+                        module: cx.module.name.clone(),
+                    }),
+                );
+            }
+        }
+    }
+
+    fn visit_func(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Function<'a>) {
+        if node.info.flags.contains(&DefFlags::Public) {
+            if let Some(ty) = &node.info.target {
+                let map = cx
+                    .module
+                    .inst_func_exports
+                    .entry(&node.info.name.0)
+                    .or_default();
+
+                if let Some(export) = map.get(&ty.to_string()) {
+                    let span = export.span();
+                    cx.duplicate_export(node.info.name.0, span, node.span);
+                } else {
+                    map.insert(
+                        ty.to_string(),
+                        FuncExport {
+                            info: node.info.clone(),
+                            meta: node.info.meta.clone(),
+                            span: node.span,
+                            module: cx.module.name.clone(),
+                        },
+                    );
+                }
+            } else {
+                if let Some(export) = cx.module.exports.get(&node.info.name.0) {
+                    cx.duplicate_export(node.info.name.0, export.span(), node.span);
+                } else {
+                    cx.module.exports.insert(
+                        &node.info.name.0,
+                        Export::Function(FuncExport {
+                            info: node.info.clone(),
+                            meta: node.info.meta.clone(),
+                            span: node.span,
+                            module: cx.module.name.clone(),
+                        }),
+                    );
+                }
+            }
+        }
+    }
+
+    fn visit_objective(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Objective<'a>) {
+        if node.flags.contains(&DefFlags::Public) {
+            if let Some(export) = cx.module.exports.get(&node.name.0) {
+                cx.duplicate_export(node.name.0, export.span(), node.span);
+            } else {
+                cx.module.exports.insert(
+                    &node.name.0,
+                    Export::Objective(ObjectiveExport {
+                        name: node.name,
+                        meta: node.meta.clone(),
+                        span: node.span,
+                        module: cx.module.name.clone(),
+                    }),
+                );
+            }
+        }
+    }
+
+    fn visit_struct(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Struct<'a>) {
+        if node.flags.contains(&DefFlags::Public) {
+            if let Some(export) = cx.module.exports.get(&node.name.0) {
+                cx.duplicate_export(node.name.0, export.span(), node.span);
+            } else {
+                cx.module.exports.insert(
+                    &node.name.0,
+                    Export::Type(TypeExport {
+                        name: node.name,
+                        data: TypeData::Struct(node.clone()),
+                        span: node.span,
+                        module: cx.module.name.clone(),
+                    }),
+                );
+            }
+        }
+    }
+
+    fn visit_enum(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Enum<'a>) {
+        if node.flags.contains(&DefFlags::Public) {
+            if let Some(export) = cx.module.exports.get(&node.name.0) {
+                cx.duplicate_export(node.name.0, export.span(), node.span);
+            } else {
+                cx.module.exports.insert(
+                    &node.name.0,
+                    Export::Type(TypeExport {
+                        name: node.name,
+                        data: TypeData::Enum(node.clone()),
+                        span: node.span,
+                        module: cx.module.name.clone(),
+                    }),
+                );
+            }
+        }
+    }
+
+    fn visit_typedef(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Typedef<'a>) {
+        if node.flags.contains(&DefFlags::Public) {
+            if let Some(export) = cx.module.exports.get(&node.name.0) {
+                cx.duplicate_export(node.name.0, export.span(), node.span);
+            } else {
+                cx.module.exports.insert(
+                    &node.name.0,
+                    Export::Type(TypeExport {
+                        name: node.name,
+                        data: TypeData::Typedef(node.clone()),
+                        span: node.span,
+                        module: cx.module.name.clone(),
+                    }),
+                );
+            }
+        }
+    }
+}
+
+pub struct ExportStmtResolver;
+
+impl<'a, 'visit> DefVisitor<'a, 'visit> for ExportStmtResolver
 where
     'a: 'visit,
 {
@@ -39,138 +176,42 @@ where
             }
 
             if !cx.analysis.visit_module(&module, self) {
-                cx.analysis.cannot_find_module(module, path.span);
+                cx.cannot_find_module(module, path.span);
 
                 continue;
             }
 
-            let module = cx.analysis.modules.get(&module).unwrap();
-
             // TODO: Don't clone this!
-            for (k, v) in module.exports.clone() {
+            for (k, v) in cx.analysis.modules.get(&module).unwrap().exports.clone() {
                 if let Some(export) = cx.module.exports.get(k) {
-                    cx.analysis.duplicate_export(k, export.span(), path.span);
+                    let span = export.span();
+                    cx.duplicate_export(k, span, path.span);
                 } else {
                     cx.module.exports.insert(k, v.with(path.span, v.module()));
                 }
             }
-        }
-    }
 
-    fn visit_constant(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Constant<'a>) {
-        if node.flags.contains(&DefFlags::Public) {
-            if let Some(export) = cx.module.exports.get(&node.name.0) {
-                cx.analysis
-                    .duplicate_export(node.name.0, export.span(), node.span);
-            } else {
-                cx.module.exports.insert(
-                    &node.name.0,
-                    Export::Constant(ConstExport {
-                        name: node.name,
-                        ty: node.ty.clone(),
-                        meta: node.meta.clone(),
-                        span: node.span,
-                        module: cx.module.name.clone(),
-                    }),
-                );
-            }
-        }
-    }
-
-    fn visit_func(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Function<'a>) {
-        if node.info.flags.contains(&DefFlags::Public) {
-            if let Some(export) = cx.module.exports.get(&node.info.name.0) {
-                cx.analysis
-                    .duplicate_export(node.info.name.0, export.span(), node.span);
-            } else {
-                cx.module.exports.insert(
-                    &node.info.name.0,
-                    Export::Function(FuncExport {
-                        info: node.info.clone(),
-                        meta: node.info.meta.clone(),
-                        span: node.span,
-                        module: cx.module.name.clone(),
-                    }),
-                );
-            }
-        }
-    }
-
-    fn visit_objective(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Objective<'a>) {
-        if node.flags.contains(&DefFlags::Public) {
-            if let Some(export) = cx.module.exports.get(&node.name.0) {
-                cx.analysis
-                    .duplicate_export(node.name.0, export.span(), node.span);
-            } else {
-                cx.module.exports.insert(
-                    &node.name.0,
-                    Export::Objective(ObjectiveExport {
-                        name: node.name,
-                        meta: node.meta.clone(),
-                        span: node.span,
-                        module: cx.module.name.clone(),
-                    }),
-                );
-            }
-        }
-    }
-
-    fn visit_struct(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Struct<'a>) {
-        if node.flags.contains(&DefFlags::Public) {
-            if let Some(export) = cx.module.exports.get(&node.name.0) {
-                cx.analysis
-                    .duplicate_export(node.name.0, export.span(), node.span);
-            } else {
-                cx.module.exports.insert(
-                    &node.name.0,
-                    Export::Struct(StructExport {
-                        name: node.name,
-                        meta: node.meta.clone(),
-                        extends: node.extends.clone(),
-                        fields: node.fields.clone(),
-                        span: node.span,
-                        module: cx.module.name.clone(),
-                    }),
-                );
-            }
-        }
-    }
-
-    fn visit_enum(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Enum<'a>) {
-        if node.flags.contains(&DefFlags::Public) {
-            if let Some(export) = cx.module.exports.get(&node.name.0) {
-                cx.analysis
-                    .duplicate_export(node.name.0, export.span(), node.span);
-            } else {
-                cx.module.exports.insert(
-                    &node.name.0,
-                    Export::Enum(EnumExport {
-                        name: node.name,
-                        variants: node.variants.clone(),
-                        meta: node.meta.clone(),
-                        span: node.span,
-                        module: cx.module.name.clone(),
-                    }),
-                );
-            }
-        }
-    }
-
-    fn visit_typedef(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Typedef<'a>) {
-        if node.flags.contains(&DefFlags::Public) {
-            if let Some(export) = cx.module.exports.get(&node.name.0) {
-                cx.analysis
-                    .duplicate_export(node.name.0, export.span(), node.span);
-            } else {
-                cx.module.exports.insert(
-                    &node.name.0,
-                    Export::Typedef(TypedefExport {
-                        name: node.name,
-                        meta: node.meta.clone(),
-                        span: node.span,
-                        module: cx.module.name.clone(),
-                    }),
-                );
+            for (k, v) in cx
+                .analysis
+                .modules
+                .get(&module)
+                .unwrap()
+                .inst_func_exports
+                .clone()
+            {
+                for (t, v) in v {
+                    if let Some(export) = cx.module.exports.get(k) {
+                        cx.duplicate_export(k, export.span(), path.span);
+                    } else {
+                        cx.module.inst_func_exports.entry(k).or_default().insert(
+                            t,
+                            FuncExport {
+                                span: path.span,
+                                ..v
+                            },
+                        );
+                    }
+                }
             }
         }
     }

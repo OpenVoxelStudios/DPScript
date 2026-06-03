@@ -1,9 +1,9 @@
 use dpscript_ast::{
     prelude::{
         SourceSpan,
-        def::{enums::EnumVariant, func::FunctionInfo, structs::StructField},
+        def::func::FunctionInfo,
         meta::DefMeta,
-        types::TypeRef,
+        types::{TypeData, TypeRef},
     },
     util::Name,
 };
@@ -37,28 +37,9 @@ pub struct ObjectiveExport<'a> {
 }
 
 #[derive(Debug, Clone, Serialize, Facet, HasSpan)]
-pub struct StructExport<'a> {
+pub struct TypeExport<'a> {
     pub name: Name<'a>,
-    pub meta: DefMeta<'a>,
-    pub extends: Vec<TypeRef<'a>>,
-    pub fields: Vec<StructField<'a>>,
-    pub span: SourceSpan,
-    pub module: String,
-}
-
-#[derive(Debug, Clone, Serialize, Facet, HasSpan)]
-pub struct EnumExport<'a> {
-    pub name: Name<'a>,
-    pub meta: DefMeta<'a>,
-    pub variants: Vec<EnumVariant<'a>>,
-    pub span: SourceSpan,
-    pub module: String,
-}
-
-#[derive(Debug, Clone, Serialize, Facet, HasSpan)]
-pub struct TypedefExport<'a> {
-    pub name: Name<'a>,
-    pub meta: DefMeta<'a>,
+    pub data: TypeData<'a>,
     pub span: SourceSpan,
     pub module: String,
 }
@@ -69,9 +50,7 @@ pub enum Export<'a> {
     Constant(ConstExport<'a>),
     Function(FuncExport<'a>),
     Objective(ObjectiveExport<'a>),
-    Struct(StructExport<'a>),
-    Enum(EnumExport<'a>),
-    Typedef(TypedefExport<'a>),
+    Type(TypeExport<'a>),
 }
 
 impl<'a> Export<'a> {
@@ -80,9 +59,7 @@ impl<'a> Export<'a> {
             Self::Constant(it) => &it.module,
             Self::Function(it) => &it.module,
             Self::Objective(it) => &it.module,
-            Self::Struct(it) => &it.module,
-            Self::Enum(it) => &it.module,
-            Self::Typedef(it) => &it.module,
+            Self::Type(it) => &it.module,
         }
     }
 
@@ -108,19 +85,7 @@ impl<'a> Export<'a> {
                 ..it.clone()
             }),
 
-            Self::Struct(it) => Self::Struct(StructExport {
-                module,
-                span,
-                ..it.clone()
-            }),
-
-            Self::Enum(it) => Self::Enum(EnumExport {
-                module,
-                span,
-                ..it.clone()
-            }),
-
-            Self::Typedef(it) => Self::Typedef(TypedefExport {
+            Self::Type(it) => Self::Type(TypeExport {
                 module,
                 span,
                 ..it.clone()

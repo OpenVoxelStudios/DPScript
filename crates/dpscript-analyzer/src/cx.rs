@@ -1,11 +1,11 @@
-use dpscript_ast::prelude::{def::Def, scope::Scope};
+use dpscript_ast::prelude::{NamedSource, def::Def, scope::Scope};
 use facet::Facet;
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 
 use crate::{
     err::{Error, Warning},
-    util::Export,
+    util::{Export, FuncExport},
     visitor::DefVisitor,
 };
 
@@ -19,13 +19,20 @@ pub struct ScopeCx<'a> {
     pub stack: Vec<Scope<'a>>,
 }
 
+impl<'a> ScopeCx<'a> {
+    pub fn current(&mut self) -> &mut Scope<'a> {
+        self.stack.last_mut().unwrap()
+    }
+}
+
 #[derive(Default, Serialize, Facet)]
 pub struct Module<'a> {
     pub name: String,
     pub exports: HashMap<&'a str, Export<'a>>,
+    pub inst_func_exports: HashMap<&'a str, HashMap<String, FuncExport<'a>>>,
     pub defs: Vec<Def<'a>>,
     pub scope: Scope<'a>,
-    pub source: &'a str,
+    pub source: NamedSource<'a>,
 }
 
 #[derive(Default)]
@@ -55,10 +62,6 @@ impl<'a> AnalysisCx<'a> {
 
     pub fn run_pass<T>(&mut self, visitor: &mut T)
     where
-        // tbh I asked AI to help with this, since it was giving borrow errors
-        // I DONT USE AI FOR ANYTHING ELSE DW ITS JUST A DEBUGGING ASSISTANT
-        // i need to learn the `for<'a>` syntax i dont understand this but i understand everything else
-        // this is magic fr fr
         for<'visit> T: DefVisitor<'a, 'visit>,
     {
         self.visited_modules.clear();
@@ -83,6 +86,8 @@ impl<'a> AnalysisCx<'a> {
         if self.visited_modules.contains(module_id.as_ref()) {
             return true;
         }
+
+        self.visited_modules.insert(module_id.as_ref().into());
 
         if self.modules.contains_key(module_id.as_ref()) {
             let mut module_tmp = self

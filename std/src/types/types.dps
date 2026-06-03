@@ -10,4 +10,3 @@ export std::types::misc::*;
 export std::types::players::*;
 export std::types::text::*;
 export std::types::transform::*;
-export std::types::types::*;

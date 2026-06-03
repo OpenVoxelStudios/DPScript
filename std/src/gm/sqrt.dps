@@ -2,11 +2,8 @@ import std::entity::tp;
 import std::gm::gm_std;
 import std::gm::math_entity;
 import std::math::sub;
-import std::selectors::Pos;
-import std::transform::transformation;
-import std::transform::translation;
 import std::intrinsics::slice;
-import std::intrinsics::slice;
+import std::intrinsics::float_of;
 
 const looper: Selector = @"__sqrt_loop";
 

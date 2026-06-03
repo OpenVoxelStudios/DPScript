@@ -1,6 +1,8 @@
 use miette::{MietteSpanContents, SourceCode};
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Facet, Default,
+)]
 pub struct NamedSource<'a> {
     pub file: &'a str,
     pub code: &'a str,
