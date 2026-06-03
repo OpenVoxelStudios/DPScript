@@ -17,7 +17,6 @@ tracing = "0.1.41"
 miette = { version = "7.6.0", features = ["fancy"] }
 pastey = "0.2.1"
 thiserror = "2.0.18"
-
 dpscript-macros = { path = "../dpscript-macros" }
 ordered-float = { version = "5.3.0", features = ["serde"] }
 facet = { version = "0.46.0", features = ["ordered-float"] }

@@ -3,7 +3,7 @@ mod macros {
         { $group: ident = [$($mod: ident::$name: ident),*$(,)?] } => {
             pastey::paste! {
                 #[repr(u8)]
-                #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpanGroup)]
+                #[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpanGroup)]
                 pub enum $group<'a> {
                     $(
                         [<$name:upper_camel>]($mod::$name<'a>),

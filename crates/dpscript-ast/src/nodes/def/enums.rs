@@ -7,7 +7,7 @@ use crate::{
     util::Name,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct Enum<'a> {
     pub name: Name<'a>,
     pub flags: Vec<DefFlags>,
@@ -16,7 +16,7 @@ pub struct Enum<'a> {
     pub meta: DefMeta<'a>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct EnumVariant<'a> {
     pub name: Name<'a>,
     pub span: SourceSpan,

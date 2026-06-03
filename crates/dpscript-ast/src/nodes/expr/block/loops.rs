@@ -1,9 +1,9 @@
 use crate::{
-    prelude::{SourceSpan, expr::Expr, value::Value},
+    prelude::{SourceSpan, expr::Expr, scope::Scope, value::Value},
     util::Name,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct ForLoop<'a> {
     /// The value to iterate through.
     pub array: Value<'a>,
@@ -16,4 +16,6 @@ pub struct ForLoop<'a> {
 
     /// The block's span.
     pub span: SourceSpan,
+
+    pub scope: Option<Scope<'a>>,
 }

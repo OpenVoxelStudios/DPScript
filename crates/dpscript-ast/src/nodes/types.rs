@@ -1,3 +1,4 @@
+use core::fmt;
 use std::path::PathBuf;
 
 use crate::{
@@ -11,7 +12,7 @@ use crate::{
     util::{ModulePath, Name},
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct Typedef<'a> {
     pub name: Name<'a>,
     pub flags: Vec<DefFlags>,
@@ -26,7 +27,7 @@ impl<'a> DefTrait<'a> for Typedef<'a> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct TypeRef<'a> {
     pub data: TypeRefData<'a>,
     pub span: SourceSpan,
@@ -34,7 +35,7 @@ pub struct TypeRef<'a> {
 }
 
 #[repr(u8)]
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet)]
 pub enum TypeRefData<'a> {
     Named {
         name: Name<'a>,
@@ -48,9 +49,26 @@ pub enum TypeRefData<'a> {
     UnsizedArray {
         inner: Box<TypeRef<'a>>,
     },
+
+    /// This means that `self.resolved` MUST be true~
+    Resolved,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+impl<'a> fmt::Display for TypeRef<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.data {
+            TypeRefData::Named { name } => write!(f, "{}", name.0),
+            TypeRefData::SizedArray { inner, length } => write!(f, "[{inner}; {length:?}]"),
+            TypeRefData::UnsizedArray { inner } => write!(f, "[{inner}]"),
+
+            TypeRefData::Resolved => {
+                write!(f, "<inferred: {}>", self.resolved.as_ref().unwrap().data)
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct ResolvedTypeRef<'a> {
     pub module: ModulePath<'a>,
     pub source_file: PathBuf,
@@ -59,7 +77,7 @@ pub struct ResolvedTypeRef<'a> {
 }
 
 #[repr(u8)]
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpanGroup)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpanGroup)]
 pub enum TypeData<'a> {
     Enum(Enum<'a>),
     Struct(Struct<'a>),
@@ -74,6 +92,16 @@ impl<'a> TypeRef<'a> {
             },
             span,
             resolved: None,
+        }
+    }
+}
+
+impl<'a> fmt::Display for TypeData<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Enum(it) => write!(f, "{}", it.name.0),
+            Self::Struct(it) => write!(f, "{}", it.name.0),
+            Self::Typedef(it) => write!(f, "{}", it.name.0),
         }
     }
 }

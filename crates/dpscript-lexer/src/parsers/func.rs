@@ -95,6 +95,7 @@ pub fn parse_func<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<F
             },
             body: Vec::new(),
             span,
+            scope: None,
         });
     }
 
@@ -121,5 +122,6 @@ pub fn parse_func<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<F
         },
         body,
         span,
+        scope: None,
     })
 }

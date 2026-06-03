@@ -34,6 +34,7 @@ pub fn parse_cond<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<C
         body,
         condition,
         span,
+        scope: None,
     });
 
     while c.next_if_eq(&Token::Keyword(Keyword::Else)).is_some() {
@@ -56,6 +57,7 @@ pub fn parse_cond<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<C
                 body,
                 condition,
                 span,
+                scope: None,
             });
         } else {
             let mut block = c.expect_group(BraceType::Braces)?;
@@ -77,5 +79,6 @@ pub fn parse_cond<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<C
         conditions: conds,
         else_block,
         span,
+        else_scope: None,
     })
 }

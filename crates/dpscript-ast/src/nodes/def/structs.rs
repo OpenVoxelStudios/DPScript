@@ -4,7 +4,7 @@ use crate::{
     util::Name,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct Struct<'a> {
     /// The name of the struct.
     pub name: Name<'a>,
@@ -25,7 +25,7 @@ pub struct Struct<'a> {
     pub meta: DefMeta<'a>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct StructField<'a> {
     pub name: Name<'a>,
     pub ty: TypeRef<'a>,

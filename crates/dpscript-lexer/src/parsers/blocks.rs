@@ -38,5 +38,6 @@ pub fn parse_block<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<
         body,
         span,
         meta: Default::default(),
+        scope: None,
     })
 }

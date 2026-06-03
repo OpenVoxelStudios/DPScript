@@ -1,24 +1,21 @@
 use crate::{
     prelude::{
-        SourceSpan,
-        def::DefTrait,
-        expr::Expr,
-        meta::{DefFlags, DefMeta},
-        types::TypeRef,
+        SourceSpan, def::DefTrait, expr::Expr, meta::{DefFlags, DefMeta}, scope::Scope, types::TypeRef
     },
     util::Name,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct Function<'a> {
     /// The function's info. This is stored in a seperate struct to make it easy to clone
     /// and move around for type checking and validation (see [crate::nodes::expr::call::ResolvedCall]).
     pub info: FunctionInfo<'a>,
     pub body: Vec<Expr<'a>>,
     pub span: SourceSpan,
+    pub scope: Option<Scope<'a>>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct FunctionArg<'a> {
     pub name: Name<'a>,
     pub ty: TypeRef<'a>,
@@ -28,7 +25,7 @@ pub struct FunctionArg<'a> {
     pub is_const: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct FunctionInfo<'a> {
     /// The name of the function.
     pub name: Name<'a>,

@@ -34,5 +34,6 @@ pub fn parse_for_loop<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Resu
         var,
         body,
         span,
+        scope: None,
     })
 }

@@ -1,6 +1,6 @@
 use crate::{prelude::{SourceSpan, def::DefTrait, meta::DefMeta}, util::Name};
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct Import<'a> {
     pub paths: Vec<PathRef<'a>>,
     pub meta: DefMeta<'a>,

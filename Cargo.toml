@@ -15,33 +15,36 @@ name = "dscls"
 path = "src/bin/lsp.rs"
 
 [dependencies]
-anyhow = { version = "1.0.100", features = ["backtrace"] }
-bitflags = { version = "2.9.4", features = ["serde", "std"] }
-clap = { version = "4.5.49", features = ["derive"] }
+anyhow = { version = "1.0.102", features = ["backtrace"] }
+bitflags = { version = "2.12.1", features = ["serde", "std"] }
+clap = { version = "4.6.1", features = ["derive"] }
 clap-verbosity-flag = { version = "3.0.4", default-features = false, features = ["tracing"] }
-colored = "3.0.0"
+colored = "3.1.1"
 concat-idents = "1.1.5"
-indicatif = "0.18.0"
+indicatif = "0.18.4"
 itertools = "0.14.0"
-json5 = "0.4.1"
+json5 = "1.3.1"
 miette = { version = "7.6.0", features = ["fancy", "serde", "syntect-highlighter"] }
 once_cell = "1.21.3"
-ron = "0.11.0"
+ron = "0.12.1"
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.145"
-strum = { version = "0.27.2", features = ["derive"] }
-thiserror = "2.0.17"
-tokio = { version = "1.48.0", features = ["full"] }
-toml = "0.9.8"
+serde_json = "1.0.150"
+strum = { version = "0.28.0", features = ["derive"] }
+thiserror = "2.0.18"
+tokio = { version = "1.52.3", features = ["full"] }
+toml = "1.1.2"
 tower-lsp = "0.20.0"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.20", features = ["ansi", "env-filter", "registry"] }
-uuid = { version = "1.18.1", features = ["v4"] }
+uuid = { version = "1.23.2", features = ["v4"] }
 walkdir = "2.5.0"
 
+dpscript-analyzer = { path = "./crates/dpscript-analyzer" }
 dpscript-ast = { path = "./crates/dpscript-ast" }
+dpscript-core = { path = "./crates/dpscript-core" }
 dpscript-lexer = { path = "./crates/dpscript-lexer" }
 dpscript-macros = { path = "./crates/dpscript-macros" }
+dpscript-parser = { path = "./crates/dpscript-parser" }
 dpscript-tokenizer = { path = "./crates/dpscript-tokenizer" }
 
 [package.metadata.binstall]

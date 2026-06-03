@@ -5,7 +5,7 @@ use crate::prelude::{
 };
 
 /// Exports all items from a module.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct Export<'a> {
     pub paths: Vec<PathRef<'a>>,
     pub meta: DefMeta<'a>,

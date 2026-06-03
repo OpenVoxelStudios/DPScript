@@ -9,7 +9,7 @@ use crate::{
     util::Name,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct ValueRef<'a> {
     /// The value root.
     /// If this was `(a + b).c.d.e`, this would be `(a + b)`.
@@ -23,7 +23,7 @@ pub struct ValueRef<'a> {
     pub span: SourceSpan,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct VarRef<'a> {
     pub name: Name<'a>,
     pub resolved: Option<VarInfo<'a>>,
@@ -31,7 +31,7 @@ pub struct VarRef<'a> {
 }
 
 #[repr(u8)]
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpanGroup)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpanGroup)]
 pub enum VarInfo<'a> {
     Const(Box<Constant<'a>>),
     Var(Box<Variable<'a>>),

@@ -1,7 +1,7 @@
 use crate::prelude::{SourceSpan, def::func::FunctionInfo, value::Value};
 use std::path::PathBuf;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct Call<'a> {
     pub target: Box<Value<'a>>,
     pub args: Vec<Value<'a>>,
@@ -9,7 +9,7 @@ pub struct Call<'a> {
     pub span: SourceSpan,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct ResolvedCall<'a> {
     /// The span of the call site.
     pub span: SourceSpan,

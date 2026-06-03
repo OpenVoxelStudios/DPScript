@@ -1,6 +1,6 @@
-use crate::prelude::{SourceSpan, def::DefTrait, expr::Expr, meta::DefMeta};
+use crate::prelude::{SourceSpan, def::DefTrait, expr::Expr, meta::DefMeta, scope::Scope};
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct Block<'a> {
     /// The kind of block this is.
     pub kind: BlockKind,
@@ -13,6 +13,8 @@ pub struct Block<'a> {
 
     /// The definition's metadata.
     pub meta: DefMeta<'a>,
+
+    pub scope: Option<Scope<'a>>,
 }
 
 #[repr(u8)]

@@ -2,7 +2,7 @@ use dpscript_core::SourceSpan;
 
 use crate::prelude::value::Value;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct Unary<'a> {
     pub value: Box<Value<'a>>,
     pub op: UnaryOp,

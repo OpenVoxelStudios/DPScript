@@ -25,7 +25,7 @@ pub enum AllowFlag {
 }
 
 #[derive(
-    Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, Default, HasSpan,
+    Debug, Clone, PartialEq, Eq, Serialize, Facet, Default, HasSpan,
 )]
 pub struct DefMeta<'a> {
     /// Corresponds to `#[builtin]`.
@@ -118,7 +118,7 @@ pub enum Repr {
 }
 
 #[repr(u8)]
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet)]
 pub enum BuiltinInfo<'a> {
     /// `#[builtin(cast)]`
     ///

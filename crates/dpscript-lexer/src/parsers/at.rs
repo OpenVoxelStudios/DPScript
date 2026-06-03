@@ -25,5 +25,10 @@ pub fn parse_at_block<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Resu
 
     let span = c.end_span();
 
-    Ok(At { arg, body, span })
+    Ok(At {
+        arg,
+        body,
+        span,
+        scope: None,
+    })
 }

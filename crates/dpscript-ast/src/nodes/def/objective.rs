@@ -7,7 +7,7 @@ use crate::{
     util::Name,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct Objective<'a> {
     /// The variable name of the objective.
     pub name: Name<'a>,

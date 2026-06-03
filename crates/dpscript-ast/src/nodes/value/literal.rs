@@ -7,7 +7,7 @@ pub struct Literal<'a> {
     pub span: SourceSpan,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct DslLiteral<'a> {
     pub dsl_marker: DslMarker,
     pub value: Box<Value<'a>>,
