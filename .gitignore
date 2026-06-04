@@ -16,3 +16,4 @@ flamegraph.svg
 *.dps.ron
 *.tokens_raw.ron
 profile.json.gz
+vscode/out
