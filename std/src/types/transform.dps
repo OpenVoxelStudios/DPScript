@@ -1,3 +1,4 @@
+import std::types::base::float;
 import std::types::math::FVec3;
 
 #[allow(incomplete)] // when type checking, users can initialize a value of this type without all fields present

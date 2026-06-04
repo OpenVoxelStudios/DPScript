@@ -29,7 +29,7 @@ use crate::cx::VisitCx;
 pub trait MetaVisitor<'a, 'visit> {
     fn visit_meta(&mut self, _cx: &mut VisitCx<'a, 'visit>, _meta: &mut DefMeta<'a>) {}
 
-    fn visit_type(&mut self, _cx: &mut VisitCx<'a, 'visit>, _meta: &mut TypeRef<'a>) {}
+    fn visit_type(&mut self, _cx: &mut VisitCx<'a, 'visit>, _ty: &mut TypeRef<'a>) {}
 }
 
 pub trait DefVisitor<'a, 'visit> {
@@ -261,10 +261,7 @@ pub trait ExprVisitor<'a, 'visit> {
     }
 }
 
-pub trait ValueVisitor<'a, 'visit>
-where
-    'a: 'visit,
-{
+pub trait ValueVisitor<'a, 'visit> {
     fn visit_value(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Value<'a>) {
         match node {
             Value::BinOp(it) => self.visit_binop(cx, it),
@@ -276,6 +273,7 @@ where
             Value::Unary(it) => self.visit_unary(cx, it),
             Value::NbtLiteral(it) => self.visit_nbt_literal(cx, it),
             Value::ArrayLiteral(it) => self.visit_arr_literal(cx, it),
+            Value::TypedValue(it) => self.visit_value(cx, &mut it.value),
         }
     }
 

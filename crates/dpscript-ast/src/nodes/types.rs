@@ -1,5 +1,4 @@
 use core::fmt;
-use std::path::PathBuf;
 
 use crate::{
     nodes::meta::DefFlags,
@@ -9,7 +8,7 @@ use crate::{
         meta::DefMeta,
         value::Value,
     },
-    util::{ModulePath, Name},
+    util::Name,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
@@ -70,10 +69,21 @@ impl<'a> fmt::Display for TypeRef<'a> {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct ResolvedTypeRef<'a> {
-    pub module: ModulePath<'a>,
-    pub source_file: PathBuf,
+    pub module: String,
     pub span: SourceSpan,
     pub data: TypeData<'a>,
+    pub array: ArrayKind,
+}
+
+#[repr(u8)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Facet, Default,
+)]
+pub enum ArrayKind {
+    #[default]
+    None,
+    Sized,
+    Unsized,
 }
 
 #[repr(u8)]

@@ -1,5 +1,7 @@
 import std::selectors::tellraw;
 import std::selectors::all_players;
+import std::types::text::Text;
+import std::types::entities::Entity;
 
 #[name = "dpscript_config"]
 pub objective config = "dummy";

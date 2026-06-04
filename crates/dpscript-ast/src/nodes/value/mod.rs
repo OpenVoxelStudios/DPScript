@@ -5,18 +5,28 @@ pub mod nbt;
 pub mod refs;
 pub mod unary;
 
-use crate::prelude::expr::call;
+use dpscript_core::SourceSpan;
+
+use crate::prelude::{expr::call, types::TypeRef};
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
+pub struct TypedValue<'a> {
+    pub value: Box<Value<'a>>,
+    pub ty: TypeRef<'a>,
+    pub span: SourceSpan,
+}
 
 crate::nodes::util::node_group! {
     Value = [
-        binop::BinOp,
-        literal::Literal,
-        literal::DslLiteral,
-        call::Call,
-        refs::ValueRef,
-        refs::VarRef,
-        unary::Unary,
-        nbt::NbtLiteral,
-        arr::ArrayLiteral,
+        @binop::BinOp,
+        @literal::Literal,
+        @literal::DslLiteral,
+        @call::Call,
+        @refs::ValueRef,
+        @refs::VarRef,
+        @unary::Unary,
+        @nbt::NbtLiteral,
+        @arr::ArrayLiteral,
+        TypedValue,
     ]
 }

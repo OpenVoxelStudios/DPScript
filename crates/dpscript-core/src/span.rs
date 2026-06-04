@@ -20,6 +20,28 @@ impl SourceSpan {
     pub fn length(&self) -> usize {
         self.end - self.start
     }
+
+    pub fn position(&self, src: &str) -> (usize, usize) {
+        let mut pos = 0;
+        let mut line = 0;
+        let mut post = 0;
+
+        for ch in src.chars() {
+            if pos > self.start {
+                break;
+            }
+
+            pos += 1;
+            post += 1;
+
+            if ch == '\n' {
+                post = 0;
+                line += 1;
+            }
+        }
+
+        (line, post)
+    }
 }
 
 impl<'a> Into<SourceSpan> for pest::Span<'a> {

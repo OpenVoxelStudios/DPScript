@@ -64,6 +64,16 @@ pub enum Error {
 
         cur_module: String,
     },
+
+    #[error("unresolved type: {name}")]
+    UnresolvedType {
+        name: String,
+
+        #[label("here")]
+        at: MSourceSpan,
+
+        cur_module: String,
+    },
 }
 
 #[derive(Debug, Error, Diagnostic)]
@@ -77,6 +87,7 @@ impl Error {
             Self::DuplicateExport { cur_module, .. } => cur_module.clone(),
             Self::DuplicateDefs { cur_module, .. } => cur_module.clone(),
             Self::UnresolvedImport { cur_module, .. } => cur_module.clone(),
+            Self::UnresolvedType { cur_module, .. } => cur_module.clone(),
         }
     }
 }
@@ -134,6 +145,14 @@ impl<'a, 'visit> VisitCx<'a, 'visit> {
 
     pub fn unresolved_import(&mut self, name: impl AsRef<str>, at: impl Into<MSourceSpan>) {
         self.analysis.err(Error::UnresolvedImport {
+            name: name.as_ref().into(),
+            at: at.into(),
+            cur_module: self.module.name.clone(),
+        });
+    }
+
+    pub fn unresolved_type(&mut self, name: impl AsRef<str>, at: impl Into<MSourceSpan>) {
+        self.analysis.err(Error::UnresolvedType {
             name: name.as_ref().into(),
             at: at.into(),
             cur_module: self.module.name.clone(),

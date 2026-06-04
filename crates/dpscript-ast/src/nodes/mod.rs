@@ -10,8 +10,8 @@ mod util;
 
 util::node_group! {
     Node = [
-        def::Def,
-        expr::Expr,
-        value::Value
+        @def::Def,
+        @expr::Expr,
+        @value::Value
     ]
 }

@@ -1,3 +1,6 @@
+import std::types::base::int;
+import std::types::base::float;
+import std::types::entities::Entity;
 import std::gm::simple::gm_add;
 import std::gm::simple::gm_negate;
 import std::gm::sqrt::gm_sqrt;

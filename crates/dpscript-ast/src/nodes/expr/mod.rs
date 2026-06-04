@@ -9,13 +9,13 @@ use block::*;
 
 crate::nodes::util::node_group! {
     Expr = [
-        call::Call,
-        at::At,
-        cond::Cond,
-        loops::ForLoop,
-        ret::Return,
-        var::Variable,
-        constant::Constant,
-        assign::Assign,
+        @call::Call,
+        @at::At,
+        @cond::Cond,
+        @loops::ForLoop,
+        @ret::Return,
+        @var::Variable,
+        @constant::Constant,
+        @assign::Assign,
     ]
 }

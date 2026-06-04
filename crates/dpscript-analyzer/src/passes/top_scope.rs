@@ -1,13 +1,16 @@
 //! Pass 2: Top-level scope resolution pass (imports, declarations, etc.).
 
 use crate::{cx::VisitCx, util::Export, visitor::DefVisitor};
-use dpscript_ast::prelude::{
-    HasSpan,
-    def::{
-        constant::Constant, enums::Enum, func::Function, import::Import, objective::Objective,
-        structs::Struct,
+use dpscript_ast::{
+    prelude::{
+        HasSpan,
+        def::{
+            constant::Constant, enums::Enum, func::Function, import::Import, objective::Objective,
+            structs::Struct,
+        },
+        types::{TypeData, Typedef},
     },
-    types::{TypeData, Typedef},
+    util::Remote,
 };
 
 pub struct TopScopeResolver;
@@ -86,10 +89,17 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
                         let map = &mut cx.scope.current().types;
 
                         if let Some(entry) = map.get(&it.name.0) {
-                            let span = entry.span();
+                            let span = entry.data.span();
                             cx.duplicate_defs(it.name.0, span, path.span);
                         } else {
-                            map.insert(it.name.0, it.data.clone());
+                            map.insert(
+                                it.name.0,
+                                Remote {
+                                    module: module.clone(),
+                                    span: it.span,
+                                    data: it.data.clone(),
+                                },
+                            );
                         }
                     }
                 }
@@ -160,10 +170,17 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
         let map = &mut cx.scope.current().types;
 
         if let Some(entry) = map.get(&node.name.0) {
-            let span = entry.span();
+            let span = entry.data.span();
             cx.duplicate_defs(node.name.0, span, node.span);
         } else {
-            map.insert(node.name.0, TypeData::Enum(node.clone()));
+            map.insert(
+                node.name.0,
+                Remote {
+                    module: cx.module.name.clone(),
+                    span: node.span(),
+                    data: TypeData::Enum(node.clone()),
+                },
+            );
         }
     }
 
@@ -171,10 +188,17 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
         let map = &mut cx.scope.current().types;
 
         if let Some(entry) = map.get(&node.name.0) {
-            let span = entry.span();
+            let span = entry.data.span();
             cx.duplicate_defs(node.name.0, span, node.span);
         } else {
-            map.insert(node.name.0, TypeData::Struct(node.clone()));
+            map.insert(
+                node.name.0,
+                Remote {
+                    module: cx.module.name.clone(),
+                    span: node.span(),
+                    data: TypeData::Struct(node.clone()),
+                },
+            );
         }
     }
 
@@ -182,10 +206,17 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
         let map = &mut cx.scope.current().types;
 
         if let Some(entry) = map.get(&node.name.0) {
-            let span = entry.span();
+            let span = entry.data.span();
             cx.duplicate_defs(node.name.0, span, node.span);
         } else {
-            map.insert(node.name.0, TypeData::Typedef(node.clone()));
+            map.insert(
+                node.name.0,
+                Remote {
+                    module: cx.module.name.clone(),
+                    span: node.span(),
+                    data: TypeData::Typedef(node.clone()),
+                },
+            );
         }
     }
 }

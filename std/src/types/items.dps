@@ -1,3 +1,7 @@
+import std::types::base::int;
+import std::types::base::Ident;
+import std::types::base::NBT;
+
 /// A single item stack.
 #[allow(incomplete)]
 pub struct ItemStack {

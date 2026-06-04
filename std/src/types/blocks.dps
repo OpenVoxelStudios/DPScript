@@ -1,3 +1,6 @@
+import std::types::base::str;
+import std::types::base::NBT;
+
 /// Block state.
 #[allow(incomplete)]
 pub struct BlockState {

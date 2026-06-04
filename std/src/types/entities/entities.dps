@@ -1,3 +1,14 @@
+import std::types::base::short;
+import std::types::base::bool;
+import std::types::base::NBT;
+import std::types::base::double;
+import std::types::base::Ident;
+import std::types::base::int;
+import std::types::base::str;
+
+import std::types::math::DVec3;
+import std::types::transform::Rot;
+
 /// Entities include all dynamic, moving objects throughout the Minecraft world.
 #[allow(incomplete)] // when type checking, users can initialize a value of this type without all fields present
 pub struct Entity {

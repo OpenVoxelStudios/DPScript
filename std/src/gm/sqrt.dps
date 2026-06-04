@@ -1,3 +1,7 @@
+import std::types::base::str;
+import std::types::base::float;
+import std::types::base::double;
+import std::types::entities::Entity;
 import std::entity::tp;
 import std::gm::gm_std;
 import std::gm::math_entity;
@@ -5,7 +9,7 @@ import std::math::sub;
 import std::intrinsics::slice;
 import std::intrinsics::float_of;
 
-const looper: Selector = @"__sqrt_loop";
+const looper: Entity = @"__sqrt_loop";
 
 // Compiler note: structs are only used for compile-time type checking
 // they are always represented as NBT objects in data storage

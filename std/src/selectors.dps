@@ -1,18 +1,24 @@
-pub const self: Selector = @"@s";
-pub const nearest_entity: Selector = @"@n";
-pub const nearest_player: Selector = @"@p";
-pub const random_player: Selector = @"@r";
-pub const all_players: Selector = @"@a";
-pub const all_entities: Selector = @"@e";
+import std::types::base::NBT;
+import std::types::base::Ident;
+import std::types::math::FVec3;
+import std::types::entities::Entity;
+// import std::types::players::Player; // TODO: Player type
+
+pub const self: Entity = @"@s";
+pub const nearest_entity: Entity = @"@n";
+pub const nearest_player: Entity = @"@p";
+pub const random_player: Entity = @"@r";
+pub const all_players: [Entity] = @"@a";
+pub const all_entities: [Entity] = @"@e";
 
 #[cmd("tellraw {target} {message}")]
-pub fn Selector::tellraw(#[this] target: Selector, message: NBT);
+pub fn Entity::tellraw(#[this] target: Entity, message: NBT);
 
 #[cmd("give {target} {item}")]
-pub fn Selector::give(#[this] target: Selector, #[hint = "item"] item: Ident);
+pub fn Entity::give(#[this] target: Entity, #[hint = "item"] item: Ident);
 
 #[cmd("give {target} {item} {data}")]
-pub fn Selector::give_nbt(#[this] target: Selector, #[hint = "item"] item: Ident, data: NBT);
+pub fn Entity::give_nbt(#[this] target: Entity, #[hint = "item"] item: Ident, data: NBT);
 
 #[cmd("tp {target} {position}")]
-pub fn Selector::tp(#[this] target: Selector, position: Pos3);
+pub fn Entity::tp(#[this] target: Entity, position: FVec3);

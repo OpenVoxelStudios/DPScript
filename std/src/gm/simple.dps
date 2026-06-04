@@ -1,3 +1,4 @@
+import std::types::base::float;
 import std::gm::gm_std;
 import std::gm::math_entity;
 import std::intrinsics::float_of;

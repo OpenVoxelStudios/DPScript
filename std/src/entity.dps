@@ -1,5 +1,9 @@
+import std::types::base::int;
+import std::types::math::FVec3;
+import std::types::entities::Entity;
+
 #[cmd("data get entity {target} UUID")]
 pub fn Entity::uuid(#[this] target: Entity) -> [int; 4];
 
 #[cmd("tp {target} {pos}")]
-pub fn Entity::tp(#[this] target: Entity, pos: Pos3);
+pub fn Entity::tp(#[this] target: Entity, pos: FVec3);

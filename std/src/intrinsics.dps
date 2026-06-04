@@ -1,4 +1,14 @@
 // COMPILER NOTE: compiler-builtins are always inlined.
+import std::types::base::int;
+import std::types::base::float;
+import std::types::base::double;
+import std::types::base::str;
+import std::types::base::Any;
+import std::types::math::DVec3;
+import std::types::math::FVec3;
+import std::types::math::BlockPos;
+import std::types::text::Text;
+import std::types::entities::Entity;
 
 /// Clone the value given into a compiler-assigned temporary storage.
 #[builtin]

@@ -1,4 +1,5 @@
 use dpscript_analyzer::StaticRef;
+use itertools::Itertools;
 use miette::IntoDiagnostic;
 use std::{collections::HashMap, fs};
 use tracing::level_filters::LevelFilter;
@@ -38,7 +39,8 @@ pub fn main() -> miette::Result<()> {
         "std/src/std.dps",
     ];
 
-    let write_output = false;
+    let write_output =
+        !std::env::args().contains("--no-output") && !std::env::args().contains("-N");
 
     let contents = files
         .iter()

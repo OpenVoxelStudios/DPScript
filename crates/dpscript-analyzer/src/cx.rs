@@ -1,5 +1,6 @@
 use dpscript_ast::prelude::{NamedSource, def::Def, scope::Scope};
 use facet::Facet;
+use itertools::Itertools;
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 
@@ -66,7 +67,7 @@ impl<'a> AnalysisCx<'a> {
     {
         self.visited_modules.clear();
 
-        let keys = self.modules.keys().cloned().collect::<Vec<_>>();
+        let keys = self.modules.keys().cloned().sorted().collect::<Vec<_>>();
 
         for key in keys {
             self.visit_module(key, visitor);

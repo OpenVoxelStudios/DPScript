@@ -11,3 +11,4 @@ pub typedef Ident;
 pub typedef NBT;
 pub typedef void;
 pub typedef Objective;
+pub typedef Any;

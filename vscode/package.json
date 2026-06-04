@@ -4,6 +4,7 @@
     "displayName": "DPScript",
     "description": "Syntax highlighting & support for the DPScript language.",
     "version": "0.0.1",
+    "main": "./out/extension",
     "repository": {
         "type": "git",
         "url": "https://github.com/RedstoneWizard08/DPScript"
@@ -12,7 +13,7 @@
         "RedstoneWizard08"
     ],
     "engines": {
-        "vscode": "^1.90.0"
+        "vscode": "^1.120.0"
     },
     "categories": [
         "Programming Languages"
@@ -37,16 +38,33 @@
                 "scopeName": "source.dpscript",
                 "path": "./syntaxes/dpscript.tmLanguage.json"
             }
+        ],
+        "commands": [
+            {
+                "command": "dpscript.lsp.restart",
+                "title": "DPScript: Restart LSP"
+            }
         ]
     },
     "devDependencies": {
+        "@types/node": "^25.9.1",
+        "@types/vscode": "^1.120.0",
         "@vscode/test-cli": "^0.0.11",
+        "@vscode/test-electron": "^2.5.2",
         "@vscode/test-web": "^0.0.70",
         "@vscode/vsce": "^3.5.0",
-        "prettier": "^3.5.3"
+        "prettier": "^3.5.3",
+        "typescript": "^6.0.3"
     },
     "scripts": {
+        "vscode:prepublish": "bun run compile",
+        "compile": "tsc -b",
+        "watch": "tsc -b -w",
         "fmt": "prettier --write .",
         "pack": "vsce package"
+    },
+    "dependencies": {
+        "glob": "^13.0.6",
+        "vscode-languageclient": "^10.0.0"
     }
 }

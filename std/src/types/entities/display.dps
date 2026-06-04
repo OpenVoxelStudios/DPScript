@@ -1,3 +1,15 @@
+import std::types::base::int;
+import std::types::base::float;
+import std::types::base::byte;
+import std::types::base::bool;
+import std::types::text::Text;
+import std::types::text::TextAlignment;
+import std::types::blocks::BlockState;
+import std::types::items::ItemStack;
+import std::types::transform::Transform;
+import std::types::level::Brightness;
+import std::types::misc::BillboardType;
+
 /// Display entities are entities useful for map or data pack creators to display various things. There
 /// are Block Displays, Item Displays and Text Displays, which are used to display blocks, items and
 /// texts respectively.

@@ -1,57 +1,62 @@
+import std::types::base::int;
+import std::types::base::str;
+import std::types::base::Objective;
+import std::types::entities::Entity;
+
 objective operation_temp = "dummy";
 
 #[cmd("scoreboard players get {sel} {obj}")]
-pub fn Objective::index(#[this] obj: Objective, sel: Selector) -> int;
+pub fn Objective::index(#[this] obj: Objective, sel: Entity) -> int;
 
 #[cmd("scoreboard players set {sel} {obj} {value}")]
-pub fn Objective::index_assign(#[this] obj: Objective, sel: Selector, value: int) -> int;
+pub fn Objective::index_assign(#[this] obj: Objective, sel: Entity, value: int) -> int;
 
 #[cmd("scoreboard players operation {sel_a} {obj_a} {op} {sel_b} {obj_b}")]
-pub fn operation(obj_a: Objective, sel_a: Selector, op: str, obj_b: Objective, sel_b: Selector) -> int;
+pub fn operation(obj_a: Objective, sel_a: Entity, op: str, obj_b: Objective, sel_b: Entity) -> int;
 
 #[inline]
-pub fn operation_self(obj: Objective, sel: Selector, op: str, value: int) -> int {
+pub fn operation_self(obj: Objective, sel: Entity, op: str, value: int) -> int {
     operation_temp[sel] = value;
 
     return operation(obj, sel, op, operation_temp, sel);
 }
 
 #[inline]
-pub operator fn Objective::index_add_assign(#[this] obj: Objective, sel: Selector, value: int) -> int {
+pub operator fn Objective::index_add_assign(#[this] obj: Objective, sel: Entity, value: int) -> int {
     return operation_self(obj, sel, "+=", value);
 }
 
 #[inline]
-pub operator fn Objective::index_sub_assign(#[this] obj: Objective, sel: Selector, value: int) -> int {
+pub operator fn Objective::index_sub_assign(#[this] obj: Objective, sel: Entity, value: int) -> int {
     return operation_self(obj, sel, "-=", value);
 }
 
 #[inline]
-pub operator fn Objective::index_mul_assign(#[this] obj: Objective, sel: Selector, value: int) -> int {
+pub operator fn Objective::index_mul_assign(#[this] obj: Objective, sel: Entity, value: int) -> int {
     return operation_self(obj, sel, "*=", value);
 }
 
 #[inline]
-pub operator fn Objective::index_div_assign(#[this] obj: Objective, sel: Selector, value: int) -> int {
+pub operator fn Objective::index_div_assign(#[this] obj: Objective, sel: Entity, value: int) -> int {
     return operation_self(obj, sel, "/=", value);
 }
 
 #[inline]
-pub operator fn Objective::index_mod_assign(#[this] obj: Objective, sel: Selector, value: int) -> int {
+pub operator fn Objective::index_mod_assign(#[this] obj: Objective, sel: Entity, value: int) -> int {
     return operation_self(obj, sel, "%=", value);
 }
 
 #[inline]
-pub fn Objective::min_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
+pub fn Objective::min_assign(#[this] obj: Objective, sel: Entity, obj2: Objective, sel2: Entity) -> int {
     return operation(obj, sel, "<", obj2, sel2);
 }
 
 #[inline]
-pub fn Objective::max_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
+pub fn Objective::max_assign(#[this] obj: Objective, sel: Entity, obj2: Objective, sel2: Entity) -> int {
     return operation(obj, sel, ">", obj2, sel2);
 }
 
 #[inline]
-pub fn Objective::swap_assign(#[this] obj: Objective, sel: Selector, obj2: Objective, sel2: Selector) -> int {
+pub fn Objective::swap_assign(#[this] obj: Objective, sel: Entity, obj2: Objective, sel2: Entity) -> int {
     return operation(obj, sel, "><", obj2, sel2);
 }

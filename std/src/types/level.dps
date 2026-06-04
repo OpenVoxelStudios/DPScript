@@ -1,3 +1,5 @@
+import std::types::base::int;
+
 pub struct Brightness {
     /// (Required) The block-light level, with values from 0-15.
     #[limit(0, 15)] // user sets to a literal: error if outside of range. otherwise compiler will just do it and let MC clamp it.

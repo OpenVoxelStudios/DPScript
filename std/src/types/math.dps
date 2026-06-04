@@ -1,3 +1,7 @@
+import std::types::base::int;
+import std::types::base::float;
+import std::types::base::double;
+
 #[same_as(FVec3)] // can be implicitly cast to a FVec3
 pub struct DVec3 {
     x: double,

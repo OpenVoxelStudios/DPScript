@@ -27,5 +27,10 @@
     "rust-analyzer.imports.merge.glob": true,
     "rust-analyzer.imports.preferPrelude": true,
     "rust-analyzer.procMacro.attributes.enable": true,
-    "rust-analyzer.procMacro.enable": true
+    "rust-analyzer.procMacro.enable": true,
+    "chat.agent.thinking.phrases": {
+        "mode": "append",
+        "phrases": []
+    },
+    "chat.useAgentsMdFile": true
 }

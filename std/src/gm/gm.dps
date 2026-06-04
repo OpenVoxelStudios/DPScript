@@ -1,9 +1,10 @@
 import std::base::forceload_add;
 import std::base::summon_with;
+import std::types::entities::Entity;
 
 pub objective gm_std = "dummy";
 
-pub const math_entity: Selector = @"91bb5-0-0-0-ffff";
+pub const math_entity: Entity = @"91bb5-0-0-0-ffff";
 
 init {
     forceload_add(29999999, 91665);

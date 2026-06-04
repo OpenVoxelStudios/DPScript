@@ -5,12 +5,12 @@ use crate::{
         def::func::FunctionInfo,
         types::{TypeData, TypeRef},
     },
-    util::Name,
+    util::{Name, Remote},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, Default)]
 pub struct Scope<'a> {
-    pub types: HashMap<&'a str, TypeData<'a>>,
+    pub types: HashMap<&'a str, Remote<TypeData<'a>>>,
     pub vars: HashMap<&'a str, TypeRef<'a>>,
     pub consts: HashMap<&'a str, TypeRef<'a>>,
     pub funcs: HashMap<&'a str, FunctionInfo<'a>>,

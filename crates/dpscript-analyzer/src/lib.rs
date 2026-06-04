@@ -3,6 +3,7 @@ use crate::{
     err::Error,
     passes::{
         exports::{ExportResolver, ExportStmtResolver},
+        resolution::TypeResolver,
         top_scope::TopScopeResolver,
     },
 };
@@ -15,6 +16,7 @@ use thiserror::Error;
 
 pub mod cx;
 pub mod err;
+pub mod ops;
 pub mod passes;
 pub mod util;
 pub mod visitor;
@@ -35,11 +37,12 @@ pub struct ModuleErrors {
 }
 
 #[derive(Debug, Error, Diagnostic)]
-#[error("errors emitted")]
+#[error("{count} errors emitted")]
 #[diagnostic()]
 pub struct ErrorGroup {
     #[related]
     pub inner: Vec<ModuleErrors>,
+    pub count: usize,
 }
 
 pub struct StaticRef {
@@ -140,6 +143,7 @@ pub fn analyze<'a>(
     cx.run_pass(&mut ExportResolver);
     cx.run_pass(&mut ExportStmtResolver);
     cx.run_pass(&mut TopScopeResolver);
+    cx.run_pass(&mut TypeResolver);
 
     let modules = cx.modules;
 
@@ -159,6 +163,7 @@ pub fn analyze<'a>(
         }
 
         return Err(ErrorGroup {
+            count: errs.values().map(|it| it.inner.len()).sum(),
             inner: errs.into_values().collect(),
         });
     }

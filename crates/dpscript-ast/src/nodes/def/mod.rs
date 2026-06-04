@@ -11,15 +11,15 @@ pub mod structs;
 
 crate::nodes::util::node_group! {
     Def = [
-        constant::Constant,
-        enums::Enum,
-        func::Function,
-        import::Import,
-        objective::Objective,
-        structs::Struct,
-        block::Block,
-        types::Typedef,
-        export::Export,
+        @constant::Constant,
+        @enums::Enum,
+        @func::Function,
+        @import::Import,
+        @objective::Objective,
+        @structs::Struct,
+        @block::Block,
+        @types::Typedef,
+        @export::Export,
     ]
 }
 
