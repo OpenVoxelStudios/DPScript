@@ -85,8 +85,8 @@ jobs:
       - name: Build
         if: matrix.windows != true
         run: |
-          cargo zigbuild --target ${{ matrix.target }}
-          cargo zigbuild --release --target ${{ matrix.target }}
+          cargo zigbuild --bins --target ${{ matrix.target }}
+          cargo zigbuild --bins --release --target ${{ matrix.target }}
 
           mkdir bin
 
@@ -111,8 +111,8 @@ jobs:
       - name: Build (windows)
         if: matrix.windows == true
         run: |
-          cross build --target ${{ matrix.target }}
-          cross build --release --target ${{ matrix.target }}
+          cross build --bins --target ${{ matrix.target }}
+          cross build --bins --release --target ${{ matrix.target }}
 
           mkdir bin
 
