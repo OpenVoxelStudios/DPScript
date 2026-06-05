@@ -1,4 +1,4 @@
-on: [workflow_dispatch]
+on: [workflow_dispatch, push]
 name: build
 
 jobs:
@@ -90,6 +90,21 @@ jobs:
 
           mkdir bin
 
+          cp -v target/${{ matrix.target }}/debug/dpscript-analyzer bin/dpscript-analyzer-debug
+          cp -v target/${{ matrix.target }}/release/dpscript-analyzer bin/dpscript-analyzer
+
+          cp -v target/${{ matrix.target }}/debug/dpscript-lsp bin/dpscript-lsp-debug
+          cp -v target/${{ matrix.target }}/release/dpscript-lsp bin/dpscript-lsp
+
+          cp -v target/${{ matrix.target }}/debug/dpscript-tokenizer bin/dpscript-tokenizer-debug
+          cp -v target/${{ matrix.target }}/release/dpscript-tokenizer bin/dpscript-tokenizer
+
+          cp -v target/${{ matrix.target }}/debug/dpscript-lexer bin/dpscript-lexer-debug
+          cp -v target/${{ matrix.target }}/release/dpscript-lexer bin/dpscript-lexer
+
+          cp -v target/${{ matrix.target }}/debug/dpscript-parser bin/dpscript-parser-debug
+          cp -v target/${{ matrix.target }}/release/dpscript-parser bin/dpscript-parser
+
           cp -v target/${{ matrix.target }}/debug/dsc bin/dsc-debug
           cp -v target/${{ matrix.target }}/release/dsc bin/dsc
 
@@ -100,6 +115,21 @@ jobs:
           cross build --release --target ${{ matrix.target }}
 
           mkdir bin
+
+          cp -v target/${{ matrix.target }}/debug/dpscript-analyzer.exe bin/dpscript-analyzer-debug.exe
+          cp -v target/${{ matrix.target }}/release/dpscript-analyzer.exe bin/dpscript-analyzer.exe
+
+          cp -v target/${{ matrix.target }}/debug/dpscript-lsp.exe bin/dpscript-lsp-debug.exe
+          cp -v target/${{ matrix.target }}/release/dpscript-lsp.exe bin/dpscript-lsp.exe
+
+          cp -v target/${{ matrix.target }}/debug/dpscript-tokenizer.exe bin/dpscript-tokenizer-debug.exe
+          cp -v target/${{ matrix.target }}/release/dpscript-tokenizer.exe bin/dpscript-tokenizer.exe
+
+          cp -v target/${{ matrix.target }}/debug/dpscript-lexer.exe bin/dpscript-lexer-debug.exe
+          cp -v target/${{ matrix.target }}/release/dpscript-lexer.exe bin/dpscript-lexer.exe
+
+          cp -v target/${{ matrix.target }}/debug/dpscript-parser.exe bin/dpscript-parser-debug.exe
+          cp -v target/${{ matrix.target }}/release/dpscript-parser.exe bin/dpscript-parser.exe
 
           cp -v target/${{ matrix.target }}/debug/dsc.exe bin/dsc-debug.exe
           cp -v target/${{ matrix.target }}/release/dsc.exe bin/dsc.exe
