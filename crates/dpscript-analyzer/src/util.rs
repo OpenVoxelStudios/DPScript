@@ -1,56 +1,22 @@
 use dpscript_ast::{
     prelude::{
         SourceSpan,
-        def::func::FunctionInfo,
-        meta::DefMeta,
-        types::{TypeData, TypeRef},
+        def::{constant::Constant, func::FunctionInfo, objective::Objective},
+        types::TypeData,
     },
-    util::Name,
+    util::Remote,
 };
-use dpscript_core::{HasSpan, HasSpanGroup};
+use dpscript_core::HasSpanGroup;
 use facet::Facet;
 use serde::Serialize;
-
-#[derive(Debug, Clone, Serialize, Facet, HasSpan)]
-pub struct ConstExport<'a> {
-    pub name: Name<'a>,
-    pub ty: TypeRef<'a>,
-    pub meta: DefMeta<'a>,
-    pub span: SourceSpan,
-    pub module: String,
-}
-
-#[derive(Debug, Clone, Serialize, Facet, HasSpan)]
-pub struct FuncExport<'a> {
-    pub info: FunctionInfo<'a>,
-    pub meta: DefMeta<'a>,
-    pub span: SourceSpan,
-    pub module: String,
-}
-
-#[derive(Debug, Clone, Serialize, Facet, HasSpan)]
-pub struct ObjectiveExport<'a> {
-    pub name: Name<'a>,
-    pub meta: DefMeta<'a>,
-    pub span: SourceSpan,
-    pub module: String,
-}
-
-#[derive(Debug, Clone, Serialize, Facet, HasSpan)]
-pub struct TypeExport<'a> {
-    pub name: Name<'a>,
-    pub data: TypeData<'a>,
-    pub span: SourceSpan,
-    pub module: String,
-}
 
 #[repr(u8)]
 #[derive(Debug, Clone, Serialize, Facet, HasSpanGroup)]
 pub enum Export<'a> {
-    Constant(ConstExport<'a>),
-    Function(FuncExport<'a>),
-    Objective(ObjectiveExport<'a>),
-    Type(TypeExport<'a>),
+    Constant(Remote<Constant<'a>>),
+    Function(Remote<FunctionInfo<'a>>),
+    Objective(Remote<Objective<'a>>),
+    Type(Remote<TypeData<'a>>),
 }
 
 impl<'a> Export<'a> {
@@ -67,25 +33,25 @@ impl<'a> Export<'a> {
         let module = module.as_ref().into();
 
         match self {
-            Self::Constant(it) => Self::Constant(ConstExport {
+            Self::Constant(it) => Self::Constant(Remote {
                 module,
                 span,
                 ..it.clone()
             }),
 
-            Self::Function(it) => Self::Function(FuncExport {
+            Self::Function(it) => Self::Function(Remote {
                 module,
                 span,
                 ..it.clone()
             }),
 
-            Self::Objective(it) => Self::Objective(ObjectiveExport {
+            Self::Objective(it) => Self::Objective(Remote {
                 module,
                 span,
                 ..it.clone()
             }),
 
-            Self::Type(it) => Self::Type(TypeExport {
+            Self::Type(it) => Self::Type(Remote {
                 module,
                 span,
                 ..it.clone()

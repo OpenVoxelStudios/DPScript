@@ -16,6 +16,7 @@ pub fn parse_unary<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<
             op: UnaryOp::Negate,
             span,
             value: Box::new(value),
+            resolved: None,
         })
     } else if let Some((_, span)) = c.next_if_eq(&Token::Operator(Operator::Bang)) {
         let value = parse_value(c, cx)?;
@@ -25,6 +26,7 @@ pub fn parse_unary<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<
             op: UnaryOp::Invert,
             span,
             value: Box::new(value),
+            resolved: None,
         })
     } else if let Some((_, span)) = c.next_if_eq(&Token::Operator(Operator::CurPos))
         && c.has_next()
@@ -36,6 +38,7 @@ pub fn parse_unary<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<
             op: UnaryOp::Offset,
             span,
             value: Box::new(value),
+            resolved: None,
         })
     } else {
         Err(cx.skip())

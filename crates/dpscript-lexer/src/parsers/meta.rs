@@ -7,8 +7,9 @@ use crate::{
     parsers::{literal::parse_literal, types::parse_typeref},
     util::TokenCursor,
 };
-use dpscript_ast::prelude::meta::{
-    AllowFlag, BuiltinInfo, DefFlags, DefMeta, DslInfo, EnforceType, Repr, Require, Restrict,
+use dpscript_ast::prelude::{
+    meta::{AllowFlag, BuiltinInfo, DefFlags, DefMeta, EnforceType, Repr, Require, Restrict},
+    value::literal::DslMarker,
 };
 use dpscript_core::{MaxBy, MinBy, Spanned};
 use dpscript_parser::{Assignment, BraceType, Keyword, Literal, Punct, Token};
@@ -196,7 +197,6 @@ pub fn parse_single_def_meta<'a>(
     } else if inner.next_if_ident("dsl").is_some() {
         // #[dsl(...)]
         let mut group = inner.expect_group(BraceType::Parens)?;
-        let mut dsl = Vec::new();
 
         if group.next_if_ident("prefix").is_some() {
             group.expect(Token::Assignment(Assignment::Equal))?;
@@ -207,11 +207,15 @@ pub fn parse_single_def_meta<'a>(
                 return Err(cx.unexpected(it));
             };
 
-            dsl.push(DslInfo::Prefix((s, it.1)));
+            match s {
+                "#" => meta.dsl = Some(DslMarker::Hash),
+                "@" => meta.dsl = Some(DslMarker::At),
+
+                _ => return Err(cx.unexpected(it)),
+            }
         }
 
         group.assert_empty()?;
-        meta.dsl = dsl;
     } else if inner.next_if_ident("cmd").is_some() {
         // #[cmd(...)]
         let mut group = inner.expect_group(BraceType::Parens)?;
@@ -375,7 +379,16 @@ fn merge_def_meta<'a>(a: &mut DefMeta<'a>, b: DefMeta<'a>) -> Result<()> {
         a.require.push(item);
     }
 
-    a.dsl.extend(b.dsl);
+    if let Some(dsl) = b.dsl {
+        if a.dsl.is_some() {
+            return Err(Error::DuplicateMeta {
+                kind: "dsl",
+                span: b.span.into(),
+            });
+        }
+
+        a.dsl = Some(dsl);
+    }
 
     if let Some(cmd) = b.cmd {
         if a.cmd.is_some() {

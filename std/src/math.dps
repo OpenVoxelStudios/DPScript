@@ -4,6 +4,7 @@ import std::types::entities::Entity;
 import std::gm::simple::gm_add;
 import std::gm::simple::gm_negate;
 import std::gm::sqrt::gm_sqrt;
+import std::intrinsics::dsl_entity_id;
 
 objective int_math = "dummy";
 const value: Entity = @"dpscript.std.int_math.value";

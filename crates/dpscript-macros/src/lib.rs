@@ -6,7 +6,7 @@
 )]
 
 use proc_macro::TokenStream;
-use quote::{format_ident, quote, quote_spanned};
+use quote::{ToTokens, format_ident, quote, quote_spanned};
 use syn::{Data, DeriveInput, FnArg, ItemFn, Visibility, parse_macro_input, spanned::Spanned};
 
 #[proc_macro_derive(HasSpan)]
@@ -58,6 +58,7 @@ pub fn derive_has_span(stream: TokenStream) -> TokenStream {
         }
 
         Data::Struct(ref data) => {
+            let generics = input.generics.to_token_stream();
             let mut found = false;
 
             for field in &data.fields {
@@ -77,7 +78,7 @@ pub fn derive_has_span(stream: TokenStream) -> TokenStream {
                 let name = input.ident.clone();
 
                 quote! {
-                    impl<'a> crate::prelude::HasSpan for #name<'a> {
+                    impl #generics crate::prelude::HasSpan for #name #generics {
                         fn span(&self) -> crate::prelude::SourceSpan {
                             self.span.clone()
                         }

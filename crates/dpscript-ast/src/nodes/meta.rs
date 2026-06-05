@@ -1,7 +1,7 @@
 use dpscript_core::SourceSpan;
 
 use crate::{
-    prelude::{Spanned, types::TypeRef, value::literal::Literal},
+    prelude::{Spanned, types::TypeRef, value::literal::{DslMarker, Literal}},
     util::Name,
 };
 
@@ -58,7 +58,7 @@ pub struct DefMeta<'a> {
     pub require: Vec<Require<'a>>,
 
     /// Any `#[dsl(...)]` declarations.
-    pub dsl: Vec<DslInfo<'a>>,
+    pub dsl: Option<DslMarker>,
 
     /// If this is a command function, this is the template to build the command from.
     pub cmd: Option<Spanned<&'a str>>,

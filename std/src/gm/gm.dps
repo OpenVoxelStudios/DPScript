@@ -1,6 +1,8 @@
 import std::base::forceload_add;
 import std::base::summon_with;
 import std::types::entities::Entity;
+import std::intrinsics::dsl_pos_int;
+import std::intrinsics::dsl_entity_id;
 
 pub objective gm_std = "dummy";
 

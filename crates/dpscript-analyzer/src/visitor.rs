@@ -12,7 +12,7 @@ use dpscript_ast::prelude::{
         var::Variable,
     },
     meta::DefMeta,
-    types::{TypeRef, Typedef},
+    types::{TypeData, TypeRef, Typedef},
     value::{
         Value,
         arr::ArrayLiteral,
@@ -64,11 +64,16 @@ pub trait DefVisitor<'a, 'visit> {
             visitor.visit_meta(cx, &mut node.meta);
         }
 
+        cx.scope
+            .push_existing(node.scope.take().unwrap_or_default());
+
         if let Some(visitor) = self.expr_visitor() {
             for expr in &mut node.body {
                 visitor.visit_expr(cx, expr);
             }
         }
+
+        node.scope = Some(cx.scope.pop());
     }
 
     fn visit_constant(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Constant<'a>) {
@@ -79,6 +84,14 @@ pub trait DefVisitor<'a, 'visit> {
 
         if let Some(visitor) = self.value_visitor() {
             visitor.visit_value(cx, &mut node.value);
+        }
+
+        if let Some(it) = cx.scope.lookup().lookup_const_mut(node.name.0)
+            && it.module == cx.module.name
+            && it.span == node.span
+            && it.data != *node
+        {
+            it.data = node.clone();
         }
     }
 
@@ -91,6 +104,15 @@ pub trait DefVisitor<'a, 'visit> {
             if let Some(visitor) = self.meta_visitor() {
                 visitor.visit_meta(cx, &mut variant.meta);
             }
+        }
+
+        if let Some(it) = cx.scope.lookup().lookup_type_mut(node.name.0)
+            && it.module == cx.module.name
+            && it.span == node.span
+            && let TypeData::Enum(obj) = &mut it.data
+            && *obj != *node
+        {
+            *obj = node.clone();
         }
     }
 
@@ -113,9 +135,43 @@ pub trait DefVisitor<'a, 'visit> {
             }
         }
 
+        cx.scope
+            .push_existing(node.scope.take().unwrap_or_default());
+
         if let Some(visitor) = self.expr_visitor() {
             for expr in &mut node.body {
                 visitor.visit_expr(cx, expr);
+            }
+        }
+
+        node.scope = Some(cx.scope.pop());
+
+        if let Some(dsl) = node.info.meta.dsl
+            && let Some(arg) = node.info.args.first()
+            && let Some(it) = cx.scope.lookup().lookup_dsl_func_mut(&arg.ty.as_id(), dsl)
+            && it.module == cx.module.name
+            && it.span == node.span
+        {
+            if it.data != node.info {
+                it.data = node.info.clone();
+            }
+        } else if let Some(target) = &node.info.target
+            && let Some(it) = cx
+                .scope
+                .lookup()
+                .lookup_inst_func_mut(node.info.name.0, &target.as_id())
+            && it.module == cx.module.name
+            && it.span == node.span
+        {
+            if it.data != node.info {
+                it.data = node.info.clone();
+            }
+        } else if let Some(it) = cx.scope.lookup().lookup_func_mut(node.info.name.0)
+            && it.module == cx.module.name
+            && it.span == node.span
+        {
+            if it.data != node.info {
+                it.data = node.info.clone();
             }
         }
     }
@@ -130,6 +186,14 @@ pub trait DefVisitor<'a, 'visit> {
         if let Some(visitor) = self.meta_visitor() {
             visitor.visit_meta(cx, &mut node.meta);
         }
+
+        if let Some(it) = cx.scope.lookup().lookup_objective_mut(node.name.0)
+            && it.module == cx.module.name
+            && it.span == node.span
+            && it.data != *node
+        {
+            it.data = node.clone();
+        }
     }
 
     fn visit_struct(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Struct<'a>) {
@@ -141,11 +205,29 @@ pub trait DefVisitor<'a, 'visit> {
                 visitor.visit_type(cx, &mut field.ty);
             }
         }
+
+        if let Some(it) = cx.scope.lookup().lookup_type_mut(node.name.0)
+            && it.module == cx.module.name
+            && it.span == node.span
+            && let TypeData::Struct(obj) = &mut it.data
+            && *obj != *node
+        {
+            *obj = node.clone();
+        }
     }
 
     fn visit_typedef(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Typedef<'a>) {
         if let Some(visitor) = self.meta_visitor() {
             visitor.visit_meta(cx, &mut node.meta);
+        }
+
+        if let Some(it) = cx.scope.lookup().lookup_type_mut(node.name.0)
+            && it.module == cx.module.name
+            && it.span == node.span
+            && let TypeData::Typedef(obj) = &mut it.data
+            && *obj != *node
+        {
+            *obj = node.clone();
         }
     }
 }
@@ -177,9 +259,14 @@ pub trait ExprVisitor<'a, 'visit> {
             visitor.visit_value(cx, &mut node.arg);
         }
 
+        cx.scope
+            .push_existing(node.scope.take().unwrap_or_default());
+
         for expr in &mut node.body {
             self.visit_expr(cx, expr);
         }
+
+        node.scope = Some(cx.scope.pop());
     }
 
     fn visit_cond(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Cond<'a>) {
@@ -190,14 +277,24 @@ pub trait ExprVisitor<'a, 'visit> {
         }
 
         for cond in &mut node.conditions {
+            cx.scope
+                .push_existing(cond.scope.take().unwrap_or_default());
+
             for expr in &mut cond.body {
                 self.visit_expr(cx, expr);
             }
+
+            cond.scope = Some(cx.scope.pop());
         }
+
+        cx.scope
+            .push_existing(node.else_scope.take().unwrap_or_default());
 
         for expr in &mut node.else_block {
             self.visit_expr(cx, expr);
         }
+
+        node.else_scope = Some(cx.scope.pop());
     }
 
     fn visit_constant_expr(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Constant<'a>) {
@@ -209,6 +306,14 @@ pub trait ExprVisitor<'a, 'visit> {
         if let Some(visitor) = self.value_visitor() {
             visitor.visit_value(cx, &mut node.value);
         }
+
+        if let Some(it) = cx.scope.lookup().lookup_const_mut(node.name.0)
+            && it.module == cx.module.name
+            && it.span == node.span
+            && it.data != *node
+        {
+            it.data = node.clone();
+        }
     }
 
     fn visit_for_loop(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut ForLoop<'a>) {
@@ -216,9 +321,14 @@ pub trait ExprVisitor<'a, 'visit> {
             visitor.visit_value(cx, &mut node.array);
         }
 
+        cx.scope
+            .push_existing(node.scope.take().unwrap_or_default());
+
         for expr in &mut node.body {
             self.visit_expr(cx, expr);
         }
+
+        node.scope = Some(cx.scope.pop());
     }
 
     fn visit_assign(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Assign<'a>) {
@@ -230,7 +340,9 @@ pub trait ExprVisitor<'a, 'visit> {
 
     fn visit_call(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Call<'a>) {
         if let Some(visitor) = self.value_visitor() {
-            visitor.visit_value(cx, &mut node.target);
+            if let Some(target) = &mut node.target {
+                visitor.visit_value(cx, target);
+            }
 
             for arg in &mut node.args {
                 visitor.visit_value(cx, arg);
@@ -257,6 +369,14 @@ pub trait ExprVisitor<'a, 'visit> {
             if let Some(value) = &mut node.value {
                 visitor.visit_value(cx, value);
             }
+        }
+
+        if let Some(it) = cx.scope.lookup().lookup_var_mut(node.name.0)
+            && it.module == cx.module.name
+            && it.span == node.span
+            && it.data != *node
+        {
+            it.data = node.clone();
         }
     }
 }
@@ -289,7 +409,9 @@ pub trait ValueVisitor<'a, 'visit> {
     }
 
     fn visit_call_value(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Call<'a>) {
-        self.visit_value(cx, &mut node.target);
+        if let Some(target) = &mut node.target {
+            self.visit_value(cx, target);
+        }
 
         for value in &mut node.args {
             self.visit_value(cx, value);

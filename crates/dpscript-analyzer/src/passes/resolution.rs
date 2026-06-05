@@ -15,10 +15,8 @@ impl TypeResolver {
         cx: &mut VisitCx<'a, 'visit>,
         ty: &TypeRef<'a>,
     ) -> Option<Box<ResolvedTypeRef<'a>>> {
-        let scope = cx.scope.current();
-
         match &ty.data {
-            TypeRefData::Named { name } => match scope.types.get(name.0) {
+            TypeRefData::Named { name } => match cx.scope.lookup().lookup_type(name.0) {
                 Some(res) => Some(Box::new(ResolvedTypeRef {
                     module: res.module.clone(),
                     span: res.span,

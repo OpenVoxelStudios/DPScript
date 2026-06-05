@@ -1,12 +1,8 @@
 use dpscript_core::SourceSpan;
 
 use crate::{
-    prelude::{
-        def::{constant::Constant, func::Function},
-        expr::var::Variable,
-        value::Value,
-    },
-    util::Name,
+    prelude::{types::TypeRef, value::Value},
+    util::{Name, Remote},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
@@ -26,16 +22,6 @@ pub struct ValueRef<'a> {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct VarRef<'a> {
     pub name: Name<'a>,
-    pub resolved: Option<VarInfo<'a>>,
+    pub resolved: Option<Remote<TypeRef<'a>>>,
     pub span: SourceSpan,
-}
-
-#[repr(u8)]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpanGroup)]
-pub enum VarInfo<'a> {
-    Const(Box<Constant<'a>>),
-    Var(Box<Variable<'a>>),
-
-    /// Only used when parsing calls, but this counts as a reference to a "value". Easier to parse things this way.
-    Func(Box<Function<'a>>),
 }

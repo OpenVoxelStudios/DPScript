@@ -1,4 +1,12 @@
-use dpscript_ast::prelude::{NamedSource, def::Def, scope::Scope};
+use dpscript_ast::{
+    prelude::{
+        NamedSource,
+        def::{Def, func::FunctionInfo},
+        scope::Scope,
+        types::TypeRefId,
+    },
+    util::Remote,
+};
 use facet::Facet;
 use itertools::Itertools;
 use serde::Serialize;
@@ -6,7 +14,8 @@ use std::collections::{HashMap, HashSet};
 
 use crate::{
     err::{Error, Warning},
-    util::{Export, FuncExport},
+    scope::ScopeCx,
+    util::Export,
     visitor::DefVisitor,
 };
 
@@ -16,21 +25,11 @@ pub struct VisitCx<'a, 'visit> {
     pub analysis: &'visit mut AnalysisCx<'a>,
 }
 
-pub struct ScopeCx<'a> {
-    pub stack: Vec<Scope<'a>>,
-}
-
-impl<'a> ScopeCx<'a> {
-    pub fn current(&mut self) -> &mut Scope<'a> {
-        self.stack.last_mut().unwrap()
-    }
-}
-
 #[derive(Default, Serialize, Facet)]
 pub struct Module<'a> {
     pub name: String,
     pub exports: HashMap<&'a str, Export<'a>>,
-    pub inst_func_exports: HashMap<&'a str, HashMap<String, FuncExport<'a>>>,
+    pub inst_func_exports: HashMap<&'a str, HashMap<TypeRefId, Remote<FunctionInfo<'a>>>>,
     pub defs: Vec<Def<'a>>,
     pub scope: Scope<'a>,
     pub source: NamedSource<'a>,
@@ -61,7 +60,7 @@ impl<'a> AnalysisCx<'a> {
         self.warnings.push(warn.into());
     }
 
-    pub fn run_pass<T>(&mut self, visitor: &mut T)
+    pub fn run_pass<T : ?Sized>(&mut self, visitor: &mut T)
     where
         for<'visit> T: DefVisitor<'a, 'visit>,
     {
@@ -76,7 +75,7 @@ impl<'a> AnalysisCx<'a> {
         self.visited_modules.clear();
     }
 
-    pub fn visit_module<'visit, T: DefVisitor<'a, 'visit>>(
+    pub fn visit_module<'visit, T: DefVisitor<'a, 'visit> + ?Sized>(
         &'visit mut self,
         module_id: impl AsRef<str>,
         visitor: &mut T,

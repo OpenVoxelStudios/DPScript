@@ -17,3 +17,5 @@ flamegraph.svg
 *.tokens_raw.ron
 profile.json.gz
 vscode/out
+*.module.ron
+/*.log

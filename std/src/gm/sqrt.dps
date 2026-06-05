@@ -8,6 +8,7 @@ import std::gm::math_entity;
 import std::math::sub;
 import std::intrinsics::slice;
 import std::intrinsics::float_of;
+import std::intrinsics::dsl_entity_id;
 
 const looper: Entity = @"__sqrt_loop";
 

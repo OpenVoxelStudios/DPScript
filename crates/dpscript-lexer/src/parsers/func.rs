@@ -12,7 +12,7 @@ use dpscript_ast::prelude::{
     def::func::{Function, FunctionArg, FunctionInfo},
     types::{TypeRef, TypeRefData},
 };
-use dpscript_parser::{BraceType, Keyword, Operator, Punct, Token};
+use dpscript_parser::{BraceType, Keyword, Literal, Operator, Punct, Token};
 
 #[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
@@ -48,17 +48,35 @@ pub fn parse_func<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<F
 
     c.expect_or_skip(Token::Keyword(Keyword::Fn))?;
 
+    let tkn = c.take_next()?;
     let mut target = None;
-    let mut name = c.expect_ident()?;
+    let mut name;
 
-    if c.check(&Token::Operator(Operator::ModulePath)) {
-        target = Some(TypeRef {
-            span: name.1,
-            data: TypeRefData::Named { name },
-            resolved: None,
-        });
+    match tkn.0 {
+        Token::Literal(Literal::Identifier(s)) => name = (s, tkn.1),
 
-        name = c.expect_ident()?;
+        Token::BraceGroup(BraceType::Brackets, _) => {
+            c.back();
+            target = Some(parse_typeref(c, cx)?);
+            c.expect(Token::Operator(Operator::ModulePath))?;
+            name = c.expect_ident()?;
+        }
+
+        _ => return Err(cx.skip()),
+    };
+
+    if let Some(tkn) = c.next_if_eq(&Token::Operator(Operator::ModulePath)) {
+        if target.is_none() {
+            target = Some(TypeRef {
+                span: name.1,
+                data: TypeRefData::Named { name },
+                resolved: None,
+            });
+
+            name = c.expect_ident()?;
+        } else {
+            return Err(cx.unexpected(tkn));
+        }
     }
 
     let mut group = c.expect_group(BraceType::Parens)?;

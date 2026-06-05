@@ -6,7 +6,10 @@ use crate::{
         SourceSpan,
         def::{DefTrait, enums::Enum, structs::Struct},
         meta::DefMeta,
-        value::Value,
+        value::{
+            Value,
+            literal::{Literal, LiteralValue},
+        },
     },
     util::Name,
 };
@@ -112,6 +115,81 @@ impl<'a> fmt::Display for TypeData<'a> {
             Self::Enum(it) => write!(f, "{}", it.name.0),
             Self::Struct(it) => write!(f, "{}", it.name.0),
             Self::Typedef(it) => write!(f, "{}", it.name.0),
+        }
+    }
+}
+
+#[repr(u8)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, Facet, Hash)]
+pub enum TypeRefId {
+    Named {
+        name: (String, SourceSpan),
+    },
+
+    SizedArray {
+        inner: Box<TypeRefId>,
+        length: usize,
+    },
+
+    UnsizedArray {
+        inner: Box<TypeRefId>,
+    },
+}
+
+impl<'a> TypeRef<'a> {
+    pub fn as_id(&self) -> TypeRefId {
+        match &self.resolved {
+            Some(resolved) => {
+                let name = match &resolved.data {
+                    TypeData::Enum(it) => {
+                        (format!("{}::{}", resolved.module, it.name.0), it.name.1)
+                    }
+
+                    TypeData::Struct(it) => {
+                        (format!("{}::{}", resolved.module, it.name.0), it.name.1)
+                    }
+
+                    TypeData::Typedef(it) => {
+                        (format!("{}::{}", resolved.module, it.name.0), it.name.1)
+                    }
+                };
+
+                match resolved.array {
+                    ArrayKind::None => TypeRefId::Named { name },
+
+                    _ => TypeRefId::UnsizedArray {
+                        inner: Box::new(TypeRefId::Named { name }),
+                    },
+                }
+            }
+
+            None => match &self.data {
+                TypeRefData::Named { name } => TypeRefId::Named {
+                    name: (name.0.into(), name.1),
+                },
+
+                TypeRefData::SizedArray { inner, length } => match &**length {
+                    Value::Literal(Literal {
+                        value: LiteralValue::Int(len),
+                        ..
+                    }) => TypeRefId::SizedArray {
+                        inner: Box::new(inner.as_id()),
+                        length: *len as usize,
+                    },
+
+                    _ => TypeRefId::UnsizedArray {
+                        inner: Box::new(inner.as_id()),
+                    },
+                },
+
+                TypeRefData::UnsizedArray { inner } => TypeRefId::UnsizedArray {
+                    inner: Box::new(inner.as_id()),
+                },
+
+                TypeRefData::Resolved => {
+                    unreachable!("TypeRefData::Resolved is not valid if self.resolved is None!")
+                }
+            },
         }
     }
 }

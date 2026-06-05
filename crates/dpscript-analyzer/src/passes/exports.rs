@@ -1,26 +1,20 @@
 //! Pass 1: Export resolution & module completion.
 
-use crate::{
-    cx::VisitCx,
-    util::{ConstExport, Export, FuncExport, ObjectiveExport, TypeExport},
-    visitor::DefVisitor,
-};
-use dpscript_ast::prelude::{
-    HasSpan,
-    def::{
-        constant::Constant, enums::Enum, export::Export as ExportNode, func::Function,
-        objective::Objective, structs::Struct,
+use crate::{cx::VisitCx, util::Export, visitor::DefVisitor};
+use dpscript_ast::{
+    prelude::{
+        HasSpan,
+        def::{
+            constant::Constant, export::Export as ExportNode, func::Function, objective::Objective,
+        },
+        meta::DefFlags,
     },
-    meta::DefFlags,
-    types::{TypeData, Typedef},
+    util::Remote,
 };
 
 pub struct ExportResolver;
 
-impl<'a, 'visit> DefVisitor<'a, 'visit> for ExportResolver
-where
-    'a: 'visit,
-{
+impl<'a, 'visit> DefVisitor<'a, 'visit> for ExportResolver {
     fn visit_constant(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Constant<'a>) {
         if node.flags.contains(&DefFlags::Public) {
             if let Some(export) = cx.module.exports.get(&node.name.0) {
@@ -28,10 +22,8 @@ where
             } else {
                 cx.module.exports.insert(
                     &node.name.0,
-                    Export::Constant(ConstExport {
-                        name: node.name,
-                        ty: node.ty.clone(),
-                        meta: node.meta.clone(),
+                    Export::Constant(Remote {
+                        data: node.clone(),
                         span: node.span,
                         module: cx.module.name.clone(),
                     }),
@@ -49,15 +41,14 @@ where
                     .entry(&node.info.name.0)
                     .or_default();
 
-                if let Some(export) = map.get(&ty.to_string()) {
+                if let Some(export) = map.get(&ty.as_id()) {
                     let span = export.span();
                     cx.duplicate_export(node.info.name.0, span, node.span);
                 } else {
                     map.insert(
-                        ty.to_string(),
-                        FuncExport {
-                            info: node.info.clone(),
-                            meta: node.info.meta.clone(),
+                        ty.as_id(),
+                        Remote {
+                            data: node.info.clone(),
                             span: node.span,
                             module: cx.module.name.clone(),
                         },
@@ -69,9 +60,8 @@ where
                 } else {
                     cx.module.exports.insert(
                         &node.info.name.0,
-                        Export::Function(FuncExport {
-                            info: node.info.clone(),
-                            meta: node.info.meta.clone(),
+                        Export::Function(Remote {
+                            data: node.info.clone(),
                             span: node.span,
                             module: cx.module.name.clone(),
                         }),
@@ -88,9 +78,8 @@ where
             } else {
                 cx.module.exports.insert(
                     &node.name.0,
-                    Export::Objective(ObjectiveExport {
-                        name: node.name,
-                        meta: node.meta.clone(),
+                    Export::Objective(Remote {
+                        data: node.clone(),
                         span: node.span,
                         module: cx.module.name.clone(),
                     }),
@@ -99,59 +88,7 @@ where
         }
     }
 
-    fn visit_struct(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Struct<'a>) {
-        if node.flags.contains(&DefFlags::Public) {
-            if let Some(export) = cx.module.exports.get(&node.name.0) {
-                cx.duplicate_export(node.name.0, export.span(), node.span);
-            } else {
-                cx.module.exports.insert(
-                    &node.name.0,
-                    Export::Type(TypeExport {
-                        name: node.name,
-                        data: TypeData::Struct(node.clone()),
-                        span: node.span,
-                        module: cx.module.name.clone(),
-                    }),
-                );
-            }
-        }
-    }
-
-    fn visit_enum(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Enum<'a>) {
-        if node.flags.contains(&DefFlags::Public) {
-            if let Some(export) = cx.module.exports.get(&node.name.0) {
-                cx.duplicate_export(node.name.0, export.span(), node.span);
-            } else {
-                cx.module.exports.insert(
-                    &node.name.0,
-                    Export::Type(TypeExport {
-                        name: node.name,
-                        data: TypeData::Enum(node.clone()),
-                        span: node.span,
-                        module: cx.module.name.clone(),
-                    }),
-                );
-            }
-        }
-    }
-
-    fn visit_typedef(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Typedef<'a>) {
-        if node.flags.contains(&DefFlags::Public) {
-            if let Some(export) = cx.module.exports.get(&node.name.0) {
-                cx.duplicate_export(node.name.0, export.span(), node.span);
-            } else {
-                cx.module.exports.insert(
-                    &node.name.0,
-                    Export::Type(TypeExport {
-                        name: node.name,
-                        data: TypeData::Typedef(node.clone()),
-                        span: node.span,
-                        module: cx.module.name.clone(),
-                    }),
-                );
-            }
-        }
-    }
+    // struct, enum, typedef: all handled in the basic export resolver
 }
 
 pub struct ExportStmtResolver;
@@ -205,7 +142,7 @@ where
                     } else {
                         cx.module.inst_func_exports.entry(k).or_default().insert(
                             t,
-                            FuncExport {
+                            Remote {
                                 span: path.span,
                                 ..v
                             },

@@ -1,4 +1,4 @@
-use dpscript_analyzer::StaticRef;
+use dpscript_analyzer::refs::StaticRef;
 use itertools::Itertools;
 use miette::IntoDiagnostic;
 use std::{collections::HashMap, fs};
@@ -47,7 +47,39 @@ pub fn main() -> miette::Result<()> {
         .map(|it| (*it, StaticRef::new(fs::read_to_string(it).unwrap())))
         .collect::<HashMap<_, _>>();
 
-    let modules = dpscript_analyzer::analyze(&files, &contents, write_output)?;
+    let mut res = Ok(());
+
+    let modules = match dpscript_analyzer::analyze(&files, &contents, write_output) {
+        Ok(it) => it,
+
+        Err((it, errs)) => {
+            res = Err(errs);
+            it
+        }
+    };
+
+    for (key, data) in &modules {
+        let mut split = key.split("::").map(|it| it.to_string()).collect::<Vec<_>>();
+
+        split.insert(1, "src".into());
+
+        let mut path = format!("{}.dps", split.join("/"));
+        let path2 = format!("{}/{}.dps", split.join("/"), split.last().unwrap());
+
+        if files.contains(&path2.as_str()) {
+            path = path2;
+        }
+
+        if key == "std" {
+            path = "std/src/std.dps".into();
+        }
+
+        fs::write(
+            format!("{path}.module.ron"),
+            ron::ser::to_string_pretty(data, ron::ser::PrettyConfig::new()).into_diagnostic()?,
+        )
+        .into_diagnostic()?;
+    }
 
     if write_output {
         std::fs::write(
@@ -57,6 +89,8 @@ pub fn main() -> miette::Result<()> {
         )
         .into_diagnostic()?;
     }
+
+    res?;
 
     for (_, v) in contents {
         v.free();

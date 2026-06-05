@@ -1,6 +1,6 @@
 use crate::{Result, cx::ParseCx, err::Error, parsers::value::parse_value, util::TokenCursor};
 use dpscript_ast::prelude::expr::call::Call;
-use dpscript_parser::{BraceType, Punct, Token};
+use dpscript_parser::{BraceType, Literal, Operator, Punct, Token};
 
 #[dpscript_core::trace_fn_lexer]
 #[tracing::instrument(level = tracing::Level::DEBUG)]
@@ -28,8 +28,27 @@ pub fn parse_call<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<C
         buf.push(tkn);
     }
 
-    let mut buf = TokenCursor::new(buf);
-    let target = parse_value(&mut buf, cx)?;
+    if buf.is_empty() {
+        return Err(cx.skip());
+    }
+
+    let pop = buf.pop().unwrap();
+
+    let (Token::Literal(Literal::Identifier(func)), func_span) = pop else {
+        return Err(cx.unexpected(pop));
+    };
+
+    let func = (func, func_span);
+    let mut target = None;
+
+    if !buf.is_empty() && let (Token::Operator(Operator::Dot), _) = buf.last().unwrap() {
+        buf.pop().unwrap();
+
+        let mut buf = TokenCursor::new(buf);
+
+        target = Some(Box::new(parse_value(&mut buf, cx)?));
+    }
+
     let mut args = Vec::new();
 
     while args_buf.has_next() {
@@ -48,6 +67,7 @@ pub fn parse_call<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<C
         args,
         resolved: None,
         span,
-        target: Box::new(target),
+        target,
+        func,
     })
 }

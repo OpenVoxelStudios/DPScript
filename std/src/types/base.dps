@@ -12,3 +12,4 @@ pub typedef NBT;
 pub typedef void;
 pub typedef Objective;
 pub typedef Any;
+pub typedef long;

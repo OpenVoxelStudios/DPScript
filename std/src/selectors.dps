@@ -2,6 +2,7 @@ import std::types::base::NBT;
 import std::types::base::Ident;
 import std::types::math::FVec3;
 import std::types::entities::Entity;
+import std::intrinsics::dsl_entity_id;
 // import std::types::players::Player; // TODO: Player type
 
 pub const self: Entity = @"@s";
@@ -12,7 +13,7 @@ pub const all_players: [Entity] = @"@a";
 pub const all_entities: [Entity] = @"@e";
 
 #[cmd("tellraw {target} {message}")]
-pub fn Entity::tellraw(#[this] target: Entity, message: NBT);
+pub fn [Entity]::tellraw(#[this] target: Entity, message: NBT);
 
 #[cmd("give {target} {item}")]
 pub fn Entity::give(#[this] target: Entity, #[hint = "item"] item: Ident);

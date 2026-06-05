@@ -11,7 +11,7 @@ use crate::prelude::Spanned;
 pub type Name<'a> = Spanned<&'a str>;
 pub type ModulePath<'a> = Vec<Name<'a>>;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct Remote<T> {
     pub module: String,
     pub span: SourceSpan,

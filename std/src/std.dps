@@ -2,6 +2,9 @@ import std::selectors::tellraw;
 import std::selectors::all_players;
 import std::types::text::Text;
 import std::types::entities::Entity;
+import std::intrinsics::dsl_entity_id;
+import std::intrinsics::dsl_plain_text;
+import std::intrinsics::add;
 
 #[name = "dpscript_config"]
 pub objective config = "dummy";

@@ -1,9 +1,11 @@
 // COMPILER NOTE: compiler-builtins are always inlined.
+
 import std::types::base::int;
 import std::types::base::float;
 import std::types::base::double;
 import std::types::base::str;
 import std::types::base::Any;
+import std::types::base::NBT;
 import std::types::math::DVec3;
 import std::types::math::FVec3;
 import std::types::math::BlockPos;
@@ -44,6 +46,9 @@ pub fn dsl_pos_float(value: [float; 3]) -> FVec3;
 #[dsl(prefix = "@")]
 pub fn dsl_pos_double(value: [double; 3]) -> DVec3;
 
+#[cmd("data modify {source} merge from {other}")]
+pub operator fn NBT::add(#[enforce(clone)] #[require(store)] source: NBT, #[require(store)] other: NBT) -> NBT;
+
 // COMPILER NOTE: `facade fn` has been removed and is now implied with a `#[cmd]` attribute.
 // `#[cmd]` functions are also now automatically inlined.
 
@@ -60,7 +65,7 @@ pub fn dsl_pos_double(value: [double; 3]) -> DVec3;
 
 /// Set a string from a source to a target, slicing it.
 #[cmd("data modify {source} set string {target} {start} {end}")]
-fn set_string(
+pub fn set_string(
     #[require(store)] ref source: str,
     #[require(store)] ref target: str,
     start: int,
@@ -73,7 +78,7 @@ fn set_string(
 /// Internally, this is basically `data modify [...] set string [...] {start} {end}`.
 #[inline]
 #[since = "0.4.0"]
-pub fn Any::slice(#[this] self: Any, start: int, end: int) -> str {
+pub fn str::slice(#[this] self: str, start: int, end: int) -> str {
     let new = clone(self);
 
     set_string(self, new, start, end);

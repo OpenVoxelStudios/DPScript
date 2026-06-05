@@ -2,22 +2,28 @@ use crate::{
     cx::{AnalysisCx, Module},
     err::Error,
     passes::{
+        basic_exports::BasicExportResolver,
+        basic_scope::BasicScopeResolver,
         exports::{ExportResolver, ExportStmtResolver},
+        inference::TypeInference,
         resolution::TypeResolver,
         top_scope::TopScopeResolver,
     },
+    refs::StaticRef,
 };
 use dpscript_ast::prelude::{NamedSource, scope::Scope};
 use dpscript_lexer::parse;
 use dpscript_parser::{tast_from_tokens, tokenize_first};
 use miette::Diagnostic;
-use std::{collections::HashMap, mem::ManuallyDrop};
+use std::collections::HashMap;
 use thiserror::Error;
 
 pub mod cx;
 pub mod err;
 pub mod ops;
 pub mod passes;
+pub mod refs;
+pub mod scope;
 pub mod util;
 pub mod visitor;
 
@@ -45,33 +51,36 @@ pub struct ErrorGroup {
     pub count: usize,
 }
 
-pub struct StaticRef {
-    owned: ManuallyDrop<String>,
-    ptr: *const str,
-}
+macro_rules! passes {
+    {
+        $cx: ident;
 
-impl StaticRef {
-    pub fn new(owned: String) -> Self {
-        Self {
-            ptr: owned.as_str() as *const str,
-            owned: ManuallyDrop::new(owned),
-        }
-    }
+        $($ty: ident = $name: expr),*
+        $(,)?
+    } => {
+        let len = [$($name),*].len() as u64;
+        let pb = indicatif::ProgressBar::new(len)
+            .with_style(
+                indicatif::ProgressStyle::with_template("[{elapsed_precise}] [{bar:40.cyan/blue}] [{pos}/{len}] {msg:.green.bold}")
+                    .unwrap()
+                    .progress_chars("##-")
+            );
 
-    pub fn get<'t>(&self) -> &'t str {
-        unsafe { &*self.ptr }
-    }
+        $(
+            pb.set_message($name);
+            $cx.run_pass(&mut $ty);
+            pb.inc(1);
+        )*
 
-    pub fn free(mut self) {
-        unsafe { ManuallyDrop::drop(&mut self.owned) };
-    }
+        pb.finish();
+    };
 }
 
 pub fn analyze<'a>(
     files: &[&'static str],
     contents: &HashMap<&'static str, StaticRef>,
     write_output: bool,
-) -> Result<HashMap<String, Module<'a>>, ErrorGroup> {
+) -> Result<HashMap<String, Module<'a>>, (HashMap<String, Module<'a>>, ErrorGroup)> {
     let mut modules = HashMap::new();
 
     for file in files {
@@ -140,10 +149,18 @@ pub fn analyze<'a>(
 
     let mut cx = AnalysisCx::new(modules);
 
-    cx.run_pass(&mut ExportResolver);
-    cx.run_pass(&mut ExportStmtResolver);
-    cx.run_pass(&mut TopScopeResolver);
-    cx.run_pass(&mut TypeResolver);
+    passes! {
+        cx;
+
+        BasicExportResolver = "Basic Exports",
+        BasicScopeResolver = "Basic Scopes",
+        TypeResolver = "Type Resolution (#1)",
+        ExportResolver = "Module Exports",
+        ExportStmtResolver = "Export Statements",
+        TopScopeResolver = "Scope Resolution",
+        TypeResolver = "Type Resolution (#2)",
+        TypeInference = "Type Inference",
+    };
 
     let modules = cx.modules;
 
@@ -162,10 +179,13 @@ pub fn analyze<'a>(
                 .push(err);
         }
 
-        return Err(ErrorGroup {
-            count: errs.values().map(|it| it.inner.len()).sum(),
-            inner: errs.into_values().collect(),
-        });
+        return Err((
+            modules,
+            ErrorGroup {
+                count: errs.values().map(|it| it.inner.len()).sum(),
+                inner: errs.into_values().collect(),
+            },
+        ));
     }
 
     Ok(modules)

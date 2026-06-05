@@ -1,6 +1,9 @@
 use dpscript_core::SourceSpan;
 
-use crate::prelude::value::Value;
+use crate::{
+    prelude::{def::func::FunctionInfo, value::Value},
+    util::Remote,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
 pub struct BinOp<'a> {
@@ -8,6 +11,7 @@ pub struct BinOp<'a> {
     pub op: Operation,
     pub rhs: Box<Value<'a>>,
     pub span: SourceSpan,
+    pub resolved: Option<Remote<FunctionInfo<'a>>>,
 }
 
 #[repr(u8)]

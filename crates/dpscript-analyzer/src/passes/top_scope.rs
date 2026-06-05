@@ -1,14 +1,14 @@
 //! Pass 2: Top-level scope resolution pass (imports, declarations, etc.).
 
-use crate::{cx::VisitCx, util::Export, visitor::DefVisitor};
+use crate::{
+    cx::VisitCx,
+    util::Export,
+    visitor::{DefVisitor, ExprVisitor},
+};
 use dpscript_ast::{
     prelude::{
-        HasSpan,
-        def::{
-            constant::Constant, enums::Enum, func::Function, import::Import, objective::Objective,
-            structs::Struct,
-        },
-        types::{TypeData, Typedef},
+        def::{constant::Constant, func::Function, import::Import, objective::Objective},
+        expr::var::Variable,
     },
     util::Remote,
 };
@@ -43,57 +43,12 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
                     Export::Constant(it) => {
                         let map = &mut cx.scope.current().consts;
 
-                        if let Some(entry) = map.get(&it.name.0) {
+                        if let Some(entry) = map.get(&it.data.name.0) {
                             let span = entry.span;
-                            cx.duplicate_defs(it.name.0, span, path.span);
-                        } else {
-                            map.insert(it.name.0, it.ty.clone());
-                        }
-                    }
-
-                    Export::Function(it) => {
-                        if let Some(ty) = &it.info.target {
-                            let map = &mut cx.scope.current().inst_funcs;
-                            let entry = map.entry(it.info.name.0).or_default();
-
-                            if let Some(entry) = entry.get(&ty.to_string()) {
-                                let span = entry.span;
-                                cx.duplicate_defs(it.info.name.0, span, path.span);
-                            } else {
-                                entry.insert(ty.to_string(), it.info.clone());
-                            }
-                        } else {
-                            let map = &mut cx.scope.current().funcs;
-
-                            if let Some(entry) = map.get(&it.info.name.0) {
-                                let span = entry.span;
-                                cx.duplicate_defs(it.info.name.0, span, path.span);
-                            } else {
-                                map.insert(it.info.name.0, it.info.clone());
-                            }
-                        }
-                    }
-
-                    Export::Objective(it) => {
-                        let map = &mut cx.scope.current().objectives;
-
-                        if let Some(entry) = map.get(&it.name.0) {
-                            let span = entry.1;
-                            cx.duplicate_defs(it.name.0, span, path.span);
-                        } else {
-                            map.insert(it.name.0, it.name);
-                        }
-                    }
-
-                    Export::Type(it) => {
-                        let map = &mut cx.scope.current().types;
-
-                        if let Some(entry) = map.get(&it.name.0) {
-                            let span = entry.data.span();
-                            cx.duplicate_defs(it.name.0, span, path.span);
+                            cx.duplicate_defs(it.data.name.0, span, path.span);
                         } else {
                             map.insert(
-                                it.name.0,
+                                it.data.name.0,
                                 Remote {
                                     module: module.clone(),
                                     span: it.span,
@@ -102,17 +57,101 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
                             );
                         }
                     }
+
+                    Export::Function(it) => {
+                        if let Some(dsl) = &it.data.meta.dsl
+                            && let Some(arg) = it.data.args.first()
+                        {
+                            let map = &mut cx.scope.current().dsl_funcs;
+                            let entry = map.entry(*dsl).or_default();
+
+                            if let Some(entry) = entry.get(&arg.ty.as_id()) {
+                                let span = entry.span;
+                                cx.duplicate_defs(it.data.name.0, span, path.span);
+                            } else {
+                                entry.insert(
+                                    arg.ty.as_id(),
+                                    Remote {
+                                        module: module.clone(),
+                                        span: it.span,
+                                        data: it.data.clone(),
+                                    },
+                                );
+                            }
+                        } else if let Some(ty) = &it.data.target {
+                            let map = &mut cx.scope.current().inst_funcs;
+                            let entry = map.entry(it.data.name.0).or_default();
+
+                            if let Some(entry) = entry.get(&ty.as_id()) {
+                                let span = entry.span;
+                                cx.duplicate_defs(it.data.name.0, span, path.span);
+                            } else {
+                                entry.insert(
+                                    ty.as_id(),
+                                    Remote {
+                                        module: module.clone(),
+                                        span: it.span,
+                                        data: it.data.clone(),
+                                    },
+                                );
+                            }
+                        } else {
+                            let map = &mut cx.scope.current().funcs;
+
+                            if let Some(entry) = map.get(&it.data.name.0) {
+                                let span = entry.span;
+                                cx.duplicate_defs(it.data.name.0, span, path.span);
+                            } else {
+                                map.insert(
+                                    it.data.name.0,
+                                    Remote {
+                                        module: module.clone(),
+                                        span: it.span,
+                                        data: it.data.clone(),
+                                    },
+                                );
+                            }
+                        }
+                    }
+
+                    Export::Objective(it) => {
+                        let map = &mut cx.scope.current().objectives;
+
+                        if let Some(entry) = map.get(&it.data.name.0) {
+                            let span = entry.data.name.1;
+                            cx.duplicate_defs(it.data.name.0, span, path.span);
+                        } else {
+                            map.insert(
+                                it.data.name.0,
+                                Remote {
+                                    module: module.clone(),
+                                    span: it.span,
+                                    data: it.data.clone(),
+                                },
+                            );
+                        }
+                    }
+
+                    // Handled in the basic resolver
+                    Export::Type(_) => {}
                 }
             } else if let Some(export) = target.inst_func_exports.get(name.0) {
                 for (ty, it) in export.clone() {
                     let map = &mut cx.scope.current().inst_funcs;
-                    let entry = map.entry(it.info.name.0).or_default();
+                    let entry = map.entry(it.data.name.0).or_default();
 
-                    if let Some(entry) = entry.get(&ty.to_string()) {
+                    if let Some(entry) = entry.get(&ty) {
                         let span = entry.span;
-                        cx.duplicate_defs(it.info.name.0, span, path.span);
+                        cx.duplicate_defs(it.data.name.0, span, path.span);
                     } else {
-                        entry.insert(ty.to_string(), it.info.clone());
+                        entry.insert(
+                            ty,
+                            Remote {
+                                module: module.clone(),
+                                span: it.span,
+                                data: it.data.clone(),
+                            },
+                        );
                     }
                 }
             } else {
@@ -128,20 +167,53 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
             let span = entry.span;
             cx.duplicate_defs(node.name.0, span, node.span);
         } else {
-            map.insert(node.name.0, node.ty.clone());
+            map.insert(
+                node.name.0,
+                Remote {
+                    module: cx.module.name.clone(),
+                    span: node.span,
+                    data: node.clone(),
+                },
+            );
         }
     }
 
     fn visit_func(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Function<'a>) {
-        if let Some(ty) = &node.info.target {
-            let map = &mut cx.scope.current().inst_funcs;
-            let entry = map.entry(node.info.name.0).or_default();
+        if let Some(dsl) = &node.info.meta.dsl
+            && let Some(arg) = node.info.args.first()
+        {
+            let map = &mut cx.scope.current().dsl_funcs;
+            let entry = map.entry(*dsl).or_default();
 
-            if let Some(entry) = entry.get(&ty.to_string()) {
+            if let Some(entry) = entry.get(&arg.ty.as_id()) {
                 let span = entry.span;
                 cx.duplicate_defs(node.info.name.0, span, node.span);
             } else {
-                entry.insert(ty.to_string(), node.info.clone());
+                entry.insert(
+                    arg.ty.as_id(),
+                    Remote {
+                        module: cx.module.name.clone(),
+                        span: node.span,
+                        data: node.info.clone(),
+                    },
+                );
+            }
+        } else if let Some(ty) = &node.info.target {
+            let map = &mut cx.scope.current().inst_funcs;
+            let entry = map.entry(node.info.name.0).or_default();
+
+            if let Some(entry) = entry.get(&ty.as_id()) {
+                let span = entry.span;
+                cx.duplicate_defs(node.info.name.0, span, node.span);
+            } else {
+                entry.insert(
+                    ty.as_id(),
+                    Remote {
+                        module: cx.module.name.clone(),
+                        span: node.span,
+                        data: node.info.clone(),
+                    },
+                );
             }
         } else {
             let map = &mut cx.scope.current().funcs;
@@ -150,7 +222,71 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
                 let span = entry.span;
                 cx.duplicate_defs(node.info.name.0, span, node.span);
             } else {
-                map.insert(node.info.name.0, node.info.clone());
+                map.insert(
+                    node.info.name.0,
+                    Remote {
+                        module: cx.module.name.clone(),
+                        span: node.span,
+                        data: node.info.clone(),
+                    },
+                );
+            }
+        }
+
+        cx.scope
+            .push_existing(node.scope.take().unwrap_or_default());
+
+        for arg in &node.info.args {
+            cx.scope.current().vars.insert(
+                arg.name.0,
+                Remote {
+                    data: Variable {
+                        value: None,
+                        ty: Some(arg.ty.clone()),
+                        name: arg.name,
+                        span: arg.span,
+                    },
+
+                    module: cx.module.name.clone(),
+                    span: arg.span,
+                },
+            );
+        }
+
+        if let Some(visitor) = self.expr_visitor() {
+            for expr in &mut node.body {
+                visitor.visit_expr(cx, expr);
+            }
+        }
+
+        node.scope = Some(cx.scope.pop());
+
+        if let Some(dsl) = node.info.meta.dsl
+            && let Some(arg) = node.info.args.first()
+            && let Some(it) = cx.scope.lookup().lookup_dsl_func_mut(&arg.ty.as_id(), dsl)
+            && it.module == cx.module.name
+            && it.span == node.span
+        {
+            if it.data != node.info {
+                it.data = node.info.clone();
+            }
+        } else if let Some(target) = &node.info.target
+            && let Some(it) = cx
+                .scope
+                .lookup()
+                .lookup_inst_func_mut(node.info.name.0, &target.as_id())
+            && it.module == cx.module.name
+            && it.span == node.span
+        {
+            if it.data != node.info {
+                it.data = node.info.clone();
+            }
+        } else if let Some(it) = cx.scope.lookup().lookup_func_mut(node.info.name.0)
+            && it.module == cx.module.name
+            && it.span == node.span
+        {
+            if it.data != node.info {
+                it.data = node.info.clone();
             }
         }
     }
@@ -159,62 +295,55 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
         let map = &mut cx.scope.current().objectives;
 
         if let Some(entry) = map.get(&node.name.0) {
-            let span = entry.1;
-            cx.duplicate_defs(node.name.0, span, node.span);
-        } else {
-            map.insert(node.name.0, node.name);
-        }
-    }
-
-    fn visit_enum(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Enum<'a>) {
-        let map = &mut cx.scope.current().types;
-
-        if let Some(entry) = map.get(&node.name.0) {
-            let span = entry.data.span();
+            let span = entry.data.name.1;
             cx.duplicate_defs(node.name.0, span, node.span);
         } else {
             map.insert(
                 node.name.0,
                 Remote {
                     module: cx.module.name.clone(),
-                    span: node.span(),
-                    data: TypeData::Enum(node.clone()),
+                    span: node.span,
+                    data: node.clone(),
                 },
             );
         }
     }
 
-    fn visit_struct(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Struct<'a>) {
-        let map = &mut cx.scope.current().types;
+    // enum, struct, typedef: all handled in the basic scope resolver
+}
+
+impl<'a, 'visit> ExprVisitor<'a, 'visit> for TopScopeResolver {
+    fn visit_var(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Variable<'a>) {
+        let map = &mut cx.scope.current().vars;
 
         if let Some(entry) = map.get(&node.name.0) {
-            let span = entry.data.span();
+            let span = entry.span;
             cx.duplicate_defs(node.name.0, span, node.span);
         } else {
             map.insert(
                 node.name.0,
                 Remote {
                     module: cx.module.name.clone(),
-                    span: node.span(),
-                    data: TypeData::Struct(node.clone()),
+                    span: node.span,
+                    data: node.clone(),
                 },
             );
         }
     }
 
-    fn visit_typedef(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Typedef<'a>) {
-        let map = &mut cx.scope.current().types;
+    fn visit_constant_expr(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Constant<'a>) {
+        let map = &mut cx.scope.current().consts;
 
         if let Some(entry) = map.get(&node.name.0) {
-            let span = entry.data.span();
+            let span = entry.span;
             cx.duplicate_defs(node.name.0, span, node.span);
         } else {
             map.insert(
                 node.name.0,
                 Remote {
                     module: cx.module.name.clone(),
-                    span: node.span(),
-                    data: TypeData::Typedef(node.clone()),
+                    span: node.span,
+                    data: node.clone(),
                 },
             );
         }

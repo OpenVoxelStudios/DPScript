@@ -80,6 +80,7 @@ pub fn parse_dsl_literal<'a>(
         dsl_marker: marker,
         value: Box::new(value),
         span: c.end_span(),
+        resolved: None,
     })
 }
 

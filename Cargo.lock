@@ -560,6 +560,7 @@ dependencies = [
  "dpscript-parser",
  "dpscript-tokenizer",
  "facet",
+ "indicatif",
  "itertools 0.14.0",
  "miette",
  "ordered-float",

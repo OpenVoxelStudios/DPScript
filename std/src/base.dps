@@ -1,7 +1,7 @@
-import std::types::Ident;
-import std::types::FVec3;
-import std::types::NBT;
-import std::types::int;
+import std::types::base::Ident;
+import std::types::base::NBT;
+import std::types::base::int;
+import std::types::math::FVec3;
 
 objective compiler_support = "dummy";
 

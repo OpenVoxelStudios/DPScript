@@ -104,6 +104,7 @@ pub fn parse_binop<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> Result<
         op: op.ok_or(Error::MissingOp { span: span.into() })?,
         rhs: Box::new(rhs),
         span,
+        resolved: None,
     })
 }
 
@@ -333,5 +334,6 @@ pub fn parse_array_index<'a>(c: &mut TokenCursor<'a>, cx: &mut ParseCx<'a>) -> R
         op: Operation::ArrayIndex,
         rhs: Box::new(rhs),
         span,
+        resolved: None,
     })
 }
