@@ -307,10 +307,15 @@ async fn main() {
         .with_writer(std::io::stderr)
         .init();
 
+    #[cfg(not(windows))]
     let (stdin, stdout) = (
         async_lsp::stdio::PipeStdin::lock_tokio().unwrap(),
         async_lsp::stdio::PipeStdout::lock_tokio().unwrap(),
     );
 
+    #[cfg(not(windows))]
     server.run_buffered(stdin, stdout).await.unwrap();
+
+    #[cfg(windows)]
+    println!("lsp server not currently implemented on windows");
 }
