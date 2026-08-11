@@ -2,6 +2,7 @@ pub mod basic_exports;
 pub mod basic_scope;
 pub mod exports;
 pub mod inference;
+pub mod lowering;
 pub mod resolution;
 pub mod top_scope;
 

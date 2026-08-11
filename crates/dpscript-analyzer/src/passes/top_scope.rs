@@ -2,6 +2,7 @@
 
 use crate::{
     cx::VisitCx,
+    scope::ScopeLookupMutTrait,
     util::Export,
     visitor::{DefVisitor, ExprVisitor},
 };
@@ -41,13 +42,13 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
             if let Some(export) = target.exports.get(name.0) {
                 match export {
                     Export::Constant(it) => {
-                        let map = &mut cx.scope.current().consts;
+                        let map = cx.scope.current().consts.clone();
 
-                        if let Some(entry) = map.get(&it.data.name.0) {
+                        if let Some(entry) = map.read().get(&it.data.name.0) {
                             let span = entry.span;
                             cx.duplicate_defs(it.data.name.0, span, path.span);
                         } else {
-                            map.insert(
+                            map.write().insert(
                                 it.data.name.0,
                                 Remote {
                                     module: module.clone(),
@@ -62,7 +63,8 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
                         if let Some(dsl) = &it.data.meta.dsl
                             && let Some(arg) = it.data.args.first()
                         {
-                            let map = &mut cx.scope.current().dsl_funcs;
+                            let map = cx.scope.current().dsl_funcs.clone();
+                            let mut map = map.write();
                             let entry = map.entry(*dsl).or_default();
 
                             if let Some(entry) = entry.get(&arg.ty.as_id()) {
@@ -79,7 +81,8 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
                                 );
                             }
                         } else if let Some(ty) = &it.data.target {
-                            let map = &mut cx.scope.current().inst_funcs;
+                            let map = cx.scope.current().inst_funcs.clone();
+                            let mut map = map.write();
                             let entry = map.entry(it.data.name.0).or_default();
 
                             if let Some(entry) = entry.get(&ty.as_id()) {
@@ -96,13 +99,13 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
                                 );
                             }
                         } else {
-                            let map = &mut cx.scope.current().funcs;
+                            let map = cx.scope.current().funcs.clone();
 
-                            if let Some(entry) = map.get(&it.data.name.0) {
+                            if let Some(entry) = map.read().get(&it.data.name.0) {
                                 let span = entry.span;
                                 cx.duplicate_defs(it.data.name.0, span, path.span);
                             } else {
-                                map.insert(
+                                map.write().insert(
                                     it.data.name.0,
                                     Remote {
                                         module: module.clone(),
@@ -115,13 +118,13 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
                     }
 
                     Export::Objective(it) => {
-                        let map = &mut cx.scope.current().objectives;
+                        let map = cx.scope.current().objectives.clone();
 
-                        if let Some(entry) = map.get(&it.data.name.0) {
+                        if let Some(entry) = map.read().get(&it.data.name.0) {
                             let span = entry.data.name.1;
                             cx.duplicate_defs(it.data.name.0, span, path.span);
                         } else {
-                            map.insert(
+                            map.write().insert(
                                 it.data.name.0,
                                 Remote {
                                     module: module.clone(),
@@ -137,7 +140,8 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
                 }
             } else if let Some(export) = target.inst_func_exports.get(name.0) {
                 for (ty, it) in export.clone() {
-                    let map = &mut cx.scope.current().inst_funcs;
+                    let map = cx.scope.current().inst_funcs.clone();
+                    let mut map = map.write();
                     let entry = map.entry(it.data.name.0).or_default();
 
                     if let Some(entry) = entry.get(&ty) {
@@ -161,13 +165,13 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
     }
 
     fn visit_constant(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Constant<'a>) {
-        let map = &mut cx.scope.current().consts;
+        let map = cx.scope.current().consts.clone();
 
-        if let Some(entry) = map.get(&node.name.0) {
+        if let Some(entry) = map.read().get(&node.name.0) {
             let span = entry.span;
             cx.duplicate_defs(node.name.0, span, node.span);
         } else {
-            map.insert(
+            map.write().insert(
                 node.name.0,
                 Remote {
                     module: cx.module.name.clone(),
@@ -182,7 +186,8 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
         if let Some(dsl) = &node.info.meta.dsl
             && let Some(arg) = node.info.args.first()
         {
-            let map = &mut cx.scope.current().dsl_funcs;
+            let map = cx.scope.current().dsl_funcs.clone();
+            let mut map = map.write();
             let entry = map.entry(*dsl).or_default();
 
             if let Some(entry) = entry.get(&arg.ty.as_id()) {
@@ -199,7 +204,8 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
                 );
             }
         } else if let Some(ty) = &node.info.target {
-            let map = &mut cx.scope.current().inst_funcs;
+            let map = cx.scope.current().inst_funcs.clone();
+            let mut map = map.write();
             let entry = map.entry(node.info.name.0).or_default();
 
             if let Some(entry) = entry.get(&ty.as_id()) {
@@ -216,13 +222,13 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
                 );
             }
         } else {
-            let map = &mut cx.scope.current().funcs;
+            let map = cx.scope.current().funcs.clone();
 
-            if let Some(entry) = map.get(&node.info.name.0) {
+            if let Some(entry) = map.read().get(&node.info.name.0) {
                 let span = entry.span;
                 cx.duplicate_defs(node.info.name.0, span, node.span);
             } else {
-                map.insert(
+                map.write().insert(
                     node.info.name.0,
                     Remote {
                         module: cx.module.name.clone(),
@@ -237,7 +243,7 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
             .push_existing(node.scope.take().unwrap_or_default());
 
         for arg in &node.info.args {
-            cx.scope.current().vars.insert(
+            cx.scope.current().vars.write().insert(
                 arg.name.0,
                 Remote {
                     data: Variable {
@@ -261,28 +267,29 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
 
         node.scope = Some(cx.scope.pop());
 
+        let module = cx.module.name.clone();
+
         if let Some(dsl) = node.info.meta.dsl
             && let Some(arg) = node.info.args.first()
-            && let Some(it) = cx.scope.lookup().lookup_dsl_func_mut(&arg.ty.as_id(), dsl)
-            && it.module == cx.module.name
+            && let Some(mut it) = cx.lookup_mut().lookup_dsl_func_mut(&arg.ty.as_id(), dsl)
+            && it.module == module
             && it.span == node.span
         {
             if it.data != node.info {
                 it.data = node.info.clone();
             }
         } else if let Some(target) = &node.info.target
-            && let Some(it) = cx
-                .scope
-                .lookup()
+            && let Some(mut it) = cx
+                .lookup_mut()
                 .lookup_inst_func_mut(node.info.name.0, &target.as_id())
-            && it.module == cx.module.name
+            && it.module == module
             && it.span == node.span
         {
             if it.data != node.info {
                 it.data = node.info.clone();
             }
-        } else if let Some(it) = cx.scope.lookup().lookup_func_mut(node.info.name.0)
-            && it.module == cx.module.name
+        } else if let Some(mut it) = cx.lookup_mut().lookup_func_mut(node.info.name.0)
+            && it.module == module
             && it.span == node.span
         {
             if it.data != node.info {
@@ -292,13 +299,13 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
     }
 
     fn visit_objective(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Objective<'a>) {
-        let map = &mut cx.scope.current().objectives;
+        let map = cx.scope.current().objectives.clone();
 
-        if let Some(entry) = map.get(&node.name.0) {
+        if let Some(entry) = map.read().get(&node.name.0) {
             let span = entry.data.name.1;
             cx.duplicate_defs(node.name.0, span, node.span);
         } else {
-            map.insert(
+            map.write().insert(
                 node.name.0,
                 Remote {
                     module: cx.module.name.clone(),
@@ -314,13 +321,13 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for TopScopeResolver {
 
 impl<'a, 'visit> ExprVisitor<'a, 'visit> for TopScopeResolver {
     fn visit_var(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Variable<'a>) {
-        let map = &mut cx.scope.current().vars;
+        let map = cx.scope.current().vars.clone();
 
-        if let Some(entry) = map.get(&node.name.0) {
+        if let Some(entry) = map.read().get(&node.name.0) {
             let span = entry.span;
             cx.duplicate_defs(node.name.0, span, node.span);
         } else {
-            map.insert(
+            map.write().insert(
                 node.name.0,
                 Remote {
                     module: cx.module.name.clone(),
@@ -332,13 +339,13 @@ impl<'a, 'visit> ExprVisitor<'a, 'visit> for TopScopeResolver {
     }
 
     fn visit_constant_expr(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Constant<'a>) {
-        let map = &mut cx.scope.current().consts;
+        let map = cx.scope.current().consts.clone();
 
-        if let Some(entry) = map.get(&node.name.0) {
+        if let Some(entry) = map.read().get(&node.name.0) {
             let span = entry.span;
             cx.duplicate_defs(node.name.0, span, node.span);
         } else {
-            map.insert(
+            map.write().insert(
                 node.name.0,
                 Remote {
                     module: cx.module.name.clone(),

@@ -31,6 +31,7 @@ pub struct Module<'a> {
     pub exports: HashMap<&'a str, Export<'a>>,
     pub inst_func_exports: HashMap<&'a str, HashMap<TypeRefId, Remote<FunctionInfo<'a>>>>,
     pub defs: Vec<Def<'a>>,
+    #[facet(opaque)]
     pub scope: Scope<'a>,
     pub source: NamedSource<'a>,
 }
@@ -60,7 +61,7 @@ impl<'a> AnalysisCx<'a> {
         self.warnings.push(warn.into());
     }
 
-    pub fn run_pass<T : ?Sized>(&mut self, visitor: &mut T)
+    pub fn run_pass<T: ?Sized>(&mut self, visitor: &mut T)
     where
         for<'visit> T: DefVisitor<'a, 'visit>,
     {

@@ -12,6 +12,8 @@ mod ops;
 mod span;
 mod span_ops;
 
+pub mod facet_impls;
+
 pub use arr::*;
 pub use cursor::*;
 pub use ops::*;

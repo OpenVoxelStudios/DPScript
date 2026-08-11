@@ -11,7 +11,7 @@ print-clarity = []
 bitflags = { version = "2.10.0", features = ["serde", "std"] }
 itertools = "0.14.0"
 pest = "2.8.5"
-serde = { version = "1.0.228", features = ["derive"] }
+serde = { version = "1.0.228", features = ["derive", "rc"] }
 strum = { version = "0.28.0", features = ["derive"] }
 tracing = "0.1.41"
 miette = { version = "7.6.0", features = ["fancy"] }
@@ -22,3 +22,6 @@ ordered-float = { version = "5.3.0", features = ["serde"] }
 facet = { version = "0.46.0", features = ["ordered-float"] }
 dpscript-core = { version = "0.1.0", path = "../dpscript-core" }
 better_default = "1.0.5"
+dashmap = { version = "6.2.1", features = ["serde"] }
+derivative = "2.2.0"
+parking_lot = { version = "0.12.5", features = ["arc_lock", "send_guard", "owning_ref", "serde"] }

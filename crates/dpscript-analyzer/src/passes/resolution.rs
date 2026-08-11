@@ -4,6 +4,7 @@ use dpscript_ast::prelude::types::{ArrayKind, ResolvedTypeRef, TypeRef, TypeRefD
 
 use crate::{
     cx::VisitCx,
+    scope::ScopeLookupTrait,
     visitor::{DefVisitor, ExprVisitor, MetaVisitor},
 };
 
@@ -16,19 +17,25 @@ impl TypeResolver {
         ty: &TypeRef<'a>,
     ) -> Option<Box<ResolvedTypeRef<'a>>> {
         match &ty.data {
-            TypeRefData::Named { name } => match cx.scope.lookup().lookup_type(name.0) {
-                Some(res) => Some(Box::new(ResolvedTypeRef {
-                    module: res.module.clone(),
-                    span: res.span,
-                    data: res.data.clone(),
-                    array: ArrayKind::None,
-                })),
+            TypeRefData::Named { name } => {
+                let lkp = cx.lookup();
+                let ty = lkp.lookup_type(name.0);
 
-                None => {
-                    cx.unresolved_type(name.0, name.1);
-                    None
+                match ty {
+                    Some(res) => Some(Box::new(ResolvedTypeRef {
+                        module: res.module.clone(),
+                        span: res.span,
+                        data: res.data.clone(),
+                        array: ArrayKind::None,
+                    })),
+
+                    None => {
+                        drop(ty);
+                        cx.unresolved_type(name.0, name.1);
+                        None
+                    }
                 }
-            },
+            }
 
             TypeRefData::SizedArray { inner, .. } => self.resolve_ty(cx, &*inner).map(|mut it| {
                 it.array = ArrayKind::Sized;

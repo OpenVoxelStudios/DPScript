@@ -1,6 +1,9 @@
+use derivative::Derivative;
+
 use crate::prelude::{SourceSpan, def::DefTrait, expr::Expr, meta::DefMeta, scope::Scope};
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, Serialize, Facet, HasSpan, Derivative)]
+#[derivative(PartialEq, Eq)]
 pub struct Block<'a> {
     /// The kind of block this is.
     pub kind: BlockKind,
@@ -14,6 +17,8 @@ pub struct Block<'a> {
     /// The definition's metadata.
     pub meta: DefMeta<'a>,
 
+    #[facet(opaque)]
+    #[derivative(PartialEq = "ignore")]
     pub scope: Option<Scope<'a>>,
 }
 

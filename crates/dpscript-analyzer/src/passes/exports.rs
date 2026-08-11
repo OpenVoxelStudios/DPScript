@@ -93,10 +93,7 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for ExportResolver {
 
 pub struct ExportStmtResolver;
 
-impl<'a, 'visit> DefVisitor<'a, 'visit> for ExportStmtResolver
-where
-    'a: 'visit,
-{
+impl<'a, 'visit> DefVisitor<'a, 'visit> for ExportStmtResolver {
     fn visit_export(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut ExportNode<'a>) {
         for path in &node.paths {
             let mut module = String::new();

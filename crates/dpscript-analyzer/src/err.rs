@@ -3,6 +3,8 @@ use dpscript_core::MSourceSpan;
 use miette::Diagnostic;
 use thiserror::Error;
 
+pub type Result<T, E = Error> = core::result::Result<T, E>;
+
 #[derive(Debug, Error, Diagnostic)]
 pub enum Error {
     #[error("incompatible types: {lhs} cannot be assigned from {rhs}")]
@@ -75,6 +77,16 @@ pub enum Error {
         cur_module: String,
     },
 
+    #[error("cannot find name: {name}")]
+    UnresolvedName {
+        name: String,
+
+        #[label("here")]
+        at: MSourceSpan,
+
+        cur_module: String,
+    },
+
     #[error("cannot infer type for value")]
     CannotInferType {
         #[label("here")]
@@ -97,6 +109,7 @@ impl Error {
             Self::UnresolvedImport { cur_module, .. } => cur_module.clone(),
             Self::UnresolvedType { cur_module, .. } => cur_module.clone(),
             Self::CannotInferType { cur_module, .. } => cur_module.clone(),
+            Error::UnresolvedName { cur_module, .. } => cur_module.clone(),
         }
     }
 }
@@ -170,6 +183,14 @@ impl<'a, 'visit> VisitCx<'a, 'visit> {
 
     pub fn cannot_infer_type(&mut self, at: impl Into<MSourceSpan>) {
         self.analysis.err(Error::CannotInferType {
+            at: at.into(),
+            cur_module: self.module.name.clone(),
+        });
+    }
+
+    pub fn unresolved_name(&mut self, name: impl AsRef<str>, at: impl Into<MSourceSpan>) {
+        self.analysis.err(Error::UnresolvedName {
+            name: name.as_ref().into(),
             at: at.into(),
             cur_module: self.module.name.clone(),
         });

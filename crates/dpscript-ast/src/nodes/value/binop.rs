@@ -5,7 +5,7 @@ use crate::{
     util::Remote,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan, Default)]
 pub struct BinOp<'a> {
     pub lhs: Box<Value<'a>>,
     pub op: Operation,
@@ -16,12 +16,16 @@ pub struct BinOp<'a> {
 
 #[repr(u8)]
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Facet,
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Facet, Default,
 )]
 pub enum Operation {
     Bool(BoolOp),
     Math(MathOp),
     ArrayIndex,
+
+    /// This is only for analysis, and should never appear in the final AST.
+    #[default]
+    None,
 }
 
 #[repr(u8)]

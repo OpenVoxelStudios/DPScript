@@ -6,6 +6,7 @@ use crate::{
         basic_scope::BasicScopeResolver,
         exports::{ExportResolver, ExportStmtResolver},
         inference::TypeInference,
+        lowering::AstLowering,
         resolution::TypeResolver,
         top_scope::TopScopeResolver,
     },
@@ -18,6 +19,7 @@ use miette::Diagnostic;
 use std::collections::HashMap;
 use thiserror::Error;
 
+pub mod checks;
 pub mod cx;
 pub mod err;
 pub mod ops;
@@ -152,6 +154,7 @@ pub fn analyze<'a>(
     passes! {
         cx;
 
+        AstLowering = "AST Lowering",
         BasicExportResolver = "Basic Exports",
         BasicScopeResolver = "Basic Scopes",
         TypeResolver = "Type Resolution (#1)",

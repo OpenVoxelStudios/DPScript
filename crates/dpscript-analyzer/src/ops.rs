@@ -37,6 +37,9 @@ pub const FUNC_NAME_BOOL_INVERT: &str = "invert";
 pub const FUNC_NAME_ARRAY_INDEX: &str = "index";
 pub const FUNC_NAME_LOCAL_OFFSET: &str = "local_offset";
 
+// lmao
+pub const FUNC_NAME_COMPILER_ERROR: &str = "\0this_function_has_an_invalid_name\0";
+
 pub fn op_to_func(op: Operation) -> &'static str {
     match op {
         Operation::Bool(it) => match it {
@@ -59,6 +62,7 @@ pub fn op_to_func(op: Operation) -> &'static str {
         },
 
         Operation::ArrayIndex => FUNC_NAME_ARRAY_INDEX,
+        Operation::None => FUNC_NAME_COMPILER_ERROR,
     }
 }
 
@@ -67,5 +71,6 @@ pub fn unary_op_to_func(op: UnaryOp) -> &'static str {
         UnaryOp::Negate => FUNC_NAME_MATH_NEGATE,
         UnaryOp::Invert => FUNC_NAME_BOOL_INVERT,
         UnaryOp::Offset => FUNC_NAME_LOCAL_OFFSET,
+        UnaryOp::None => FUNC_NAME_COMPILER_ERROR,
     }
 }

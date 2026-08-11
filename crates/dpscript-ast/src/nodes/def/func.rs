@@ -1,17 +1,28 @@
+use derivative::Derivative;
+
 use crate::{
     prelude::{
-        SourceSpan, def::DefTrait, expr::Expr, meta::{DefFlags, DefMeta}, scope::Scope, types::TypeRef
+        SourceSpan,
+        def::DefTrait,
+        expr::Expr,
+        meta::{DefFlags, DefMeta},
+        scope::Scope,
+        types::TypeRef,
     },
     util::Name,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Facet, HasSpan)]
+#[derive(Debug, Clone, Serialize, Facet, HasSpan, Derivative)]
+#[derivative(PartialEq, Eq)]
 pub struct Function<'a> {
     /// The function's info. This is stored in a seperate struct to make it easy to clone
     /// and move around for type checking and validation (see [crate::nodes::expr::call::ResolvedCall]).
     pub info: FunctionInfo<'a>,
     pub body: Vec<Expr<'a>>,
     pub span: SourceSpan,
+
+    #[facet(opaque)]
+    #[derivative(PartialEq = "ignore")]
     pub scope: Option<Scope<'a>>,
 }
 

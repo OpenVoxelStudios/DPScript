@@ -30,3 +30,9 @@ crate::nodes::util::node_group! {
         TypedValue,
     ]
 }
+
+impl<'a> Default for Value<'a> {
+    fn default() -> Self {
+        Self::Literal(literal::Literal::default())
+    }
+}

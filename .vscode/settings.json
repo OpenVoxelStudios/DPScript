@@ -32,5 +32,6 @@
         "mode": "append",
         "phrases": []
     },
-    "chat.useAgentsMdFile": true
+    "chat.useAgentsMdFile": true,
+    "editor.formatOnSave": true
 }

@@ -38,7 +38,7 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for BasicScopeResolver {
             if let Some(export) = target.exports.get(name.0) {
                 match export {
                     Export::Type(it) => {
-                        let map = &mut cx.scope.current().types;
+                        let map = cx.scope.current().types.clone();
 
                         let name = match &it.data {
                             TypeData::Enum(it) => it.name,
@@ -46,11 +46,11 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for BasicScopeResolver {
                             TypeData::Typedef(it) => it.name,
                         };
 
-                        if let Some(entry) = map.get(&name.0) {
+                        if let Some(entry) = map.read().get(&name.0) {
                             let span = entry.data.span();
                             cx.duplicate_defs(name.0, span, path.span);
                         } else {
-                            map.insert(
+                            map.write().insert(
                                 name.0,
                                 Remote {
                                     module: module.clone(),
@@ -68,13 +68,13 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for BasicScopeResolver {
     }
 
     fn visit_enum(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Enum<'a>) {
-        let map = &mut cx.scope.current().types;
+        let map = cx.scope.current().types.clone();
 
-        if let Some(entry) = map.get(&node.name.0) {
+        if let Some(entry) = map.read().get(&node.name.0) {
             let span = entry.data.span();
             cx.duplicate_defs(node.name.0, span, node.span);
         } else {
-            map.insert(
+            map.write().insert(
                 node.name.0,
                 Remote {
                     module: cx.module.name.clone(),
@@ -86,13 +86,13 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for BasicScopeResolver {
     }
 
     fn visit_struct(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Struct<'a>) {
-        let map = &mut cx.scope.current().types;
+        let map = cx.scope.current().types.clone();
 
-        if let Some(entry) = map.get(&node.name.0) {
+        if let Some(entry) = map.read().get(&node.name.0) {
             let span = entry.data.span();
             cx.duplicate_defs(node.name.0, span, node.span);
         } else {
-            map.insert(
+            map.write().insert(
                 node.name.0,
                 Remote {
                     module: cx.module.name.clone(),
@@ -104,13 +104,13 @@ impl<'a, 'visit> DefVisitor<'a, 'visit> for BasicScopeResolver {
     }
 
     fn visit_typedef(&mut self, cx: &mut VisitCx<'a, 'visit>, node: &mut Typedef<'a>) {
-        let map = &mut cx.scope.current().types;
+        let map = cx.scope.current().types.clone();
 
-        if let Some(entry) = map.get(&node.name.0) {
+        if let Some(entry) = map.read().get(&node.name.0) {
             let span = entry.data.span();
             cx.duplicate_defs(node.name.0, span, node.span);
         } else {
-            map.insert(
+            map.write().insert(
                 node.name.0,
                 Remote {
                     module: cx.module.name.clone(),
